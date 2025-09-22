@@ -1,3 +1,4 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,11 +10,25 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "./AuthProvider"
+import { useRouter } from "next/navigation"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { login } = useAuth()
+  const router = useRouter()
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const formData = new FormData(form)
+    const email = String(formData.get("email") || "")
+    const password = String(formData.get("password") || "")
+    await login(email, password)
+    router.push("/")
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -24,7 +39,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={onSubmit}>
             <div className="grid gap-6">
               <div className="flex flex-col gap-4">
                 <Button variant="outline" className="w-full">
@@ -68,6 +83,7 @@ export function LoginForm({
                     type="email"
                     placeholder="m@gmail.com"
                     required
+                    name="email"
                   />
                 </div>
                 <div className="grid gap-3">
@@ -80,7 +96,7 @@ export function LoginForm({
                       Şifremi unuttum.
                     </a>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input id="password" type="password" required name="password" />
                 </div>
                 <Button type="submit" className="w-full">
                   Giriş Yap
