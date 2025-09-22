@@ -1,3 +1,7 @@
+import Header from '@/components/Header'
+import './globals.css'
+import Footer from '@/components/Footer'
+
 export default function RootLayout({
   children,
 }: {
@@ -5,10 +9,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en"> 
-    
+      <div className='flex flex-col min-h-screen'>
+
+        <Header />
+
+        <main className='flex-grow container mx-auto py-4'>
+          {children}  
+        </main>
+
+        <Footer />
+      </div>
       <body>
-        <h1>this is my root page</h1>
-        {children}
+        
 
       </body>
     </html>
