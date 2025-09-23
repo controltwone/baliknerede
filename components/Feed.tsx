@@ -1,11 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Post from "@/components/Post"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { TextareaHTMLAttributes, useState } from "react"
 
 type FeedPost = {
   id: string
@@ -19,31 +18,43 @@ type FeedPost = {
 }
 
 export default function Feed() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
+
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
   const [isPosting, setIsPosting] = useState(false)
-  const [posts, setPosts] = useState<FeedPost[]>([
-    {
-      id: "1",
-      authorName: "Ahmet Yılmaz",
-      authorAvatarUrl: "/logo.png",
-      imageUrl: "https://picsum.photos/800/1000?random=1",
-      contentText: "Bugün Boğaz’da güzel bir lüfer yakaladım! #lüfer #istanbul",
-      likeCount: 12,
-      commentCount: 3,
-      createdAt: "2s",
-    },
-    {
-      id: "2",
-      authorName: "Zeynep Kaya",
-      authorAvatarUrl: "/logo.png",
-      imageUrl: "https://picsum.photos/800/1000?random=2",
-      contentText: "Sabah suyunda çinekop bereketi",
-      likeCount: 5,
-      commentCount: 1,
-      createdAt: "10d",
-    },
-  ])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [posts, setPosts] = useState<FeedPost[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(`${API_BASE}/posts`, { credentials: 'include' })
+        if (!res.ok) throw new Error("Liste alınamadı")
+        const data = await res.json()
+        const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
+          id: p._id,
+          authorName: "Kullanıcı",
+          authorAvatarUrl: "/logo.png",
+          imageUrl: p.imageUrl,
+          contentText: p.contentText,
+          likeCount: p.likeCount || 0,
+          commentCount: p.commentCount || 0,
+          createdAt: new Date(p.createdAt).toLocaleString(),
+        }))
+        if (!cancelled) setPosts(mapped)
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Bir hata oluştu")
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [API_BASE])
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -56,22 +67,35 @@ export default function Feed() {
   async function handleShare() {
     if (!contentText && !imageUrl) return
     setIsPosting(true)
-    // mock delay
-    await new Promise((r) => setTimeout(r, 500))
-    const newPost: FeedPost = {
-      id: String(Date.now()),
-      authorName: "Sen",
-      authorAvatarUrl: "/logo.png",
-      imageUrl,
-      contentText,
-      likeCount: 0,
-      commentCount: 0,
-      createdAt: "az önce",
+    setError(null)
+    try {
+      const res = await fetch(`${API_BASE}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ contentText, imageUrl }),
+      })
+      if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
+      const data = await res.json()
+      const p = data.post
+      const newPost: FeedPost = {
+        id: p._id,
+        authorName: "Sen",
+        authorAvatarUrl: "/logo.png",
+        imageUrl: p.imageUrl,
+        contentText: p.contentText,
+        likeCount: p.likeCount || 0,
+        commentCount: p.commentCount || 0,
+        createdAt: new Date(p.createdAt).toLocaleString(),
+      }
+      setPosts((prev) => [newPost, ...prev])
+      setContentText("")
+      setImageUrl(undefined)
+    } catch (e: any) {
+      setError(e?.message || "Paylaşım sırasında hata")
+    } finally {
+      setIsPosting(false)
     }
-    setPosts((prev) => [newPost, ...prev])
-    setContentText("")
-    setImageUrl(undefined)
-    setIsPosting(false)
   }
 
   return (
@@ -99,14 +123,27 @@ export default function Feed() {
               <img src={imageUrl} alt="preview" className="h-full w-full object-cover" />
             </div>
           ) : null}
+          {error ? (
+            <p className="text-sm text-destructive">{error}</p>
+          ) : null}
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-6">
-        {posts.map((p) => (
-          <Post key={p.id} {...p} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
+          <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {posts.map((p) => (
+            <Post key={p.id} {...p} />
+          ))}
+          {posts.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">Henüz gönderi yok.</p>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }
