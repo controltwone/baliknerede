@@ -26,11 +26,16 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("bn_auth_user")
-      if (raw) setUser(JSON.parse(raw))
+      const rawUser = localStorage.getItem("bn_auth_user")
+      const rawToken = localStorage.getItem("bn_token")
+      if (rawUser) setUser(JSON.parse(rawUser))
+      if (rawToken) setToken(rawToken)
     } catch {}
   }, [])
 
@@ -41,20 +46,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, [user])
 
-  const login = useCallback(async (email: string, _password: string) => {
-    // TODO: Replace with real API call
-    await new Promise((r) => setTimeout(r, 300))
-    setUser({ id: "demo", name: email.split("@")[0] || "Kullanıcı", avatarUrl: "/logo.png" })
-  }, [])
+  useEffect(() => {
+    try {
+      if (token) localStorage.setItem("bn_token", token)
+      else localStorage.removeItem("bn_token")
+    } catch {}
+  }, [token])
 
-  const signup = useCallback(async (name: string, _email: string, _password: string) => {
-    // TODO: Replace with real API call
-    await new Promise((r) => setTimeout(r, 300))
-    setUser({ id: String(Date.now()), name, avatarUrl: "/logo.png" })
-  }, [])
+  useEffect(() => {
+    if (token && !user) {
+      fetch(`${API_BASE}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(async (res) => (res.ok ? res.json() : Promise.reject()))
+        .then((data) => {
+          if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+        })
+        .catch(() => {})
+    }
+  }, [token, user, API_BASE])
+
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '')
+      throw new Error(txt || 'Login failed')
+    }
+    const data = await res.json()
+    setToken(data.token)
+    setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+  }, [API_BASE])
+
+  const signup = useCallback(async (name: string, email: string, password: string) => {
+    const res = await fetch(`${API_BASE}/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    })
+    if (!res.ok) throw new Error('Signup failed')
+    const data = await res.json()
+    setToken(data.token)
+    setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+  }, [API_BASE])
 
   const logout = useCallback(() => {
     setUser(null)
+    setToken(null)
   }, [])
 
   const value = useMemo(

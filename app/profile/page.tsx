@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -6,22 +7,23 @@ import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const router = useRouter()
-  if (!isAuthenticated) {
-    router.replace("/login")
-    return null
-  }
+  useEffect(() => {
+    if (!isAuthenticated) router.replace("/login")
+  }, [isAuthenticated, router])
+  if (!isAuthenticated) return null
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <section className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src="/logo.png" alt="avatar" />
-            <AvatarFallback>BN</AvatarFallback>
+            <AvatarFallback>{(user?.name || 'BN').slice(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-xl font-semibold">Kullanıcı Adı</h1>
+            <h1 className="text-xl font-semibold">{user?.name || 'Kullanıcı'}</h1>
             <p className="text-sm text-muted-foreground">Balık meraklısı • İstanbul</p>
           </div>
         </div>
@@ -70,5 +72,4 @@ export default function ProfilePage() {
     </div>
   )
 }
-
 

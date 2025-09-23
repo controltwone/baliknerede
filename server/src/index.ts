@@ -2,8 +2,10 @@ import 'dotenv/config'
 import express = require('express')
 import cors = require('cors')
 import { connectDB } from './lib/db'
+import cookieParser = require('cookie-parser')
 import authRoutes from './routes/auth'
 import meRoutes from './routes/me'
+import auth0Routes from './routes/auth0'
 
 const app = express()
 
@@ -12,6 +14,7 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }))
 app.use(express.json())
+app.use(cookieParser())
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true })
@@ -19,6 +22,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/auth', authRoutes)
 app.use('/', meRoutes)
+app.use('/auth', auth0Routes)
 
 async function start() {
   try {
