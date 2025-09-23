@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export function LoginForm({
   className,
@@ -105,9 +106,9 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Hesabın yok mu?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <Link href="/signup" className="underline underline-offset-4">
                   Kaydol
-                </a>
+                </Link>
               </div>
             </div>
           </form>

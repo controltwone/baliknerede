@@ -6,6 +6,7 @@ import cookieParser = require('cookie-parser')
 import authRoutes from './routes/auth'
 import meRoutes from './routes/me'
 import auth0Routes from './routes/auth0'
+import postsRoutes from './routes/posts'
 
 const app = express()
 
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 app.use('/auth', authRoutes)
 app.use('/', meRoutes)
 app.use('/', auth0Routes)
+app.use('/posts', postsRoutes)
 
 async function start() {
   try {
