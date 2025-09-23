@@ -29,27 +29,14 @@ export default function ProfilePage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">Profili Düzenle</Button>
-          <Button>Takip Et</Button>
         </div>
       </section>
 
-      <section className="grid grid-cols-3 gap-4 text-center text-sm">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
         <Card>
           <CardContent className="p-4">
             <div className="font-semibold">24</div>
             <div className="text-muted-foreground">Gönderi</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="font-semibold">1.2k</div>
-            <div className="text-muted-foreground">Takipçi</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="font-semibold">321</div>
-            <div className="text-muted-foreground">Takip</div>
           </CardContent>
         </Card>
       </section>

@@ -13,18 +13,22 @@ const config = {
   baseURL: process.env.AUTH0_BASE_URL || 'http://localhost:4000',
   clientID: process.env.AUTH0_CLIENT_ID,
   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+  // Auth0 callback: baseURL + '/callback' → bu yolu lib kendi yönetir
+  routes: { callback: '/callback' },
 }
 
 router.use(auth(config as any))
 
 router.get('/auth0/login', (req: any, res) => {
-  res.oidc.login({ returnTo: '/auth0/callback' })
+  // Başarılı dönüşte app tarafına tamamla endpointine yönlendir
+  res.oidc.login({ returnTo: '/auth0/complete' })
 })
 
-router.get('/auth0/callback', async (req: any, res) => {
+// Callback'ı express-openid-connect handle eder; biz tamamlamayı ayrı endpointte yapıyoruz
+router.get('/auth0/complete', async (req: any, res) => {
   try {
     const claims = req.oidc.user
-    if (!claims) return res.redirect('/')
+    if (!claims) return res.redirect('/auth0/login')
     const email = claims.email
     const name = claims.name || (email ? email.split('@')[0] : 'User')
     let user = await User.findOne({ email })
@@ -38,9 +42,17 @@ router.get('/auth0/callback', async (req: any, res) => {
     })
     return res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000')
   } catch (e) {
-    console.error('Auth0 callback error:', e)
+    console.error('Auth0 complete error:', e)
     return res.redirect('/')
   }
+})
+
+router.get('/auth0/logout', (req: any, res) => {
+  try {
+    res.clearCookie('bn_token')
+  } catch {}
+  // Auth0 oturumu da kapat ve frontend'e dön
+  return res.oidc.logout({ returnTo: process.env.CLIENT_ORIGIN || 'http://localhost:3000' })
 })
 
 export default router

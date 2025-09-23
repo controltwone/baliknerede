@@ -54,9 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token])
 
   useEffect(() => {
-    if (token && !user) {
+    // bootstrap user: prefer cookie (HttpOnly) but also support header token
+    if (token || !user) {
       fetch(`${API_BASE}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: 'include',
       })
         .then(async (res) => (res.ok ? res.json() : Promise.reject()))
         .then((data) => {

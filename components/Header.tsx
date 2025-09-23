@@ -1,7 +1,6 @@
 "use client"
 
 import Link from 'next/link'
-import React from 'react'
 import Image from 'next/image'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -12,6 +11,7 @@ import { useAuth } from './AuthProvider'
 
 function Header() {
   const { isAuthenticated, user, logout } = useAuth()
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   return (
     <div className="bg-amber-300 sticky top-0 z-40 shadow-sm">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
@@ -21,9 +21,7 @@ function Header() {
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
           <Link href="/">
-            <Button>
-              Akış
-            </Button>
+            <Button>Akış</Button>
           </Link>
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -65,7 +63,10 @@ function Header() {
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        onClick={logout}
+                        onClick={() => {
+                          logout()
+                          window.location.href = `${API_BASE}/auth0/logout`
+                        }}
                         className={`${active ? 'bg-accent' : ''} block w-full rounded-sm px-3 py-2 text-left`}
                       >
                         Çıkış Yap
@@ -96,3 +97,4 @@ function Header() {
 }
 
 export default Header
+

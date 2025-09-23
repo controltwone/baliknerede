@@ -14,6 +14,7 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }))
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.get('/health', (_req, res) => {
@@ -22,7 +23,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/auth', authRoutes)
 app.use('/', meRoutes)
-app.use('/auth', auth0Routes)
+app.use('/', auth0Routes)
 
 async function start() {
   try {
