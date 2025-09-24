@@ -24,6 +24,7 @@ export default function Feed() {
 
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isPosting, setIsPosting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -61,21 +62,56 @@ export default function Feed() {
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
+    setSelectedFile(file)
+    // Preview için base64 kullan, yükleme sırasında R2'ye yükle
     const reader = new FileReader()
     reader.onload = () => setImageUrl(reader.result as string)
     reader.readAsDataURL(file)
   }
 
   async function handleShare() {
-    if (!contentText && !imageUrl) return
+    if (!contentText && !selectedFile) return
     setIsPosting(true)
     setError(null)
     try {
+      let finalImageUrl: string | undefined = undefined
+
+      // Eğer dosya seçilmişse R2'ye yükle
+      if (selectedFile) {
+        // 1. Presigned URL al
+        const presignRes = await fetch(`${API_BASE}/upload/presign`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            fileName: selectedFile.name,
+            fileType: selectedFile.type
+          })
+        })
+        
+        if (!presignRes.ok) throw new Error("Presigned URL alınamadı")
+        const { uploadUrl, publicUrl } = await presignRes.json()
+
+        // 2. Dosyayı R2'ye yükle
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': selectedFile.type },
+          body: selectedFile
+        })
+        
+        if (!uploadRes.ok) throw new Error("Dosya yüklenemedi")
+        finalImageUrl = publicUrl
+      }
+
+      // 3. Gönderiyi oluştur
       const res = await fetch(`${API_BASE}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ contentText, imageUrl }),
+        body: JSON.stringify({ contentText, imageUrl: finalImageUrl }),
       })
       if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
       const data = await res.json()
@@ -93,6 +129,7 @@ export default function Feed() {
       setPosts((prev) => [newPost, ...prev])
       setContentText("")
       setImageUrl(undefined)
+      setSelectedFile(null)
     } catch (e: any) {
       setError(e?.message || "Paylaşım sırasında hata")
     } finally {
@@ -115,7 +152,7 @@ export default function Feed() {
           />
           <div className="flex items-center justify-between gap-3">
             <Input type="file" accept="image/*" onChange={handleImageChange} className="max-w-xs" />
-            <Button onClick={handleShare} disabled={isPosting || (!contentText && !imageUrl)}>
+            <Button onClick={handleShare} disabled={isPosting || (!contentText && !selectedFile)}>
               {isPosting ? "Paylaşılıyor..." : "Paylaş"}
             </Button>
           </div>
