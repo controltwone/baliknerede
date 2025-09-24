@@ -5,9 +5,13 @@ import { AuthedRequest, requireAuth } from '../middleware/auth'
 
 const router = express.Router()
 
-// GET /posts - list latest posts
+// GET /posts - list latest posts (with author name)
 router.get('/', async (_req, res) => {
-  const posts = await Post.find().sort({ createdAt: -1 }).limit(50)
+  const posts = await (Post as any)
+    .find()
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .populate('authorId', 'name')
   res.json({ posts })
 })
 
@@ -48,6 +52,29 @@ router.post('/:id/comments', requireAuth, async (req: AuthedRequest, res) => {
   post.commentCount = post.comments.length
   await post.save()
   res.status(201).json({ commentCount: post.commentCount })
+})
+
+// GET /posts/:id/comments - list comments
+router.get('/:id/comments', async (req, res) => {
+  const post = await (Post as any)
+    .findById(req.params.id)
+    .populate('comments.userId', 'name')
+  if (!post) return res.status(404).json({ message: 'Not found' })
+  const comments = (post.comments || []).map((c: any) => ({
+    userId: String(c.userId?._id || c.userId),
+    userName: c.userId?.name || 'Kullanıcı',
+    text: c.text,
+    createdAt: c.createdAt,
+  }))
+  res.json({ comments })
+})
+
+// GET /posts/my - current user's posts
+router.get('/my', requireAuth, async (req: AuthedRequest, res) => {
+  const posts = await (Post as any)
+    .find({ authorId: req.userId })
+    .sort({ createdAt: -1 })
+  res.json({ posts })
 })
 
 export default router

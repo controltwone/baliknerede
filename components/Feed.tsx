@@ -5,6 +5,7 @@ import Post from "@/components/Post"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "./AuthProvider"
 
 type FeedPost = {
   id: string
@@ -19,6 +20,7 @@ type FeedPost = {
 
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
+  const { user } = useAuth()
 
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
@@ -38,7 +40,7 @@ export default function Feed() {
         const data = await res.json()
         const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
           id: p._id,
-          authorName: "Kullanıcı",
+          authorName: p.authorId?.name || "Kullanıcı",
           authorAvatarUrl: "/logo.png",
           imageUrl: p.imageUrl,
           contentText: p.contentText,
@@ -80,7 +82,7 @@ export default function Feed() {
       const p = data.post
       const newPost: FeedPost = {
         id: p._id,
-        authorName: "Sen",
+        authorName: user?.name || "Sen",
         authorAvatarUrl: "/logo.png",
         imageUrl: p.imageUrl,
         contentText: p.contentText,

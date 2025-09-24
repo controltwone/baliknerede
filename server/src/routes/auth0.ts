@@ -36,8 +36,8 @@ router.get('/auth0/complete', async (req: any, res) => {
     const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' })
     res.cookie('bn_token', token, {
       httpOnly: true,
-      secure: false, // prod: true
-      sameSite: 'lax',
+      secure: true, // localhost kabul edilir; cross-site cookie için gerekli
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     return res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000')
@@ -53,6 +53,13 @@ router.get('/auth0/logout', (req: any, res) => {
   } catch {}
   // Auth0 oturumu da kapat ve frontend'e dön
   return res.oidc.logout({ returnTo: process.env.CLIENT_ORIGIN || 'http://localhost:3000' })
+})
+
+// Frontend'in header kullanabilmesi için cookieden token'ı geri ver (dev amaçlı)
+router.get('/auth0/token', (req: any, res) => {
+  const token = req.cookies?.bn_token
+  if (!token) return res.status(401).json({ message: 'No session' })
+  return res.json({ token })
 })
 
 export default router

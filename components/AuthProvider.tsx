@@ -14,6 +14,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
+  token: string | null
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -54,19 +55,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token])
 
   useEffect(() => {
-    // bootstrap user: prefer cookie (HttpOnly) but also support header token
-    if (token || !user) {
-      fetch(`${API_BASE}/me`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        credentials: 'include',
-      })
-        .then(async (res) => (res.ok ? res.json() : Promise.reject()))
-        .then((data) => {
-          if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+    // bootstrap user: önce cookie'den /me, başarısızsa token endpointinden token alıp tekrar dene
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/me`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          credentials: 'include',
         })
-        .catch(() => {})
-    }
-  }, [token, user, API_BASE])
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+          return
+        }
+      } catch {}
+      try {
+        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
+        if (tr.ok) {
+          const td = await tr.json()
+          if (td?.token) setToken(td.token)
+        }
+      } catch {}
+    })()
+  }, [token, API_BASE])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
@@ -101,8 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, isAuthenticated: !!user, login, signup, logout }),
-    [user, login, signup, logout]
+    () => ({ user, isAuthenticated: !!user, login, signup, logout, token }),
+    [user, login, signup, logout, token]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
