@@ -6,12 +6,34 @@ import { AuthedRequest, requireAuth } from '../middleware/auth'
 const router = express.Router()
 
 // GET /posts - list latest posts (with author name)
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   const posts = await (Post as any)
     .find()
     .sort({ createdAt: -1 })
     .limit(50)
     .populate('authorId', 'name')
+  
+  // Eğer kullanıcı giriş yapmışsa beğeni durumunu ekle
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  
+  if (token) {
+    try {
+      const jwt = require('jsonwebtoken')
+      const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
+      const userId = payload.sub
+      
+      const postsWithLikes = posts.map((post: any) => ({
+        ...post.toObject(),
+        liked: post.likes.some((likeId: any) => String(likeId) === String(userId))
+      }))
+      
+      return res.json({ posts: postsWithLikes })
+    } catch (e) {
+      // Token geçersizse normal posts döndür
+    }
+  }
+  
   res.json({ posts })
 })
 

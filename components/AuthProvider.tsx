@@ -72,10 +72,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
         if (tr.ok) {
           const td = await tr.json()
-          if (td?.token) setToken(td.token)
+          if (td?.token) {
+            setToken(td.token)
+            localStorage.setItem('bn_token', td.token)
+            // Token'ı aldıktan sonra /me'yi tekrar dene
+            try {
+              const res = await fetch(`${API_BASE}/me`, {
+                headers: { Authorization: `Bearer ${td.token}` },
+                credentials: 'include',
+              })
+              if (res.ok) {
+                const data = await res.json()
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+              }
+            } catch {}
+          }
         }
       } catch {}
     })()
+  }, [token, API_BASE])
+
+  // Auth0 callback'inden sonra token'ı kontrol et (sadece token yoksa)
+  useEffect(() => {
+    const checkAuth0Token = async () => {
+      // Eğer zaten token varsa Auth0 kontrolü yapma
+      if (token) return
+      
+      try {
+        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
+        if (tr.ok) {
+          const td = await tr.json()
+          if (td?.token) {
+            // Token'ı güncelle
+            setToken(td.token)
+            localStorage.setItem('bn_token', td.token)
+            // Token'ı aldıktan sonra /me'yi tekrar dene
+            try {
+              const res = await fetch(`${API_BASE}/me`, {
+                headers: { Authorization: `Bearer ${td.token}` },
+                credentials: 'include',
+              })
+              if (res.ok) {
+                const data = await res.json()
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+              }
+            } catch {}
+          }
+        }
+      } catch {}
+    }
+
+    // İlk yüklemede kontrol et
+    checkAuth0Token()
+    
+    // Her 5 saniyede bir kontrol et (Auth0 callback'ini yakalamak için)
+    const interval = setInterval(checkAuth0Token, 5000)
+    return () => clearInterval(interval)
   }, [token, API_BASE])
 
   const login = useCallback(async (email: string, password: string) => {

@@ -27,6 +27,7 @@ type PostCardProps = {
   likeCount?: number
   commentCount?: number
   createdAt?: string
+  liked?: boolean
 }
 
 export default function Post({
@@ -38,6 +39,7 @@ export default function Post({
   likeCount = 0,
   commentCount = 0,
   createdAt,
+  liked = false,
 }: PostCardProps) {
   const { isAuthenticated, token } = useAuth()
   const router = useRouter()
@@ -45,6 +47,7 @@ export default function Post({
   const [likes, setLikes] = React.useState(likeCount)
   const [comments, setComments] = React.useState(commentCount)
   const [isLiking, setIsLiking] = React.useState(false)
+  const [isLiked, setIsLiked] = React.useState(liked)
   const [showCommentBox, setShowCommentBox] = React.useState(false)
   const [commentText, setCommentText] = React.useState("")
   const [isCommenting, setIsCommenting] = React.useState(false)
@@ -179,13 +182,16 @@ export default function Post({
                 })
                 if (!res.ok) return
                 const data = await res.json()
-                if (typeof data.likeCount === 'number') setLikes(data.likeCount)
+                if (typeof data.likeCount === 'number') {
+                  setLikes(data.likeCount)
+                  setIsLiked(data.liked) // Backend'den gelen beğeni durumunu kullan
+                }
               } finally {
                 setIsLiking(false)
               }
             })}
           >
-            <Heart />
+            <Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />
           </Button>
           <span className="text-sm text-muted-foreground">{likes}</span>
           <Button

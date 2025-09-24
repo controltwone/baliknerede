@@ -21,6 +21,7 @@ const s3 = new S3Client({
 
 router.post('/presign', requireAuth, async (req: AuthedRequest, res) => {
   try {
+    console.log('Presign request:', { userId: req.userId, body: req.body })
     const { fileName, fileType } = req.body || {}
     if (!fileName || !fileType) return res.status(400).json({ message: 'fileName and fileType required' })
     const bucket = (process.env.R2_BUCKET || process.env.S3_BUCKET) as string
@@ -31,6 +32,7 @@ router.post('/presign', requireAuth, async (req: AuthedRequest, res) => {
     // Prefer R2 public base if provided, else build standard R2 hostname
     const publicBase = process.env.R2_PUBLIC_BASE || (process.env.R2_ACCOUNT_ID ? `https://${bucket}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : undefined)
     const publicUrl = publicBase ? `${publicBase}/${key}` : `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+    console.log('Presign success:', { uploadUrl: url, publicUrl })
     return res.json({ uploadUrl: url, publicUrl })
   } catch (e) {
     console.error('presign error', e)

@@ -16,11 +16,12 @@ type FeedPost = {
   likeCount?: number
   commentCount?: number
   createdAt?: string
+  liked?: boolean
 }
 
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
-  const { user } = useAuth()
+  const { user, token } = useAuth()
 
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
@@ -36,7 +37,10 @@ export default function Feed() {
       setIsLoading(true)
       setError(null)
       try {
-        const res = await fetch(`${API_BASE}/posts`, { credentials: 'include' })
+        const res = await fetch(`${API_BASE}/posts`, { 
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        })
         if (!res.ok) throw new Error("Liste alınamadı")
         const data = await res.json()
         const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
@@ -48,6 +52,7 @@ export default function Feed() {
           likeCount: p.likeCount || 0,
           commentCount: p.commentCount || 0,
           createdAt: new Date(p.createdAt).toLocaleString(),
+          liked: p.liked || false,
         }))
         if (!cancelled) setPosts(mapped)
       } catch (e: any) {
@@ -83,7 +88,7 @@ export default function Feed() {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           },
           credentials: 'include',
           body: JSON.stringify({
@@ -109,7 +114,10 @@ export default function Feed() {
       // 3. Gönderiyi oluştur
       const res = await fetch(`${API_BASE}/posts`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({ contentText, imageUrl: finalImageUrl }),
       })
