@@ -30,6 +30,7 @@ type PostCardProps = {
 }
 
 export default function Post({
+  id,
   authorName,
   authorAvatarUrl,
   imageUrl,
@@ -41,6 +42,10 @@ export default function Post({
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = React.useState(false)
+  const [likes, setLikes] = React.useState(likeCount)
+  const [comments, setComments] = React.useState(commentCount)
+  const [isLiking, setIsLiking] = React.useState(false)
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
 
   function ensureAuth(orElse?: () => void) {
     if (!isAuthenticated) {
@@ -89,20 +94,46 @@ export default function Post({
             variant="ghost"
             size="icon"
             aria-label="Beğen"
-            onClick={() => ensureAuth(() => {/* TODO: like */})}
+            disabled={isLiking}
+            onClick={() => ensureAuth(async () => {
+              try {
+                setIsLiking(true)
+                const res = await fetch(`${API_BASE}/posts/${id}/like`, {
+                  method: 'POST',
+                  credentials: 'include',
+                })
+                if (!res.ok) return
+                const data = await res.json()
+                if (typeof data.likeCount === 'number') setLikes(data.likeCount)
+              } finally {
+                setIsLiking(false)
+              }
+            })}
           >
             <Heart />
           </Button>
-          <span className="text-sm text-muted-foreground">{likeCount}</span>
+          <span className="text-sm text-muted-foreground">{likes}</span>
           <Button
             variant="ghost"
             size="icon"
             aria-label="Yorum yap"
-            onClick={() => ensureAuth(() => {/* TODO: open comments */})}
+            onClick={() => ensureAuth(async () => {
+              const text = window.prompt('Yorumun:')?.trim()
+              if (!text) return
+              const res = await fetch(`${API_BASE}/posts/${id}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ text }),
+              })
+              if (!res.ok) return
+              const data = await res.json()
+              if (typeof data.commentCount === 'number') setComments(data.commentCount)
+            })}
           >
             <MessageCircle />
           </Button>
-          <span className="text-sm text-muted-foreground">{commentCount}</span>
+          <span className="text-sm text-muted-foreground">{comments}</span>
         </div>
         <Button variant="ghost" size="icon" aria-label="Kaydet">
           <Bookmark />
@@ -156,3 +187,4 @@ export default function Post({
     </Card>
   )
 }
+
