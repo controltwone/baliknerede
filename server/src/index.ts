@@ -7,6 +7,7 @@ import authRoutes from './routes/auth'
 import meRoutes from './routes/me'
 import auth0Routes from './routes/auth0'
 import postsRoutes from './routes/posts'
+import uploadRoutes from './routes/upload'
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use('/auth', authRoutes)
 app.use('/', meRoutes)
 app.use('/', auth0Routes)
 app.use('/posts', postsRoutes)
+app.use('/upload', uploadRoutes)
 
 async function start() {
   try {
