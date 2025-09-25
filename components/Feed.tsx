@@ -53,7 +53,7 @@ export default function Feed() {
           contentText: p.contentText,
           likeCount: p.likeCount || 0,
           commentCount: p.commentCount || 0,
-          createdAt: new Date(p.createdAt).toLocaleString(),
+          createdAt: new Date(p.createdAt).toLocaleDateString('tr-TR') + ' ' + new Date(p.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
           liked: p.liked || false,
         }))
         if (!cancelled) setPosts(mapped)
@@ -134,7 +134,7 @@ export default function Feed() {
         contentText: p.contentText,
         likeCount: p.likeCount || 0,
         commentCount: p.commentCount || 0,
-        createdAt: new Date(p.createdAt).toLocaleString(),
+        createdAt: new Date(p.createdAt).toLocaleDateString('tr-TR') + ' ' + new Date(p.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
       }
       setPosts((prev) => [newPost, ...prev])
       setContentText("")
@@ -149,27 +149,64 @@ export default function Feed() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-base">Bir şeyler paylaş</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <textarea
-            className="min-h-24 w-full rounded-md border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            placeholder="Bugün nerede, ne yakaladın?"
-            value={contentText}
-            onChange={(e) => setContentText(e.target.value)}
-          />
-          <div className="flex items-center justify-between gap-3">
-            <Input type="file" accept="image/*" onChange={handleImageChange} className="max-w-xs" />
-            <Button onClick={handleShare} disabled={isPosting || (!contentText && !selectedFile)}>
-              {isPosting ? "Paylaşılıyor..." : "Paylaş"}
-            </Button>
+      <Card className="w-full border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            {user ? (
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
+                <img 
+                  src={user.avatarUrl || "/logo.png"} 
+                  alt={user.name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-10 h-10"></div>
+            )}
+            <div className="flex-1 space-y-4">
+              <textarea
+                className="w-full min-h-20 resize-none border-0 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none focus:ring-0"
+                placeholder="Bugün nerede, ne yakaladın? 🎣"
+                value={contentText}
+                onChange={(e) => setContentText(e.target.value)}
+              />
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm text-gray-600">Fotoğraf</span>
+                    <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  </label>
+                </div>
+                <Button 
+                  onClick={handleShare} 
+                  disabled={isPosting || (!contentText && !selectedFile)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPosting ? "Paylaşılıyor..." : "Paylaş"}
+                </Button>
+              </div>
+            </div>
           </div>
           {imageUrl ? (
-            <div className="relative mx-auto aspect-[4/5] w-full overflow-hidden rounded-md border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="preview" className="h-full w-full object-cover" />
+            <div className="mt-4">
+              <div className="relative w-full max-w-md mx-auto overflow-hidden rounded-xl border-2 border-gray-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageUrl} alt="preview" className="w-full h-auto object-cover" />
+                <button 
+                  onClick={() => {
+                    setImageUrl(undefined)
+                    setSelectedFile(null)
+                  }}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ) : null}
           {error ? (

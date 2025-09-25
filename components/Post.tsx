@@ -81,15 +81,15 @@ export default function Post({
           <Link href={authorId ? `/u/${authorId}` : '#'}>
             <CardTitle className={`text-sm hover:underline ${hasImage ? '' : 'text-foreground/90'}`}>{authorName}</CardTitle>
           </Link>
-          {createdAt ? (
-            <CardDescription>{createdAt}</CardDescription>
-          ) : null}
         </div>
-        <CardAction>
+        <div className="flex items-center gap-2">
+          {createdAt ? (
+            <span className="text-xs text-muted-foreground">{createdAt}</span>
+          ) : null}
           <Button variant="ghost" size="icon">
             <MoreHorizontal />
           </Button>
-        </CardAction>
+        </div>
       </CardHeader>
 
       {hasImage ? (
