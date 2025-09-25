@@ -1,14 +1,16 @@
 "use client"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Heart, MessageCircle } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, token } = useAuth()
+  const { isAuthenticated, user, token, setUser } = useAuth()
   const router = useRouter()
   const [myPosts, setMyPosts] = useState<Array<{ _id: string; imageUrl?: string; contentText?: string; createdAt?: string; likeCount?: number; commentCount?: number }>>([])
   const [loading, setLoading] = useState(true)
@@ -16,54 +18,182 @@ export default function ProfilePage() {
   const [modalPost, setModalPost] = useState<{ _id: string; imageUrl?: string; contentText?: string } | null>(null)
   const [modalComments, setModalComments] = useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
   const [loadingComments, setLoadingComments] = useState(false)
+  const [followersList, setFollowersList] = useState<Array<{ id: string; name: string }>>([])
+  const [followingList, setFollowingList] = useState<Array<{ id: string; name: string }>>([])
+  const [showListModal, setShowListModal] = useState<null | 'followers' | 'following'>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editBio, setEditBio] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
+  
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
-  useEffect(() => {
-    if (!isAuthenticated) router.replace("/login")
-  }, [isAuthenticated, router])
-  if (!isAuthenticated) return null
 
+  // Auth check effect - always runs
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login")
+    }
+  }, [isAuthenticated, router])
+
+  // Data loading effect - always runs
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return
+    
     let cancelled = false
     ;(async () => {
       try {
         setLoading(true)
-        const res = await fetch(`${API_BASE}/posts/my`, {
-          credentials: 'include',
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        })
-        if (!res.ok) return
-        const data = await res.json()
-        if (!cancelled) setMyPosts(data.posts || [])
+        const [pr, fr, ngr] = await Promise.all([
+          fetch(`${API_BASE}/posts/my`, {
+            credentials: 'include',
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          }),
+          fetch(`${API_BASE}/users/${user.id}/followers`),
+          fetch(`${API_BASE}/users/${user.id}/following`),
+        ])
+        if (pr.ok) {
+          const data = await pr.json()
+          if (!cancelled) setMyPosts(data.posts || [])
+        }
+        if (fr.ok) {
+          const d = await fr.json()
+          if (!cancelled) setFollowersList(d.followers || [])
+        }
+        if (ngr.ok) {
+          const d = await ngr.json()
+          if (!cancelled) setFollowingList(d.following || [])
+        }
+      } catch (error) {
+        console.error('Profile data loading error:', error)
       } finally {
         if (!cancelled) setLoading(false)
       }
     })()
     return () => { cancelled = true }
-  }, [API_BASE, token])
+  }, [API_BASE, token, isAuthenticated, user?.id])
+
+  if (!isAuthenticated) return null
+
+  const handleEditProfile = () => {
+    setEditName(user?.name || '')
+    setEditBio(user?.bio || '')
+    setSelectedFile(null)
+    setPreviewUrl(null)
+    setShowEditModal(true)
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onload = () => setPreviewUrl(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) return
+    setIsUpdating(true)
+    try {
+      let finalAvatarUrl = user?.avatarUrl // Keep current avatar if no new file
+
+      // If a file is selected, upload it first
+      if (selectedFile) {
+        // 1. Get presigned URL
+        const presignRes = await fetch(`${API_BASE}/upload/presign`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            fileName: `avatar-${Date.now()}-${selectedFile.name}`,
+            fileType: selectedFile.type
+          })
+        })
+        
+        if (!presignRes.ok) throw new Error("Presigned URL alınamadı")
+        const { uploadUrl, publicUrl } = await presignRes.json()
+
+        // 2. Upload file to R2
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': selectedFile.type },
+          body: selectedFile
+        })
+        
+        if (!uploadRes.ok) throw new Error("Dosya yüklenemedi")
+        finalAvatarUrl = publicUrl
+      }
+
+      // 3. Update profile
+      const res = await fetch(`${API_BASE}/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: editName.trim(),
+          bio: editBio.trim() || undefined,
+          avatarUrl: finalAvatarUrl
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        // Update user in context
+        setUser(data.user)
+        setShowEditModal(false)
+      }
+    } catch (error) {
+      console.error('Profile update error:', error)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
       <section className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src="/logo.png" alt="avatar" />
+            <AvatarImage src={user?.avatarUrl || "/logo.png"} alt="avatar" />
             <AvatarFallback>{(user?.name || 'BN').slice(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-xl font-semibold">{user?.name || 'Kullanıcı'}</h1>
-            <p className="text-sm text-muted-foreground">Balık meraklısı • İstanbul</p>
+            <p className="text-sm text-muted-foreground">{user?.bio || 'Balık meraklısı • İstanbul'}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">Profili Düzenle</Button>
+          <Button variant="outline" onClick={handleEditProfile}>Profili Düzenle</Button>
         </div>
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
-        <Card>
+        <Card className="border-transparent">
           <CardContent className="p-4">
             <div className="font-semibold">{myPosts.length}</div>
             <div className="text-muted-foreground">Gönderi</div>
+          </CardContent>
+        </Card>
+        <Card className="border-transparent">
+          <CardContent className="p-4">
+            <button className="mx-auto block rounded-md border px-3 py-1 hover:bg-accent" onClick={() => setShowListModal('followers')}>
+              <span className="font-semibold">{followersList.length}</span> Takipçi
+            </button>
+          </CardContent>
+        </Card>
+        <Card className="border-transparent">
+          <CardContent className="p-4">
+            <button className="mx-auto block rounded-md border px-3 py-1 hover:bg-accent" onClick={() => setShowListModal('following')}>
+              <span className="font-semibold">{followingList.length}</span> Takip
+            </button>
           </CardContent>
         </Card>
       </section>
@@ -123,6 +253,7 @@ export default function ProfilePage() {
           </div>
         )}
       </section>
+
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowModal(false)} />
@@ -162,45 +293,138 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-    </div>
-  )
-}
 
-function ProfilePostComments({ postId }: { postId: string }) {
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
-  const [list, setList] = useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        setLoading(true)
-        const res = await fetch(`${API_BASE}/posts/${postId}/comments`)
-        if (!res.ok) return
-        const data = await res.json()
-        if (!cancelled) setList((data.comments || []).map((c: any) => ({
-          userId: String(c.userId), userName: c.userName, text: c.text, createdAt: new Date(c.createdAt).toLocaleString()
-        })))
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
-  }, [API_BASE, postId])
-  if (loading) return <div className="h-16 w-full animate-pulse rounded-md bg-muted" />
-  if (list.length === 0) return <p className="text-sm text-muted-foreground">Henüz yorum yok.</p>
-  return (
-    <div className="space-y-2">
-      {list.map((c, i) => (
-        <div key={i} className="rounded-md border p-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
-            <span className="text-xs text-muted-foreground">{c.createdAt}</span>
+      <Transition show={!!showListModal} as={React.Fragment}>
+        <Dialog className="relative z-50" onClose={() => setShowListModal(null)}>
+          <TransitionChild
+            enter="transition-opacity ease-out duration-150"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" />
+          </TransitionChild>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <TransitionChild
+                enter="transition-all ease-out duration-150"
+                enterFrom="opacity-0 translate-y-2"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition-all ease-in duration-100"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-2"
+              >
+                <DialogPanel className="w-full max-w-sm rounded-xl border bg-background p-4 shadow-lg">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-base font-semibold">{showListModal === 'followers' ? 'Takipçiler' : 'Takip Ettiklerim'}</h3>
+                    <button className="text-sm text-muted-foreground" onClick={() => setShowListModal(null)}>Kapat</button>
+                  </div>
+                  <div className="max-h-96 space-y-2 overflow-auto">
+                    {(showListModal === 'followers' ? followersList : followingList).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Liste boş.</p>
+                    ) : (
+                      (showListModal === 'followers' ? followersList : followingList).map((u) => (
+                        <Link key={u.id} href={`/u/${u.id}`} onClick={() => setShowListModal(null)} className="block rounded-md border p-2 hover:bg-accent">
+                          {u.name}
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-          <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
-        </div>
-      ))}
+        </Dialog>
+      </Transition>
+
+      {/* Profile Edit Modal */}
+      <Transition show={showEditModal} as={React.Fragment}>
+        <Dialog className="relative z-50" onClose={() => setShowEditModal(false)}>
+          <TransitionChild
+            enter="transition-opacity ease-out duration-150"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" />
+          </TransitionChild>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <TransitionChild
+                enter="transition-all ease-out duration-150"
+                enterFrom="opacity-0 translate-y-2"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition-all ease-in duration-100"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-2"
+              >
+                <DialogPanel className="w-full max-w-md rounded-xl border bg-background p-6 shadow-lg">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Profili Düzenle</h3>
+                    <button className="text-sm text-muted-foreground" onClick={() => setShowEditModal(false)}>Kapat</button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Kullanıcı Adı</label>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full rounded-md border bg-background p-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        placeholder="Kullanıcı adınızı girin"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Hakkımda</label>
+                      <textarea
+                        value={editBio}
+                        onChange={(e) => setEditBio(e.target.value)}
+                        className="w-full rounded-md border bg-background p-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        placeholder="Kendiniz hakkında bir şeyler yazın..."
+                        rows={3}
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">{editBio.length}/500</p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Profil Fotoğrafı</label>
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="w-full rounded-md border bg-background p-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        />
+                        {previewUrl && (
+                          <div className="relative w-20 h-20 rounded-full overflow-hidden border">
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setShowEditModal(false)}>
+                        İptal
+                      </Button>
+                      <Button onClick={handleSaveProfile} disabled={isUpdating || !editName.trim()}>
+                        {isUpdating ? 'Kaydediliyor...' : 'Kaydet'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   )
 }
-

@@ -15,11 +15,13 @@ import Image from "next/image"
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn } from "lucide-react"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
+import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
 import React from "react"
 
 type PostCardProps = {
   id: string
+  authorId?: string
   authorName: string
   authorAvatarUrl?: string
   imageUrl?: string
@@ -32,6 +34,7 @@ type PostCardProps = {
 
 export default function Post({
   id,
+  authorId,
   authorName,
   authorAvatarUrl,
   imageUrl,
@@ -68,12 +71,16 @@ export default function Post({
   return (
     <Card className={`w-full max-w-xl ${hasImage ? '' : 'bg-muted/30 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src={authorAvatarUrl} alt={authorName} />
-          <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
-        </Avatar>
+        <Link href={authorId ? `/u/${authorId}` : '#'}>
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={authorAvatarUrl} alt={authorName} />
+            <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Link>
         <div>
-          <CardTitle className={`text-sm ${hasImage ? '' : 'text-foreground/90'}`}>{authorName}</CardTitle>
+          <Link href={authorId ? `/u/${authorId}` : '#'}>
+            <CardTitle className={`text-sm hover:underline ${hasImage ? '' : 'text-foreground/90'}`}>{authorName}</CardTitle>
+          </Link>
           {createdAt ? (
             <CardDescription>{createdAt}</CardDescription>
           ) : null}

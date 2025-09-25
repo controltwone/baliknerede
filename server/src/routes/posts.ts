@@ -2,6 +2,10 @@ import express = require('express')
 const PostModule = require('../models/Post')
 const Post = (PostModule && (PostModule.default || PostModule)) as any
 import { AuthedRequest, requireAuth } from '../middleware/auth'
+const NotificationModule = require('../models/Notification')
+const Notification = (NotificationModule && (NotificationModule.default || NotificationModule)) as any
+const UserModule = require('../models/User')
+const User = (UserModule && (UserModule.default || UserModule)) as any
 
 const router = express.Router()
 
@@ -36,6 +40,13 @@ router.get('/', async (req, res) => {
   
   res.json({ posts })
 })
+// GET /posts/by/:userId - list posts by user
+router.get('/by/:userId', async (req, res) => {
+  const posts = await (Post as any)
+    .find({ authorId: req.params.userId })
+    .sort({ createdAt: -1 })
+  res.json({ posts })
+})
 
 // POST /posts - create post (auth)
 router.post('/', requireAuth, async (req: AuthedRequest, res) => {
@@ -45,6 +56,19 @@ router.post('/', requireAuth, async (req: AuthedRequest, res) => {
     contentText,
     imageUrl,
   })
+  try {
+    const author = await (User as any).findById(req.userId)
+    const followerIds = author?.followers || []
+    if (followerIds.length) {
+      const bulk = followerIds.map((fid: any) => ({
+        userId: fid,
+        actorId: author._id,
+        type: 'new_post',
+        postId: doc._id,
+      }))
+      await (Notification as any).insertMany(bulk)
+    }
+  } catch (e) {}
   res.status(201).json({ post: doc })
 })
 

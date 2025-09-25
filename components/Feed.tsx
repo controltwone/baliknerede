@@ -9,6 +9,7 @@ import { useAuth } from "./AuthProvider"
 
 type FeedPost = {
   id: string
+  authorId?: string
   authorName: string
   authorAvatarUrl?: string
   imageUrl?: string
@@ -45,6 +46,7 @@ export default function Feed() {
         const data = await res.json()
         const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
           id: p._id,
+          authorId: p.authorId?._id || undefined,
           authorName: p.authorId?.name || "Kullanıcı",
           authorAvatarUrl: "/logo.png",
           imageUrl: p.imageUrl,

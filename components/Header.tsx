@@ -8,10 +8,63 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Bell, Search } from 'lucide-react'
 import { Menu } from '@headlessui/react'
 import { useAuth } from './AuthProvider'
+import React from 'react'
 
 function Header() {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, logout, token } = useAuth()
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
+  const [unreadCount, setUnreadCount] = React.useState(0)
+  const [showNotifications, setShowNotifications] = React.useState(false)
+  const [notifications, setNotifications] = React.useState<Array<{ id: string; type: string; actorName: string; postId?: string; createdAt: string; read: boolean }>>([])
+
+  React.useEffect(() => {
+    let timer: any
+    async function load() {
+      if (!isAuthenticated) { setUnreadCount(0); return }
+      try {
+        const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setUnreadCount(data.count || 0)
+        }
+      } catch {}
+    }
+    load()
+    timer = setInterval(load, 30000)
+    return () => { if (timer) clearInterval(timer) }
+  }, [API_BASE, isAuthenticated, token])
+
+  async function openNotifications() {
+    if (!isAuthenticated) return
+    try {
+      const res = await fetch(`${API_BASE}/notifications`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const list = (data.notifications || []).map((n: any) => ({
+          id: n.id,
+          type: n.type,
+          actorName: n.actorName,
+          postId: n.postId,
+          createdAt: new Date(n.createdAt).toLocaleString(),
+          read: !!n.read,
+        }))
+        setNotifications(list)
+      }
+      // mark all as read
+      await fetch(`${API_BASE}/notifications/read-all`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+      setUnreadCount(0)
+    } catch {}
+  }
   return (
     <div className="bg-amber-300 sticky top-0 z-40 shadow-sm">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
@@ -33,9 +86,45 @@ function Header() {
           <Button variant="secondary" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
           </Button>
-          <Button variant="secondary" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
+          <div className="relative">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={async () => {
+                const next = !showNotifications
+                setShowNotifications(next)
+                if (next) await openNotifications()
+              }}
+            >
+              <Bell className="h-5 w-5" />
+              {isAuthenticated && unreadCount > 0 ? (
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadCount}
+                </span>
+              ) : null}
+            </Button>
+            {showNotifications ? (
+              <div className="absolute right-0 mt-2 w-80 rounded-md border bg-popover p-2 shadow-md">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">Bildirimler</span>
+                  <button className="text-xs text-muted-foreground" onClick={() => setShowNotifications(false)}>Kapat</button>
+                </div>
+                <div className="max-h-80 space-y-2 overflow-auto">
+                  {notifications.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Bildirim yok.</p>
+                  ) : notifications.map((n) => (
+                    <div key={n.id} className="rounded-sm border p-2 text-sm">
+                      <p>
+                        <span className="font-medium">{n.actorName}</span>{' '}
+                        {n.type === 'new_post' ? 'yeni bir gönderi paylaştı.' : n.type === 'follow' ? 'seni takip etti.' : n.type === 'like' ? 'gönderini beğendi.' : 'gönderine yorum yaptı.'}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{n.createdAt}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button as={Button} variant="secondary" className="px-2">

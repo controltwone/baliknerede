@@ -5,6 +5,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 type AuthUser = {
   id: string
   name: string
+  email?: string
+  bio?: string
   avatarUrl?: string
 }
 
@@ -15,6 +17,7 @@ type AuthContextValue = {
   signup: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
   token: string | null
+  setUser: (user: AuthUser | null) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -64,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         if (res.ok) {
           const data = await res.json()
-          if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+          if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
           return
         }
       } catch {}
@@ -83,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               })
               if (res.ok) {
                 const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
               }
             } catch {}
           }
@@ -114,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               })
               if (res.ok) {
                 const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
               }
             } catch {}
           }
@@ -142,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const data = await res.json()
     setToken(data.token)
-    setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+    setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
   }, [API_BASE])
 
   const signup = useCallback(async (name: string, email: string, password: string) => {
@@ -154,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!res.ok) throw new Error('Signup failed')
     const data = await res.json()
     setToken(data.token)
-    setUser({ id: data.user.id, name: data.user.name, avatarUrl: "/logo.png" })
+    setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
   }, [API_BASE])
 
   const logout = useCallback(() => {
@@ -163,8 +166,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, isAuthenticated: !!user, login, signup, logout, token }),
-    [user, login, signup, logout, token]
+    () => ({ user, isAuthenticated: !!user, login, signup, logout, token, setUser }),
+    [user, login, signup, logout, token, setUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

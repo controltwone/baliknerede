@@ -8,6 +8,9 @@ import meRoutes from './routes/me'
 import auth0Routes from './routes/auth0'
 import postsRoutes from './routes/posts'
 import uploadRoutes from './routes/upload'
+import followRoutes from './routes/follow'
+import notificationRoutes from './routes/notifications'
+import usersRoutes from './routes/users'
 
 const app = express()
 
@@ -28,6 +31,9 @@ app.use('/', meRoutes)
 app.use('/', auth0Routes)
 app.use('/posts', postsRoutes)
 app.use('/upload', uploadRoutes)
+app.use('/follow', followRoutes)
+app.use('/notifications', notificationRoutes)
+app.use('/users', usersRoutes)
 
 async function start() {
   try {

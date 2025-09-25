@@ -5,6 +5,10 @@ interface IUser extends mongoose.Document {
   name: string
   email: string
   password: string
+  bio?: string
+  avatarUrl?: string
+  followers: mongoose.Types.ObjectId[]
+  following: mongoose.Types.ObjectId[]
   comparePassword(candidate: string): Promise<boolean>
 }
 
@@ -12,6 +16,10 @@ const userSchema = new mongoose.Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true, minlength: 6 },
+  bio: { type: String, maxlength: 500 },
+  avatarUrl: { type: String },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true })
 
 userSchema.pre('save', async function(next) {
