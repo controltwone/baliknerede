@@ -66,30 +66,32 @@ function Header() {
     } catch {}
   }
   return (
-    <div className="bg-amber-300 sticky top-0 z-40 shadow-sm">
+    <div className="bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-lg border-b border-gray-200">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="shrink-0">
-          <Image src="/logo.png" width={32} height={32} alt="fishing logo" />
+        <Link href="/" className="shrink-0 flex items-center gap-3">
+          <Image src="/logo.png" width={72} height={72} alt="BALIKNEREDE logo" />
+          <span className="text-xl font-bold hidden sm:block" style={{color: '#158EC3'}}>baliknerede.com</span>
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
           <Link href="/">
-            <Button>Akış</Button>
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">Akış</Button>
           </Link>
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Ara: balık noktası, kullanıcı, etiket..." />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input className="pl-9 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300" placeholder="Ara: balık noktası, kullanıcı, etiket..." />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50">
             <Search className="h-5 w-5" />
           </Button>
           <div className="relative">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
+              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               onClick={async () => {
                 const next = !showNotifications
                 setShowNotifications(next)
@@ -126,16 +128,17 @@ function Header() {
             ) : null}
           </div>
 
-          <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button as={Button} variant="secondary" className="px-2">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-7 w-7">
-                  <AvatarImage src={user?.avatarUrl || ''} alt={user?.name || ''} />
-                  <AvatarFallback>{(user?.name || 'BN').slice(0,2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="hidden sm:inline">{isAuthenticated ? user?.name : 'Hesabım'}</span>
-              </div>
-            </Menu.Button>
+          {isAuthenticated && (
+            <Menu as="div" className="relative inline-block text-left">
+              <Menu.Button as={Button} variant="ghost" className="px-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src={user?.avatarUrl || ''} alt={user?.name || ''} />
+                    <AvatarFallback>{user?.name?.slice(0,2).toUpperCase() || 'BN'}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden sm:inline">{user?.name}</span>
+                </div>
+              </Menu.Button>
             <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md border bg-popover p-1 shadow-md focus:outline-none">
               {isAuthenticated ? (
                 <>
@@ -178,7 +181,16 @@ function Header() {
                 </>
               )}
             </Menu.Items>
-          </Menu>
+            </Menu>
+          )}
+          
+          {!isAuthenticated && (
+            <Link href="/login">
+              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                Giriş Yap
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
