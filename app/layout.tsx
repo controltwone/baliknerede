@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import './globals.css'
 import Footer from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
+import { LocationFilterProvider } from '@/components/LocationFilterProvider'
 
 export default function RootLayout({
   children,
@@ -12,13 +13,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground" suppressHydrationWarning>
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-grow container mx-auto px-4 py-4">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <LocationFilterProvider>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-grow container mx-auto px-4 py-4">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </LocationFilterProvider>
         </AuthProvider>
       </body>
     </html>

@@ -10,6 +10,8 @@ interface IPost extends mongoose.Document {
   authorId: mongoose.Types.ObjectId
   contentText?: string
   imageUrl?: string
+  locationCity?: string
+  locationSpot?: string
   likeCount: number
   commentCount: number
   likes: mongoose.Types.ObjectId[]
@@ -26,6 +28,8 @@ const postSchema = new mongoose.Schema<IPost>({
   authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   contentText: { type: String },
   imageUrl: { type: String },
+  locationCity: { type: String },
+  locationSpot: { type: String },
   likeCount: { type: Number, default: 0 },
   commentCount: { type: Number, default: 0 },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

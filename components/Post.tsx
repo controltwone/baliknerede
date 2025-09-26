@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin } from "lucide-react"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
 import React from "react"
+import { formatRelativeTime } from "../lib/time"
 
 type PostCardProps = {
   id: string
@@ -26,6 +27,8 @@ type PostCardProps = {
   authorAvatarUrl?: string
   imageUrl?: string
   contentText?: string
+  locationCity?: string
+  locationSpot?: string
   likeCount?: number
   commentCount?: number
   createdAt?: string
@@ -39,6 +42,8 @@ export default function Post({
   authorAvatarUrl,
   imageUrl,
   contentText,
+  locationCity,
+  locationSpot,
   likeCount = 0,
   commentCount = 0,
   createdAt,
@@ -69,7 +74,7 @@ export default function Post({
   }
 
   return (
-    <Card className={`w-full max-w-xl ${hasImage ? '' : 'bg-muted/30 border-dashed'}`}>
+    <Card className={`w-full max-w-xl mx-auto ${hasImage ? '' : 'bg-muted/30 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Link href={authorId ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
@@ -84,9 +89,9 @@ export default function Post({
         </div>
         <div className="flex items-center gap-2">
           {createdAt ? (
-            <span className="text-xs text-muted-foreground">{createdAt}</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">{createdAt}</span>
           ) : null}
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="shrink-0">
             <MoreHorizontal />
           </Button>
         </div>
@@ -172,7 +177,7 @@ export default function Post({
         </CardContent>
       ) : null}
 
-      <CardFooter className="justify-between">
+      <CardFooter className="justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -228,9 +233,18 @@ export default function Post({
           </Button>
           <span className="text-sm text-muted-foreground">{comments}</span>
         </div>
-        <Button variant="ghost" size="icon" aria-label="Kaydet">
-          <Bookmark />
-        </Button>
+        {(locationCity || locationSpot) ? (
+          <div className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-1.5 max-w-[200px] sm:max-w-none">
+            <MapPin className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+            <span className="text-[11px] font-medium text-gray-700 truncate">
+              {locationCity || ''}{locationCity && locationSpot ? ' • ' : ''}{locationSpot || ''}
+            </span>
+          </div>
+        ) : (
+          <Button variant="ghost" size="icon" aria-label="Kaydet" className="shrink-0">
+            <Bookmark />
+          </Button>
+        )}
       </CardFooter>
 
       <Transition show={showAuthModal} as={React.Fragment}>

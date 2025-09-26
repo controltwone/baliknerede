@@ -1,11 +1,13 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { formatRelativeTime } from "../lib/time"
 import Post from "@/components/Post"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "./AuthProvider"
+import { useLocationFilter } from "./LocationFilterProvider"
 
 type FeedPost = {
   id: string
@@ -14,6 +16,8 @@ type FeedPost = {
   authorAvatarUrl?: string
   imageUrl?: string
   contentText?: string
+  locationCity?: string
+  locationSpot?: string
   likeCount?: number
   commentCount?: number
   createdAt?: string
@@ -23,11 +27,14 @@ type FeedPost = {
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const { user, token } = useAuth()
+  const { selectedLocation } = useLocationFilter()
 
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isPosting, setIsPosting] = useState(false)
+  const [locationCity, setLocationCity] = useState<string>("İstanbul")
+  const [locationSpot, setLocationSpot] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<FeedPost[]>([])
@@ -48,15 +55,23 @@ export default function Feed() {
           id: p._id,
           authorId: p.authorId?._id || undefined,
           authorName: p.authorId?.name || "Kullanıcı",
-          authorAvatarUrl: "/logo.png",
+          authorAvatarUrl: p.authorId?.avatarUrl || "/logo.png",
           imageUrl: p.imageUrl,
           contentText: p.contentText,
+          locationCity: p.locationCity,
+          locationSpot: p.locationSpot,
           likeCount: p.likeCount || 0,
           commentCount: p.commentCount || 0,
-          createdAt: new Date(p.createdAt).toLocaleDateString('tr-TR') + ' ' + new Date(p.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          createdAt: formatRelativeTime(p.createdAt),
           liked: p.liked || false,
         }))
-        if (!cancelled) setPosts(mapped)
+        if (!cancelled) {
+          // Filter posts by selected location if any
+          const filtered = selectedLocation 
+            ? mapped.filter(p => p.locationSpot === selectedLocation)
+            : mapped
+          setPosts(filtered)
+        }
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Bir hata oluştu")
       } finally {
@@ -64,7 +79,7 @@ export default function Feed() {
       }
     })()
     return () => { cancelled = true }
-  }, [API_BASE])
+  }, [API_BASE, selectedLocation])
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -121,7 +136,7 @@ export default function Feed() {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         credentials: 'include',
-        body: JSON.stringify({ contentText, imageUrl: finalImageUrl }),
+        body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity, locationSpot }),
       })
       if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
       const data = await res.json()
@@ -129,12 +144,14 @@ export default function Feed() {
       const newPost: FeedPost = {
         id: p._id,
         authorName: user?.name || "Sen",
-        authorAvatarUrl: "/logo.png",
+        authorAvatarUrl: user?.avatarUrl || "/logo.png",
         imageUrl: p.imageUrl,
         contentText: p.contentText,
+        locationCity: p.locationCity,
+        locationSpot: p.locationSpot,
         likeCount: p.likeCount || 0,
         commentCount: p.commentCount || 0,
-        createdAt: new Date(p.createdAt).toLocaleDateString('tr-TR') + ' ' + new Date(p.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        createdAt: formatRelativeTime(p.createdAt),
       }
       setPosts((prev) => [newPost, ...prev])
       setContentText("")
@@ -148,9 +165,9 @@ export default function Feed() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-2 sm:px-0">
       <Card className="w-full border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
             {user ? (
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
@@ -163,30 +180,65 @@ export default function Feed() {
             ) : (
               <div className="w-10 h-10"></div>
             )}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-4 min-w-0">
               <textarea
-                className="w-full min-h-20 resize-none border-0 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none focus:ring-0"
+                className="w-full min-h-20 resize-none border-0 bg-transparent text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:ring-0"
                 placeholder="Bugün nerede, ne yakaladın? 🎣"
                 value={contentText}
                 onChange={(e) => setContentText(e.target.value)}
               />
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-sm text-gray-600">Fotoğraf</span>
-                    <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                  </label>
+              <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-1 justify-center sm:justify-start">
+                    <select
+                      className="rounded-md border bg-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
+                      value={locationCity}
+                      onChange={(e) => setLocationCity(e.target.value)}
+                    >
+                      <option>İstanbul</option>
+                    </select>
+                    <select
+                      className="rounded-md border bg-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
+                      value={locationSpot}
+                      onChange={(e) => setLocationSpot(e.target.value)}
+                    >
+                      <option value="">Konum seç</option>
+                      <option value="Galata Köprüsü">Galata Köprüsü</option>
+                      <option value="Unkapanı Köprüsü">Unkapanı Köprüsü</option>
+                      <option value="Sarayburnu">Sarayburnu</option>
+                      <option value="Karaköy">Karaköy</option>
+                      <option value="Kadıköy Rıhtım">Kadıköy Rıhtım</option>
+                      <option value="Akıntıburnu">Akıntıburnu</option>
+                      <option value="Arnavutköy">Arnavutköy</option>
+                      <option value="Kireçburnu-Yeniköy">Kireçburnu-Yeniköy</option>
+                      <option value="Dragos Sahili">Dragos Sahili</option>
+                      <option value="Tuzla-Güzelyalı Sahili">Tuzla-Güzelyalı Sahili</option>
+                      <option value="Anadolu Kavağı">Anadolu Kavağı</option>
+                      <option value="Avcılar">Avcılar</option>
+                      <option value="Beylerbeyi">Beylerbeyi</option>
+                      <option value="Kuleli Askeri Lisesi">Kuleli Askeri Lisesi</option>
+                      <option value="Tarabya">Tarabya</option>
+                      <option value="Eyüp Sahil">Eyüp Sahil</option>
+                      <option value="Haliç">Haliç</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Fotoğraf</span>
+                      <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                    </label>
+                    <Button 
+                      onClick={handleShare} 
+                      disabled={isPosting || (!contentText && !selectedFile)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                    >
+                      {isPosting ? "Paylaşılıyor..." : "Paylaş"}
+                    </Button>
+                  </div>
                 </div>
-                <Button 
-                  onClick={handleShare} 
-                  disabled={isPosting || (!contentText && !selectedFile)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isPosting ? "Paylaşılıyor..." : "Paylaş"}
-                </Button>
               </div>
             </div>
           </div>

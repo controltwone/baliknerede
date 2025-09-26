@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     .find()
     .sort({ createdAt: -1 })
     .limit(50)
-    .populate('authorId', 'name')
+    .populate('authorId', 'name avatarUrl')
   
   // Eğer kullanıcı giriş yapmışsa beğeni durumunu ekle
   const authHeader = req.headers.authorization
@@ -45,16 +45,19 @@ router.get('/by/:userId', async (req, res) => {
   const posts = await (Post as any)
     .find({ authorId: req.params.userId })
     .sort({ createdAt: -1 })
+    .populate('authorId', 'name avatarUrl')
   res.json({ posts })
 })
 
 // POST /posts - create post (auth)
 router.post('/', requireAuth, async (req: AuthedRequest, res) => {
-  const { contentText, imageUrl } = req.body || {}
+  const { contentText, imageUrl, locationCity, locationSpot } = req.body || {}
   const doc = await Post.create({
     authorId: req.userId,
     contentText,
     imageUrl,
+    locationCity,
+    locationSpot,
   })
   try {
     const author = await (User as any).findById(req.userId)

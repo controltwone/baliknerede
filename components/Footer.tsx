@@ -8,7 +8,7 @@ function Footer() {
         <p>© {new Date().getFullYear()} baliknerede</p>
         <nav className="flex items-center gap-4">
           <Link href="/blog">Blog</Link>
-          <Link href="/flow">Flow</Link>
+          <Link href="/">Akış</Link>
         </nav>
       </div>
     </footer>
