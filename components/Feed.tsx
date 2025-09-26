@@ -166,7 +166,7 @@ export default function Feed() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-2 sm:px-0">
-      <Card className="w-full border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+      <Card className="w-full border-0 shadow-lg bg-gradient-to-br from-white/90 to-blue-50/40 dark:from-gray-800/90 dark:to-gray-700/40 backdrop-blur-sm">
         <CardContent className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
             {user ? (
@@ -182,7 +182,7 @@ export default function Feed() {
             )}
             <div className="flex-1 space-y-4 min-w-0">
               <textarea
-                className="w-full min-h-20 resize-none border-0 bg-transparent text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:ring-0"
+                className="w-full min-h-20 resize-none border-0 bg-transparent text-sm sm:text-base placeholder:text-gray-500 dark:placeholder:text-gray-400 dark:text-white focus:outline-none focus:ring-0"
                 placeholder="Bugün nerede, ne yakaladın? 🎣"
                 value={contentText}
                 onChange={(e) => setContentText(e.target.value)}
@@ -191,14 +191,14 @@ export default function Feed() {
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-1 justify-center sm:justify-start">
                     <select
-                      className="rounded-md border bg-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
+                      className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
                       value={locationCity}
                       onChange={(e) => setLocationCity(e.target.value)}
                     >
                       <option>İstanbul</option>
                     </select>
                     <select
-                      className="rounded-md border bg-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
+                      className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
                       value={locationSpot}
                       onChange={(e) => setLocationSpot(e.target.value)}
                     >
@@ -223,11 +223,11 @@ export default function Feed() {
                     </select>
                   </div>
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer transition-colors">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Fotoğraf</span>
+                      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 hidden sm:inline">Fotoğraf</span>
                       <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
                     <Button 
@@ -244,7 +244,7 @@ export default function Feed() {
           </div>
           {imageUrl ? (
             <div className="mt-4">
-              <div className="relative w-full max-w-md mx-auto overflow-hidden rounded-xl border-2 border-gray-200">
+              <div className="relative w-full max-w-md mx-auto overflow-hidden rounded-xl border-2 border-gray-200 dark:border-gray-600">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageUrl} alt="preview" className="w-full h-auto object-cover" />
                 <button 

@@ -9,12 +9,15 @@ import { Bell, Search, Menu as MenuIcon, X } from 'lucide-react'
 import { Menu } from '@headlessui/react'
 import { useAuth } from './AuthProvider'
 import { useLocationFilter } from './LocationFilterProvider'
+import { useTheme } from './ThemeProvider'
 import React from 'react'
 import { formatRelativeTime } from '../lib/time'
+import { Sun, Moon } from 'lucide-react'
 
 function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
   const { selectedLocation, setSelectedLocation } = useLocationFilter()
+  const { theme, toggleTheme } = useTheme()
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const [unreadCount, setUnreadCount] = React.useState(0)
   const [showNotifications, setShowNotifications] = React.useState(false)
@@ -70,7 +73,7 @@ function Header() {
     } catch {}
   }
   return (
-    <div className="bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-lg border-b border-gray-200">
+    <div className="bg-gradient-to-r from-white/95 to-blue-50/80 dark:from-gray-900/95 dark:to-gray-800/80 backdrop-blur-sm sticky top-0 z-40 shadow-lg border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="shrink-0 flex items-center gap-3" onClick={() => setSelectedLocation("")}>
           <Image src="/logo.png" width={72} height={72} alt="BALIKNEREDE logo" />
@@ -79,11 +82,11 @@ function Header() {
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
           <Link href="/" onClick={() => setSelectedLocation("")}>
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">Akış</Button>
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">Akış</Button>
           </Link>
           <div className="flex items-center gap-2 w-full">
             <select
-              className="rounded-md border bg-white px-2 py-1.5 text-sm min-w-[100px]"
+              className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-2 py-1.5 text-sm min-w-[100px]"
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
@@ -107,20 +110,30 @@ function Header() {
               <option value="Haliç">Haliç</option>
             </select>
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input className="pl-9 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300" placeholder="Ara: kullanıcı, etiket..." />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <Input className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" placeholder="Ara: kullanıcı, etiket..." />
             </div>
           </div>
           <Link href="/blog">
-            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300">Blog</Button>
+            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500">Blog</Button>
           </Link>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Dark Mode Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+            onClick={toggleTheme}
+          >
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </Button>
+          
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+            className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
           >
             {showMobileMenu ? <X className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
@@ -129,7 +142,7 @@ function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
               onClick={async () => {
                 const next = !showNotifications
                 setShowNotifications(next)
@@ -144,21 +157,21 @@ function Header() {
               ) : null}
             </Button>
             {showNotifications ? (
-              <div className="absolute right-0 mt-2 w-80 rounded-md border bg-popover p-2 shadow-md">
+              <div className="absolute right-0 mt-2 w-80 rounded-md border bg-popover dark:bg-gray-800 dark:border-gray-600 p-2 shadow-md">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium">Bildirimler</span>
-                  <button className="text-xs text-muted-foreground" onClick={() => setShowNotifications(false)}>Kapat</button>
+                  <span className="text-sm font-medium dark:text-white">Bildirimler</span>
+                  <button className="text-xs text-muted-foreground dark:text-gray-400" onClick={() => setShowNotifications(false)}>Kapat</button>
                 </div>
                 <div className="max-h-80 space-y-2 overflow-auto">
                   {notifications.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">Bildirim yok.</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-400">Bildirim yok.</p>
                   ) : notifications.map((n) => (
-                    <div key={n.id} className="rounded-sm border p-2 text-sm">
-                      <p>
+                    <div key={n.id} className="rounded-sm border dark:border-gray-600 p-2 text-sm dark:bg-gray-700">
+                      <p className="dark:text-white">
                         <span className="font-medium">{n.actorName}</span>{' '}
                         {n.type === 'new_post' ? 'yeni bir gönderi paylaştı.' : n.type === 'follow' ? 'seni takip etti.' : n.type === 'like' ? 'gönderini beğendi.' : 'gönderine yorum yaptı.'}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">{n.createdAt}</p>
+                      <p className="mt-1 text-xs text-muted-foreground dark:text-gray-400">{n.createdAt}</p>
                     </div>
                   ))}
                 </div>
@@ -168,7 +181,7 @@ function Header() {
 
           {isAuthenticated && (
             <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button as={Button} variant="ghost" className="px-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+              <Menu.Button as={Button} variant="ghost" className="px-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7 overflow-hidden rounded-full">
                     <AvatarImage className="object-cover" src={user?.avatarUrl || ''} alt={user?.name || ''} />
@@ -177,14 +190,14 @@ function Header() {
                   <span className="hidden sm:inline">{user?.name}</span>
                 </div>
               </Menu.Button>
-            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md border bg-popover p-1 shadow-md focus:outline-none">
+            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md border bg-popover dark:bg-gray-800 dark:border-gray-600 p-1 shadow-md focus:outline-none">
               {isAuthenticated ? (
                 <>
                   <Menu.Item>
                     {({ active }) => (
                       <Link
                         href="/profile"
-                        className={`${active ? 'bg-accent' : ''} block rounded-sm px-3 py-2`}
+                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block rounded-sm px-3 py-2 dark:text-white`}
                       >
                         Profil
                       </Link>
@@ -197,7 +210,7 @@ function Header() {
                           logout()
                           window.location.href = `${API_BASE}/auth0/logout`
                         }}
-                        className={`${active ? 'bg-accent' : ''} block w-full rounded-sm px-3 py-2 text-left`}
+                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block w-full rounded-sm px-3 py-2 text-left dark:text-white`}
                       >
                         Çıkış Yap
                       </button>
@@ -210,7 +223,7 @@ function Header() {
                     {({ active }) => (
                       <Link
                         href="/login"
-                        className={`${active ? 'bg-accent' : ''} block rounded-sm px-3 py-2`}
+                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block rounded-sm px-3 py-2 dark:text-white`}
                       >
                         Giriş Yap
                       </Link>
@@ -224,7 +237,7 @@ function Header() {
           
           {!isAuthenticated && (
             <Link href="/login">
-              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">
                 Giriş Yap
               </Button>
             </Link>
@@ -234,19 +247,19 @@ function Header() {
       
       {/* Mobile Menu */}
       {showMobileMenu && (
-        <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-sm">
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white/95 to-blue-50/80 dark:from-gray-900/95 dark:to-gray-800/80 backdrop-blur-sm">
           <div className="px-4 py-3 space-y-3">
             <div className="flex gap-2">
               <Link href="/" onClick={() => { setSelectedLocation(""); setShowMobileMenu(false); }}>
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 w-full">Akış</Button>
+                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 w-full">Akış</Button>
               </Link>
               <Link href="/blog" onClick={() => setShowMobileMenu(false)}>
-                <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 w-full">Blog</Button>
+                <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 w-full">Blog</Button>
               </Link>
             </div>
             <div className="space-y-2">
               <select
-                className="w-full rounded-md border bg-white px-2 py-1.5 text-sm"
+                className="w-full rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-2 py-1.5 text-sm"
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
               >
@@ -270,8 +283,8 @@ function Header() {
                 <option value="Haliç">Haliç</option>
               </select>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input className="pl-9 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300" placeholder="Ara: kullanıcı, etiket..." />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <Input className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" placeholder="Ara: kullanıcı, etiket..." />
               </div>
             </div>
           </div>

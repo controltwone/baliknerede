@@ -74,7 +74,7 @@ export default function Post({
   }
 
   return (
-    <Card className={`w-full max-w-xl mx-auto ${hasImage ? '' : 'bg-muted/30 border-dashed'}`}>
+    <Card className={`w-full max-w-xl mx-auto ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Link href={authorId ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
@@ -84,14 +84,14 @@ export default function Post({
         </Link>
         <div>
           <Link href={authorId ? `/u/${authorId}` : '#'}>
-            <CardTitle className={`text-sm hover:underline ${hasImage ? '' : 'text-foreground/90'}`}>{authorName}</CardTitle>
+            <CardTitle className={`text-sm hover:underline dark:text-white ${hasImage ? '' : 'text-foreground/90 dark:text-foreground/90'}`}>{authorName}</CardTitle>
           </Link>
         </div>
         <div className="flex items-center gap-2">
           {createdAt ? (
-            <span className="text-xs text-muted-foreground hidden sm:inline">{createdAt}</span>
+            <span className="text-xs text-muted-foreground dark:text-gray-400 hidden sm:inline">{createdAt}</span>
           ) : null}
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
             <MoreHorizontal />
           </Button>
         </div>
@@ -105,7 +105,7 @@ export default function Post({
 
       {contentText ? (
         <CardContent className={`${hasImage ? 'pt-4' : 'pt-3'}`}>
-          <p className={`whitespace-pre-wrap ${hasImage ? 'text-sm leading-relaxed' : 'text-base leading-7'}`}>{contentText}</p>
+          <p className={`whitespace-pre-wrap dark:text-white ${hasImage ? 'text-sm leading-relaxed' : 'text-base leading-7'}`}>{contentText}</p>
         </CardContent>
       ) : null}
 
