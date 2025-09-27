@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "./AuthProvider"
 import { useLocationFilter } from "./LocationFilterProvider"
+import { PostCardSkeleton, FeedComposerSkeleton } from "./LoadingSkeleton"
 
 type FeedPost = {
   id: string
@@ -268,9 +269,10 @@ export default function Feed() {
       </Card>
 
       {isLoading ? (
-        <div className="space-y-4">
-          <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
-          <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
+        <div className="space-y-6">
+          <PostCardSkeleton />
+          <PostCardSkeleton />
+          <PostCardSkeleton />
         </div>
       ) : (
         <div className="flex flex-col gap-6">

@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation"
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
 import React from "react"
+import { LoadingSpinner } from "./LoadingSkeleton"
 import { formatRelativeTime } from "../lib/time"
 
 type PostCardProps = {
@@ -158,7 +159,22 @@ export default function Post({
           </div>
           <div className="mt-3 space-y-2">
             {isLoadingComments ? (
-              <div className="h-16 w-full animate-pulse rounded-md bg-muted" />
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-1/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <div className="h-3 w-2/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
             ) : (
               commentList.map((c, i) => (
                 <div key={i} className="rounded-md border p-2 text-sm">
@@ -203,7 +219,7 @@ export default function Post({
               }
             })}
           >
-            <Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />
+            {isLiking ? <LoadingSpinner size="sm" /> : <Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />}
           </Button>
           <span className="text-sm text-muted-foreground">{likes}</span>
           <Button
