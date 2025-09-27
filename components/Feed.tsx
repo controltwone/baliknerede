@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { useAuth } from "./AuthProvider"
 import { useLocationFilter } from "./LocationFilterProvider"
 import { PostCardSkeleton, FeedComposerSkeleton } from "./LoadingSkeleton"
+import { useSocket } from "@/hooks/useSocket"
 
 type FeedPost = {
   id: string
@@ -21,6 +22,7 @@ type FeedPost = {
   locationSpot?: string
   likeCount?: number
   commentCount?: number
+  viewCount?: number
   createdAt?: string
   liked?: boolean
 }
@@ -29,6 +31,7 @@ export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const { user, token } = useAuth()
   const { selectedLocation } = useLocationFilter()
+  const { socketService } = useSocket()
 
   const [contentText, setContentText] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
@@ -63,6 +66,7 @@ export default function Feed() {
           locationSpot: p.locationSpot,
           likeCount: p.likeCount || 0,
           commentCount: p.commentCount || 0,
+          viewCount: p.viewCount || 0,
           createdAt: formatRelativeTime(p.createdAt),
           liked: p.liked || false,
         }))
@@ -81,6 +85,36 @@ export default function Feed() {
     })()
     return () => { cancelled = true }
   }, [API_BASE, selectedLocation])
+
+  // Socket event listeners for real-time updates
+  useEffect(() => {
+    // Listen for new posts
+    socketService.onPostCreated((data) => {
+      if (data.post) {
+        const newPost: FeedPost = {
+          id: data.post._id,
+          authorId: data.post.authorId?._id || undefined,
+          authorName: data.post.authorId?.name || "Kullanıcı",
+          authorAvatarUrl: data.post.authorId?.avatarUrl || "/logo.png",
+          imageUrl: data.post.imageUrl,
+          contentText: data.post.contentText,
+          locationCity: data.post.locationCity,
+          locationSpot: data.post.locationSpot,
+          likeCount: data.post.likeCount || 0,
+          commentCount: data.post.commentCount || 0,
+          viewCount: data.post.viewCount || 0,
+          createdAt: formatRelativeTime(data.post.createdAt),
+          liked: false
+        }
+        
+        setPosts(prev => [newPost, ...prev])
+      }
+    })
+
+    return () => {
+      socketService.removeListener('post_created')
+    }
+  }, [socketService])
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]

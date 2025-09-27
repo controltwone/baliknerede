@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import express = require('express')
 import cors = require('cors')
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 import { connectDB } from './lib/db'
 import cookieParser = require('cookie-parser')
 import authRoutes from './routes/auth'
@@ -13,6 +15,13 @@ import notificationRoutes from './routes/notifications'
 import usersRoutes from './routes/users'
 
 const app = express()
+const server = createServer(app)
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+    credentials: true
+  }
+})
 
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
@@ -35,6 +44,44 @@ app.use('/follow', followRoutes)
 app.use('/notifications', notificationRoutes)
 app.use('/users', usersRoutes)
 
+// Socket.IO event handlers
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id)
+
+  // User joins with their ID
+  socket.on('join', (userId) => {
+    socket.join(`user_${userId}`)
+    console.log(`User ${userId} joined room`)
+  })
+
+  // Handle post like updates
+  socket.on('post_liked', (data) => {
+    socket.broadcast.emit('post_like_updated', data)
+  })
+
+  // Handle post view updates
+  socket.on('post_viewed', (data) => {
+    socket.broadcast.emit('post_view_updated', data)
+  })
+
+  // Handle new posts
+  socket.on('new_post', (data) => {
+    socket.broadcast.emit('post_created', data)
+  })
+
+  // Handle user online status
+  socket.on('user_online', (userId) => {
+    socket.broadcast.emit('user_status_changed', { userId, status: 'online' })
+  })
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id)
+  })
+})
+
+// Make io available to routes
+app.set('io', io)
+
 async function start() {
   try {
     console.log('Booting server...')
@@ -44,8 +91,9 @@ async function start() {
   } catch (err) {
     console.error('DB connection failed', err)
   } finally {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server listening on http://localhost:${PORT}`)
+      console.log(`Socket.IO server ready`)
     })
   }
 }

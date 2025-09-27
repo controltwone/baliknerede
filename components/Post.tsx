@@ -20,6 +20,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/re
 import React from "react"
 import { LoadingSpinner } from "./LoadingSkeleton"
 import { formatRelativeTime } from "../lib/time"
+import { useSocket } from "@/hooks/useSocket"
 
 type PostCardProps = {
   id: string
@@ -32,6 +33,7 @@ type PostCardProps = {
   locationSpot?: string
   likeCount?: number
   commentCount?: number
+  viewCount?: number
   createdAt?: string
   liked?: boolean
 }
@@ -47,14 +49,17 @@ export default function Post({
   locationSpot,
   likeCount = 0,
   commentCount = 0,
+  viewCount = 0,
   createdAt,
   liked = false,
 }: PostCardProps) {
   const { isAuthenticated, token } = useAuth()
   const router = useRouter()
+  const { socketService } = useSocket()
   const [showAuthModal, setShowAuthModal] = React.useState(false)
   const [likes, setLikes] = React.useState(likeCount)
   const [comments, setComments] = React.useState(commentCount)
+  const [views, setViews] = React.useState(viewCount)
   const [isLiking, setIsLiking] = React.useState(false)
   const [isLiked, setIsLiked] = React.useState(liked)
   const [showCommentBox, setShowCommentBox] = React.useState(false)
@@ -64,6 +69,45 @@ export default function Post({
   const [commentList, setCommentList] = React.useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const hasImage = !!imageUrl
+
+  // Socket event listeners
+  React.useEffect(() => {
+    // Listen for like updates
+    socketService.onPostLikeUpdated((data) => {
+      if (data.postId === id) {
+        setLikes(data.likeCount)
+        setIsLiked(data.liked)
+      }
+    })
+
+    // Listen for view updates
+    socketService.onPostViewUpdated((data) => {
+      if (data.postId === id) {
+        setViews(data.viewCount)
+      }
+    })
+
+    return () => {
+      socketService.removeListener('post_like_updated')
+      socketService.removeListener('post_view_updated')
+    }
+  }, [id, socketService])
+
+  // Track view when component mounts
+  React.useEffect(() => {
+    const trackView = async () => {
+      try {
+        await fetch(`${API_BASE}/posts/${id}/view`, {
+          method: 'POST',
+          credentials: 'include'
+        })
+      } catch (error) {
+        console.error('Failed to track view:', error)
+      }
+    }
+
+    trackView()
+  }, [id])
 
   function ensureAuth(orElse?: () => void) {
     if (!isAuthenticated) {
@@ -222,6 +266,7 @@ export default function Post({
             {isLiking ? <LoadingSpinner size="sm" /> : <Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />}
           </Button>
           <span className="text-sm text-muted-foreground">{likes}</span>
+          <span className="text-xs text-muted-foreground ml-2">👁️ {views}</span>
           <Button
             variant="ghost"
             size="icon"

@@ -14,6 +14,7 @@ interface IPost extends mongoose.Document {
   locationSpot?: string
   likeCount: number
   commentCount: number
+  viewCount: number
   likes: mongoose.Types.ObjectId[]
   comments: IComment[]
 }
@@ -32,6 +33,7 @@ const postSchema = new mongoose.Schema<IPost>({
   locationSpot: { type: String },
   likeCount: { type: Number, default: 0 },
   commentCount: { type: Number, default: 0 },
+  viewCount: { type: Number, default: 0 },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [commentSchema],
 }, { timestamps: true })

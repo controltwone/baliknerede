@@ -13,6 +13,7 @@ import { useTheme } from './ThemeProvider'
 import React from 'react'
 import { formatRelativeTime } from '../lib/time'
 import { Sun, Moon } from 'lucide-react'
+import OnlineUsers from './OnlineUsers'
 
 function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
@@ -120,6 +121,11 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Online Users */}
+          <div className="hidden lg:block">
+            <OnlineUsers />
+          </div>
+          
           {/* Dark Mode Toggle */}
           <Button
             variant="ghost"

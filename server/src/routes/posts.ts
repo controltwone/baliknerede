@@ -72,6 +72,17 @@ router.post('/', requireAuth, async (req: AuthedRequest, res) => {
       await (Notification as any).insertMany(bulk)
     }
   } catch (e) {}
+  
+  // Emit socket event for new post
+  const io = req.app.get('io')
+  if (io) {
+    const populatedPost = await Post.findById(doc._id).populate('authorId', 'name avatarUrl')
+    io.emit('post_created', {
+      post: populatedPost,
+      author: populatedPost?.authorId
+    })
+  }
+  
   res.status(201).json({ post: doc })
 })
 
@@ -88,6 +99,17 @@ router.post('/:id/like', requireAuth, async (req: AuthedRequest, res) => {
   }
   post.likeCount = post.likes.length
   await post.save()
+  
+  // Emit socket event for real-time updates
+  const io = req.app.get('io')
+  if (io) {
+    io.emit('post_like_updated', {
+      postId: req.params.id,
+      likeCount: post.likeCount,
+      liked: !has
+    })
+  }
+  
   res.json({ likeCount: post.likeCount, liked: !has })
 })
 
@@ -124,6 +146,31 @@ router.get('/my', requireAuth, async (req: AuthedRequest, res) => {
     .find({ authorId: req.userId })
     .sort({ createdAt: -1 })
   res.json({ posts })
+})
+
+// POST /posts/:id/view - increment view count
+router.post('/:id/view', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post) return res.status(404).json({ message: 'Not found' })
+    
+    post.viewCount = (post.viewCount || 0) + 1
+    await post.save()
+    
+    // Emit socket event for view count update
+    const io = req.app.get('io')
+    if (io) {
+      io.emit('post_view_updated', {
+        postId: req.params.id,
+        viewCount: post.viewCount
+      })
+    }
+    
+    res.json({ viewCount: post.viewCount })
+  } catch (error) {
+    console.error('View count update failed:', error)
+    res.status(500).json({ message: 'View count update failed' })
+  }
 })
 
 export default router
