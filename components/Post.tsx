@@ -124,10 +124,10 @@ export default function Post({
       }
     }
 
-    // Listen for view updates
+    // Listen for view updates (only for non-admin users)
     const handleViewUpdate = (data: any) => {
       console.log('Received post_view_updated event:', data)
-      if (data.postId === id) {
+      if (data.postId === id && !user?.isAdmin) {
         setViews(data.viewCount)
       }
     }
@@ -142,9 +142,20 @@ export default function Post({
     }
   }, [id, socketService])
 
-  // Track view when component mounts
+  // Track view when component mounts (only for non-admin users)
   React.useEffect(() => {
     const trackView = async () => {
+      // Don't track views for admins
+      if (user?.isAdmin) {
+        return
+      }
+
+      // Check if we've already viewed this post in this session
+      const viewedPosts = JSON.parse(sessionStorage.getItem('viewedPosts') || '[]')
+      if (viewedPosts.includes(id)) {
+        return // Already viewed this post in this session
+      }
+
       try {
         const res = await fetch(`${API_BASE}/posts/${id}/view`, {
           method: 'POST',
@@ -154,7 +165,9 @@ export default function Post({
         if (res.ok) {
           const data = await res.json()
           if (data.viewCount) {
-            setViews(data.viewCount)
+            // Mark this post as viewed in this session
+            viewedPosts.push(id)
+            sessionStorage.setItem('viewedPosts', JSON.stringify(viewedPosts))
             
             // Emit socket event for real-time updates
             socketService.emitPostViewed({
@@ -169,7 +182,32 @@ export default function Post({
     }
 
     trackView()
-  }, [id])
+  }, [id, user?.isAdmin])
+
+  // For admins: get view count without incrementing
+  React.useEffect(() => {
+    const getViewCount = async () => {
+      if (!user?.isAdmin) return
+
+      try {
+        const res = await fetch(`${API_BASE}/posts/${id}/view`, {
+          method: 'GET',
+          credentials: 'include'
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          if (data.viewCount !== undefined) {
+            setViews(data.viewCount)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to get view count:', error)
+      }
+    }
+
+    getViewCount()
+  }, [id, user?.isAdmin, API_BASE])
 
   function ensureAuth(orElse?: () => void) {
     if (!isAuthenticated) {
@@ -397,7 +435,9 @@ export default function Post({
             {isLiking ? <LoadingSpinner size="sm" /> : <Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />}
           </Button>
           <span className="text-sm text-muted-foreground">{likes}</span>
-          <span className="text-xs text-muted-foreground ml-2">👁️ {views}</span>
+          {user?.isAdmin && (
+            <span className="text-xs text-muted-foreground ml-2">👁️ {views}</span>
+          )}
           <Button
             variant="ghost"
             size="icon"

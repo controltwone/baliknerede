@@ -152,7 +152,7 @@ router.get('/my', requireAuth, async (req: AuthedRequest, res) => {
   res.json({ posts })
 })
 
-// POST /posts/:id/view - increment view count
+// POST /posts/:id/view - increment view count (non-admin users only)
 router.post('/:id/view', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
@@ -174,6 +174,19 @@ router.post('/:id/view', async (req, res) => {
   } catch (error) {
     console.error('View count update failed:', error)
     res.status(500).json({ message: 'View count update failed' })
+  }
+})
+
+// GET /posts/:id/view - get view count (for admins to see current count)
+router.get('/:id/view', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post) return res.status(404).json({ message: 'Not found' })
+    
+    res.json({ viewCount: post.viewCount || 0 })
+  } catch (error) {
+    console.error('Get view count failed:', error)
+    res.status(500).json({ message: 'Get view count failed' })
   }
 })
 
