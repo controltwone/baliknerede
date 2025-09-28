@@ -40,7 +40,6 @@ export default function Feed() {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isPosting, setIsPosting] = useState(false)
-  const [locationCity, setLocationCity] = useState<string>("İstanbul")
   const [locationSpot, setLocationSpot] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -313,7 +312,7 @@ export default function Feed() {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         credentials: 'include',
-        body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity, locationSpot }),
+        body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity: "İstanbul", locationSpot }),
       })
       if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
       const data = await res.json()
@@ -342,6 +341,7 @@ export default function Feed() {
       setContentText("")
       setImageUrl(undefined)
       setSelectedFile(null)
+      setLocationSpot("")
     } catch (e: any) {
       setError(e?.message || "Paylaşım sırasında hata")
     } finally {
@@ -375,13 +375,6 @@ export default function Feed() {
               <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-1 justify-center sm:justify-start">
-                    <select
-                      className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
-                      value={locationCity}
-                      onChange={(e) => setLocationCity(e.target.value)}
-                    >
-                      <option>İstanbul</option>
-                    </select>
                     <select
                       className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
                       value={locationSpot}
