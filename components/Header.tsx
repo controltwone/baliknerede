@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { Bell, Search, Menu as MenuIcon, X } from 'lucide-react'
+import { Bell, Search, Menu as MenuIcon, X, User, LogOut, Settings } from 'lucide-react'
 import { Menu } from '@headlessui/react'
 import { useAuth } from './AuthProvider'
 import { useLocationFilter } from './LocationFilterProvider'
@@ -151,7 +151,7 @@ function Header() {
             style={{
               color: '#158EC3',
               fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-              textShadow: '0 1px 3px rgba(21, 142, 195, 0.3)',
+              textShadow: '0 2px 8px rgba(59, 130, 246, 0.4), 0 1px 3px rgba(21, 142, 195, 0.3)',
               letterSpacing: '0.5px'
             }}
           >
@@ -159,7 +159,7 @@ function Header() {
           </span>
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
+        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 ml-20">
           <Link href="/" onClick={() => setSelectedLocation("")}>
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
           </Link>
@@ -212,9 +212,6 @@ function Header() {
               )}
             </div>
           </div>
-          <Link href="/blog">
-            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200">Blog</Button>
-          </Link>
           {user?.isAdmin && (
             <Link href="/admin">
               <Button variant="outline" className="text-gray-700 hover:text-red-600 hover:bg-red-50/80 border-gray-300/50 hover:border-red-300 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-red-500 backdrop-blur-sm transition-all duration-200">
@@ -296,32 +293,53 @@ function Header() {
                   <span className="hidden sm:inline">{user?.name}</span>
                 </div>
               </Menu.Button>
-            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md border bg-popover dark:bg-gray-800 dark:border-gray-600 p-1 shadow-md focus:outline-none">
+            <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl border bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 shadow-xl focus:outline-none overflow-hidden">
               {isAuthenticated ? (
                 <>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <Link
-                        href="/profile"
-                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block rounded-sm px-3 py-2 dark:text-white`}
-                      >
-                        Profil
-                      </Link>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={() => {
-                          logout()
-                          window.location.href = `${API_BASE}/auth0/logout`
-                        }}
-                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block w-full rounded-sm px-3 py-2 text-left dark:text-white`}
-                      >
-                        Çıkış Yap
-                      </button>
-                    )}
-                  </Menu.Item>
+                  {/* User Info Header */}
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-700 dark:to-gray-600">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage className="object-cover" src={user?.avatarUrl || ''} alt={user?.name || ''} />
+                        <AvatarFallback className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                          {user?.name?.slice(0,2).toUpperCase() || 'BN'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{user?.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Balık Meraklısı</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Menu Items */}
+                  <div className="py-2">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/profile"
+                          className={`${active ? 'bg-blue-50 dark:bg-blue-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200`}
+                        >
+                          <User className="h-4 w-4" />
+                          Profil
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={() => {
+                            logout()
+                            window.location.href = `${API_BASE}/auth0/logout`
+                          }}
+                          className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Çıkış Yap
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
                 </>
               ) : (
                 <>
@@ -329,8 +347,9 @@ function Header() {
                     {({ active }) => (
                       <Link
                         href="/login"
-                        className={`${active ? 'bg-accent dark:bg-gray-700' : ''} block rounded-sm px-3 py-2 dark:text-white`}
+                        className={`${active ? 'bg-blue-50 dark:bg-blue-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200`}
                       >
+                        <User className="h-4 w-4" />
                         Giriş Yap
                       </Link>
                     )}
@@ -348,6 +367,11 @@ function Header() {
               </Button>
             </Link>
           )}
+          
+          {/* Blog Button */}
+          <Link href="/blog">
+            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200 ml-10">Blog</Button>
+          </Link>
         </div>
       </div>
       
