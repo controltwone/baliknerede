@@ -231,35 +231,22 @@ export default function ProfilePage() {
         ) : (
           <>
             {myPosts.map((p: any) => (
-              <div key={p._id} className="relative group">
-                <Post
-                  id={p._id}
-                  authorId={user?.id}
-                  authorName={user?.name || 'Kullanıcı'}
-                  authorAvatarUrl={user?.avatarUrl || "/logo.png"}
-                  imageUrl={p.imageUrl}
-                  contentText={p.contentText}
-                  likeCount={p.likeCount}
-                  commentCount={p.commentCount}
-                  createdAt={formatRelativeTime(p.createdAt)}
-                  locationCity={p.locationCity}
-                  locationSpot={p.locationSpot}
-                  viewCount={p.viewCount}
-                  onDelete={handleDeletePost}
-                />
-                
-                {/* Delete Button Overlay */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeletePost(p._id)
-                  }}
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg z-10"
-                  title="Gönderiyi Sil"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              <Post
+                key={p._id}
+                id={p._id}
+                authorId={user?.id}
+                authorName={user?.name || 'Kullanıcı'}
+                authorAvatarUrl={user?.avatarUrl || "/logo.png"}
+                imageUrl={p.imageUrl}
+                contentText={p.contentText}
+                likeCount={p.likeCount}
+                commentCount={p.commentCount}
+                createdAt={formatRelativeTime(p.createdAt)}
+                locationCity={p.locationCity}
+                locationSpot={p.locationSpot}
+                viewCount={p.viewCount}
+                onDelete={handleDeletePost}
+              />
             ))}
             {myPosts.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground">Henüz gönderi yok.</p>

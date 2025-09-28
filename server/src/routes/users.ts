@@ -4,6 +4,31 @@ const User = (UserModule && (UserModule.default || UserModule)) as any
 
 const router = express.Router()
 
+// GET /users/search?q=query - search users by name
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query
+    if (!q || typeof q !== 'string') {
+      return res.json({ users: [] })
+    }
+    
+    const users = await User.find({
+      name: { $regex: q, $options: 'i' }
+    }).select('name avatarUrl').limit(10)
+    
+    const results = users.map((user: any) => ({
+      id: String(user._id),
+      name: user.name,
+      avatarUrl: user.avatarUrl
+    }))
+    
+    res.json({ users: results })
+  } catch (error) {
+    console.error('User search failed:', error)
+    res.status(500).json({ message: 'Search failed' })
+  }
+})
+
 // GET /users/:id - public profile
 router.get('/:id', async (req, res) => {
   const user = await (User as any).findById(req.params.id)

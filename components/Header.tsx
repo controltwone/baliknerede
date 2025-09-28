@@ -13,7 +13,6 @@ import { useTheme } from './ThemeProvider'
 import React from 'react'
 import { formatRelativeTime } from '../lib/time'
 import { Sun, Moon, Shield } from 'lucide-react'
-import OnlineUsers from './OnlineUsers'
 import { CustomSelect } from './ui/custom-select'
 
 function Header() {
@@ -48,8 +47,45 @@ function Header() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const [unreadCount, setUnreadCount] = React.useState(0)
   const [showNotifications, setShowNotifications] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [searchResults, setSearchResults] = React.useState<Array<{id: string, name: string, avatarUrl?: string}>>([])
+  const [showSearchResults, setShowSearchResults] = React.useState(false)
+  const [isSearching, setIsSearching] = React.useState(false)
   const [notifications, setNotifications] = React.useState<Array<{ id: string; type: string; actorName: string; postId?: string; createdAt: string; read: boolean }>>([])
   const [showMobileMenu, setShowMobileMenu] = React.useState(false)
+
+  // User search function
+  const searchUsers = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const response = await fetch(`${API_BASE}/users/search?q=${encodeURIComponent(query)}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSearchResults(data.users || [])
+        setShowSearchResults(true)
+      }
+    } catch (error) {
+      console.error('User search failed:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Debounced search
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      searchUsers(searchQuery)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   React.useEffect(() => {
     let timer: any
@@ -110,7 +146,17 @@ function Header() {
             alt="BALIKNEREDE logo" 
             className="logo-float logo-hover-spin transition-all duration-300 group-hover:scale-110" 
           />
-          <span className="text-xl font-bold hidden sm:block transition-colors duration-300 group-hover:text-blue-500" style={{color: '#158EC3'}}>baliknerede.com</span>
+          <span 
+            className="text-xl font-bold hidden sm:block transition-all duration-300 group-hover:scale-105 tracking-wide"
+            style={{
+              color: '#158EC3',
+              fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
+              textShadow: '0 1px 3px rgba(21, 142, 195, 0.3)',
+              letterSpacing: '0.5px'
+            }}
+          >
+            baliknerede.com
+          </span>
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
@@ -128,7 +174,42 @@ function Header() {
             />
             <div className="relative flex-1 search-float">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors duration-200" />
-              <Input className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" placeholder="Ara: kullanıcı, etiket..." />
+              <Input 
+                className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" 
+                placeholder="Ara: kullanıcı, etiket..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery && setShowSearchResults(true)}
+                onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+              />
+              
+              {/* Search Results Dropdown */}
+              {showSearchResults && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                      Aranıyor...
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((user) => (
+                      <Link key={user.id} href={`/u/${user.id}`}>
+                        <div className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.avatarUrl || "/logo.png"} alt={user.name} />
+                            <AvatarFallback>{user.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</span>
+                        </div>
+                      </Link>
+                    ))
+                  ) : searchQuery ? (
+                    <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                      Kullanıcı bulunamadı
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
           <Link href="/blog">
@@ -145,11 +226,6 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Online Users */}
-          <div className="hidden lg:block">
-            <OnlineUsers />
-          </div>
-          
           {/* Dark Mode Toggle */}
           <Button
             variant="ghost"
@@ -307,7 +383,42 @@ function Header() {
               />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <Input className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" placeholder="Ara: kullanıcı, etiket..." />
+                <Input 
+                  className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" 
+                  placeholder="Ara: kullanıcı, etiket..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery && setShowSearchResults(true)}
+                  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+                />
+                
+                {/* Mobile Search Results */}
+                {showSearchResults && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    {isSearching ? (
+                      <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        Aranıyor...
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((user) => (
+                        <Link key={user.id} href={`/u/${user.id}`} onClick={() => setShowMobileMenu(false)}>
+                          <div className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatarUrl || "/logo.png"} alt={user.name} />
+                              <AvatarFallback>{user.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</span>
+                          </div>
+                        </Link>
+                      ))
+                    ) : searchQuery ? (
+                      <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Kullanıcı bulunamadı
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           </div>
