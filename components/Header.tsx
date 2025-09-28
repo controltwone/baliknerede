@@ -14,11 +14,37 @@ import React from 'react'
 import { formatRelativeTime } from '../lib/time'
 import { Sun, Moon } from 'lucide-react'
 import OnlineUsers from './OnlineUsers'
+import { CustomSelect } from './ui/custom-select'
 
 function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
   const { selectedLocation, setSelectedLocation } = useLocationFilter()
   const { theme, toggleTheme } = useTheme()
+
+  const locationOptions = [
+    { value: "", label: "Tüm Konumlar" },
+    { value: "Galata Köprüsü", label: "Galata Köprüsü" },
+    { value: "Unkapanı Köprüsü", label: "Unkapanı Köprüsü" },
+    { value: "Sarayburnu", label: "Sarayburnu" },
+    { value: "Karaköy", label: "Karaköy" },
+    { value: "Kadıköy Rıhtım", label: "Kadıköy Rıhtım" },
+    { value: "Akıntıburnu", label: "Akıntıburnu" },
+    { value: "Arnavutköy", label: "Arnavutköy" },
+    { value: "Kireçburnu-Yeniköy", label: "Kireçburnu-Yeniköy" },
+    { value: "Dragos Sahili", label: "Dragos Sahili" },
+    { value: "Tuzla-Güzelyalı Sahili", label: "Tuzla-Güzelyalı Sahili" },
+    { value: "Anadolu Kavağı", label: "Anadolu Kavağı" },
+    { value: "Avcılar", label: "Avcılar" },
+    { value: "Beylerbeyi", label: "Beylerbeyi" },
+    { value: "Kuleli Askeri Lisesi", label: "Kuleli Askeri Lisesi" },
+    { value: "Tarabya", label: "Tarabya" },
+    { value: "Eyüp Sahil", label: "Eyüp Sahil" },
+    { value: "Haliç", label: "Haliç" },
+    { value: "Florya Sahil", label: "Florya Sahil" },
+    { value: "Yeşilköy Sahil", label: "Yeşilköy Sahil" },
+    { value: "Bakırköy Sahil", label: "Bakırköy Sahil" },
+    { value: "Yenikapı", label: "Yenikapı" }
+  ]
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const [unreadCount, setUnreadCount] = React.useState(0)
   const [showNotifications, setShowNotifications] = React.useState(false)
@@ -92,30 +118,14 @@ function Header() {
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
           </Link>
           <div className="flex items-center gap-2 w-full">
-            <select
-              className="rounded-md border bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 dark:text-white px-2 py-1.5 text-sm min-w-[100px] transition-all duration-200"
+            <CustomSelect
+              options={locationOptions}
               value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-            >
-              <option value="">Tüm Konumlar</option>
-              <option value="Galata Köprüsü">Galata Köprüsü</option>
-              <option value="Unkapanı Köprüsü">Unkapanı Köprüsü</option>
-              <option value="Sarayburnu">Sarayburnu</option>
-              <option value="Karaköy">Karaköy</option>
-              <option value="Kadıköy Rıhtım">Kadıköy Rıhtım</option>
-              <option value="Akıntıburnu">Akıntıburnu</option>
-              <option value="Arnavutköy">Arnavutköy</option>
-              <option value="Kireçburnu-Yeniköy">Kireçburnu-Yeniköy</option>
-              <option value="Dragos Sahili">Dragos Sahili</option>
-              <option value="Tuzla-Güzelyalı Sahili">Tuzla-Güzelyalı Sahili</option>
-              <option value="Anadolu Kavağı">Anadolu Kavağı</option>
-              <option value="Avcılar">Avcılar</option>
-              <option value="Beylerbeyi">Beylerbeyi</option>
-              <option value="Kuleli Askeri Lisesi">Kuleli Askeri Lisesi</option>
-              <option value="Tarabya">Tarabya</option>
-              <option value="Eyüp Sahil">Eyüp Sahil</option>
-              <option value="Haliç">Haliç</option>
-            </select>
+              onChange={setSelectedLocation}
+              placeholder="Tüm Konumlar"
+              className="min-w-[120px]"
+              showIcon={true}
+            />
             <div className="relative flex-1 search-float">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors duration-200" />
               <Input className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" placeholder="Ara: kullanıcı, etiket..." />
@@ -270,30 +280,15 @@ function Header() {
               </Link>
             </div>
             <div className="space-y-2">
-              <select
-                className="w-full rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-2 py-1.5 text-sm"
+              <CustomSelect
+                options={locationOptions}
                 value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-              >
-                <option value="">Tüm Konumlar</option>
-                <option value="Galata Köprüsü">Galata Köprüsü</option>
-                <option value="Unkapanı Köprüsü">Unkapanı Köprüsü</option>
-                <option value="Sarayburnu">Sarayburnu</option>
-                <option value="Karaköy">Karaköy</option>
-                <option value="Kadıköy Rıhtım">Kadıköy Rıhtım</option>
-                <option value="Akıntıburnu">Akıntıburnu</option>
-                <option value="Arnavutköy">Arnavutköy</option>
-                <option value="Kireçburnu-Yeniköy">Kireçburnu-Yeniköy</option>
-                <option value="Dragos Sahili">Dragos Sahili</option>
-                <option value="Tuzla-Güzelyalı Sahili">Tuzla-Güzelyalı Sahili</option>
-                <option value="Anadolu Kavağı">Anadolu Kavağı</option>
-                <option value="Avcılar">Avcılar</option>
-                <option value="Beylerbeyi">Beylerbeyi</option>
-                <option value="Kuleli Askeri Lisesi">Kuleli Askeri Lisesi</option>
-                <option value="Tarabya">Tarabya</option>
-                <option value="Eyüp Sahil">Eyüp Sahil</option>
-                <option value="Haliç">Haliç</option>
-              </select>
+                onChange={setSelectedLocation}
+                placeholder="Tüm Konumlar"
+                className="w-full"
+                showIcon={true}
+                iconLabel="Konum Filtresi"
+              />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" placeholder="Ara: kullanıcı, etiket..." />

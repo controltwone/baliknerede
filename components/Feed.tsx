@@ -13,6 +13,7 @@ import { useSocket } from "@/hooks/useSocket"
 import { ConfirmationModal } from "./ui/confirmation-modal"
 import { ReportModal } from "./ui/report-modal"
 import { ToastManager } from "./ui/toast"
+import { CustomSelect } from "./ui/custom-select"
 
 type FeedPost = {
   id: string
@@ -42,6 +43,31 @@ export default function Feed() {
   const [isPosting, setIsPosting] = useState(false)
   const [locationSpot, setLocationSpot] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
+
+  const locationOptions = [
+    { value: "", label: "Konum seç" },
+    { value: "Galata Köprüsü", label: "Galata Köprüsü" },
+    { value: "Unkapanı Köprüsü", label: "Unkapanı Köprüsü" },
+    { value: "Sarayburnu", label: "Sarayburnu" },
+    { value: "Karaköy", label: "Karaköy" },
+    { value: "Kadıköy Rıhtım", label: "Kadıköy Rıhtım" },
+    { value: "Akıntıburnu", label: "Akıntıburnu" },
+    { value: "Arnavutköy", label: "Arnavutköy" },
+    { value: "Kireçburnu-Yeniköy", label: "Kireçburnu-Yeniköy" },
+    { value: "Dragos Sahili", label: "Dragos Sahili" },
+    { value: "Tuzla-Güzelyalı Sahili", label: "Tuzla-Güzelyalı Sahili" },
+    { value: "Anadolu Kavağı", label: "Anadolu Kavağı" },
+    { value: "Avcılar", label: "Avcılar" },
+    { value: "Beylerbeyi", label: "Beylerbeyi" },
+    { value: "Kuleli Askeri Lisesi", label: "Kuleli Askeri Lisesi" },
+    { value: "Tarabya", label: "Tarabya" },
+    { value: "Eyüp Sahil", label: "Eyüp Sahil" },
+    { value: "Haliç", label: "Haliç" },
+    { value: "Florya Sahil", label: "Florya Sahil" },
+    { value: "Yeşilköy Sahil", label: "Yeşilköy Sahil" },
+    { value: "Bakırköy Sahil", label: "Bakırköy Sahil" },
+    { value: "Yenikapı", label: "Yenikapı" }
+  ]
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<FeedPost[]>([])
   
@@ -374,31 +400,16 @@ export default function Feed() {
               />
               <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-1 justify-center sm:justify-start">
-                    <select
-                      className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-1 py-1 text-xs sm:text-sm flex-1 max-w-[100px] sm:max-w-none"
+                  <div className="flex gap-2 justify-center sm:justify-start items-center">
+                    <CustomSelect
+                      options={locationOptions}
                       value={locationSpot}
-                      onChange={(e) => setLocationSpot(e.target.value)}
-                    >
-                      <option value="">Konum seç</option>
-                      <option value="Galata Köprüsü">Galata Köprüsü</option>
-                      <option value="Unkapanı Köprüsü">Unkapanı Köprüsü</option>
-                      <option value="Sarayburnu">Sarayburnu</option>
-                      <option value="Karaköy">Karaköy</option>
-                      <option value="Kadıköy Rıhtım">Kadıköy Rıhtım</option>
-                      <option value="Akıntıburnu">Akıntıburnu</option>
-                      <option value="Arnavutköy">Arnavutköy</option>
-                      <option value="Kireçburnu-Yeniköy">Kireçburnu-Yeniköy</option>
-                      <option value="Dragos Sahili">Dragos Sahili</option>
-                      <option value="Tuzla-Güzelyalı Sahili">Tuzla-Güzelyalı Sahili</option>
-                      <option value="Anadolu Kavağı">Anadolu Kavağı</option>
-                      <option value="Avcılar">Avcılar</option>
-                      <option value="Beylerbeyi">Beylerbeyi</option>
-                      <option value="Kuleli Askeri Lisesi">Kuleli Askeri Lisesi</option>
-                      <option value="Tarabya">Tarabya</option>
-                      <option value="Eyüp Sahil">Eyüp Sahil</option>
-                      <option value="Haliç">Haliç</option>
-                    </select>
+                      onChange={setLocationSpot}
+                      placeholder="Konum seç"
+                      className="flex-1 max-w-[120px] sm:max-w-none"
+                      showIcon={true}
+                      iconLabel="Konum"
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer transition-colors">
@@ -452,7 +463,7 @@ export default function Feed() {
           <PostCardSkeleton />
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 custom-scrollbar">
           {posts.map((p) => (
             <Post 
               key={p.id} 
