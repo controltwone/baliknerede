@@ -12,7 +12,7 @@ import { useLocationFilter } from './LocationFilterProvider'
 import { useTheme } from './ThemeProvider'
 import React from 'react'
 import { formatRelativeTime } from '../lib/time'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Shield } from 'lucide-react'
 import OnlineUsers from './OnlineUsers'
 import { CustomSelect } from './ui/custom-select'
 
@@ -134,6 +134,14 @@ function Header() {
           <Link href="/blog">
             <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200">Blog</Button>
           </Link>
+          {user?.isAdmin && (
+            <Link href="/admin">
+              <Button variant="outline" className="text-gray-700 hover:text-red-600 hover:bg-red-50/80 border-gray-300/50 hover:border-red-300 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-red-500 backdrop-blur-sm transition-all duration-200">
+                <Shield className="w-4 h-4 mr-1" />
+                Admin
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -278,6 +286,14 @@ function Header() {
               <Link href="/blog" onClick={() => setShowMobileMenu(false)}>
                 <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 w-full">Blog</Button>
               </Link>
+              {user?.isAdmin && (
+                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                  <Button variant="outline" className="text-gray-700 hover:text-red-600 hover:bg-red-50 border-gray-300 hover:border-red-300 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-red-500 w-full">
+                    <Shield className="w-4 h-4 mr-1" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
             </div>
             <div className="space-y-2">
               <CustomSelect

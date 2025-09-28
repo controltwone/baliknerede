@@ -13,6 +13,7 @@ import uploadRoutes from './routes/upload'
 import followRoutes from './routes/follow'
 import notificationRoutes from './routes/notifications'
 import usersRoutes from './routes/users'
+import adminRoutes from './routes/admin'
 
 const app = express()
 const server = createServer(app)
@@ -43,6 +44,7 @@ app.use('/upload', uploadRoutes)
 app.use('/follow', followRoutes)
 app.use('/notifications', notificationRoutes)
 app.use('/users', usersRoutes)
+app.use('/admin', adminRoutes)
 
 // Socket.IO event handlers
 io.on('connection', (socket) => {

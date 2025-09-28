@@ -6,9 +6,9 @@ import { AuthedRequest, requireAuth } from '../middleware/auth'
 const router = express.Router()
 
 router.get('/me', requireAuth, async (req: AuthedRequest, res) => {
-  const user = await User.findById(req.userId).select('name email bio avatarUrl')
+  const user = await User.findById(req.userId).select('name email bio avatarUrl isAdmin')
   if (!user) return res.status(404).json({ message: 'Not found' })
-  res.json({ user: { id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl } })
+  res.json({ user: { id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl, isAdmin: user.isAdmin } })
 })
 
 router.put('/me', requireAuth, async (req: AuthedRequest, res) => {
@@ -21,7 +21,7 @@ router.put('/me', requireAuth, async (req: AuthedRequest, res) => {
   if (avatarUrl !== undefined) user.avatarUrl = avatarUrl
   
   await user.save()
-  res.json({ user: { id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl } })
+  res.json({ user: { id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl, isAdmin: user.isAdmin } })
 })
 
 export default router

@@ -6,6 +6,8 @@ const NotificationModule = require('../models/Notification')
 const Notification = (NotificationModule && (NotificationModule.default || NotificationModule)) as any
 const UserModule = require('../models/User')
 const User = (UserModule && (UserModule.default || UserModule)) as any
+const ReportModule = require('../models/Report')
+const Report = (ReportModule && (ReportModule.default || ReportModule)) as any
 
 const router = express.Router()
 
@@ -212,11 +214,27 @@ router.post('/:id/report', requireAuth, async (req: AuthedRequest, res) => {
       return res.status(400).json({ message: 'Cannot report your own post' })
     }
 
-    // Here you would typically save the report to a database
-    // For now, we'll just log it
-    console.log(`Post ${req.params.id} reported by user ${req.userId}. Reason: ${reason}`)
+    // Check if user already reported this post
+    const existingReport = await Report.findOne({
+      postId: req.params.id,
+      reporterId: req.userId
+    })
+
+    if (existingReport) {
+      return res.status(400).json({ message: 'You have already reported this post' })
+    }
+
+    // Save report to database
+    const report = await Report.create({
+      postId: req.params.id,
+      reporterId: req.userId,
+      reason: reason,
+      status: 'pending'
+    })
+
+    console.log(`Post ${req.params.id} reported by user ${req.userId}. Reason: ${reason}. Report ID: ${report._id}`)
     
-    res.json({ message: 'Report submitted successfully' })
+    res.json({ message: 'Report submitted successfully', reportId: report._id })
   } catch (error) {
     console.error('Report post failed:', error)
     res.status(500).json({ message: 'Report post failed' })

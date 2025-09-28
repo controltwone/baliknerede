@@ -8,6 +8,7 @@ type AuthUser = {
   email?: string
   bio?: string
   avatarUrl?: string
+  isAdmin?: boolean
 }
 
 type AuthContextValue = {
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         if (res.ok) {
           const data = await res.json()
-          if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
+          if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
           return
         }
       } catch {}
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               })
               if (res.ok) {
                 const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
               }
             } catch {}
           }
@@ -117,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               })
               if (res.ok) {
                 const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png" })
+                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
               }
             } catch {}
           }

@@ -9,6 +9,7 @@ interface IUser extends mongoose.Document {
   avatarUrl?: string
   followers: mongoose.Types.ObjectId[]
   following: mongoose.Types.ObjectId[]
+  isAdmin?: boolean
   comparePassword(candidate: string): Promise<boolean>
 }
 
@@ -20,6 +21,7 @@ const userSchema = new mongoose.Schema<IUser>({
   avatarUrl: { type: String },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  isAdmin: { type: Boolean, default: false },
 }, { timestamps: true })
 
 userSchema.pre('save', async function(next) {
