@@ -74,7 +74,7 @@ function Header() {
     } catch {}
   }
   return (
-    <div className="bg-gradient-to-r from-white/95 to-blue-50/80 dark:from-gray-900/95 dark:to-gray-800/80 backdrop-blur-sm sticky top-0 z-40 shadow-lg border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-gradient-to-r from-white/80 to-blue-50/60 dark:from-gray-900/80 dark:to-gray-800/60 backdrop-blur-md sticky top-0 z-40 shadow-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="shrink-0 flex items-center gap-3" onClick={() => setSelectedLocation("")}>
           <Image src="/logo.png" width={72} height={72} alt="BALIKNEREDE logo" />
@@ -83,11 +83,11 @@ function Header() {
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
           <Link href="/" onClick={() => setSelectedLocation("")}>
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">Akış</Button>
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
           </Link>
           <div className="flex items-center gap-2 w-full">
             <select
-              className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white px-2 py-1.5 text-sm min-w-[100px]"
+              className="rounded-md border bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 dark:text-white px-2 py-1.5 text-sm min-w-[100px] transition-all duration-200"
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
@@ -112,11 +112,11 @@ function Header() {
             </select>
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <Input className="pl-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white" placeholder="Ara: kullanıcı, etiket..." />
+              <Input className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-200" placeholder="Ara: kullanıcı, etiket..." />
             </div>
           </div>
           <Link href="/blog">
-            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500">Blog</Button>
+            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200">Blog</Button>
           </Link>
         </div>
 
@@ -130,7 +130,7 @@ function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+            className="text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200"
             onClick={toggleTheme}
           >
             {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
@@ -139,7 +139,7 @@ function Header() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+            className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
           >
             {showMobileMenu ? <X className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
@@ -148,7 +148,7 @@ function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200"
               onClick={async () => {
                 const next = !showNotifications
                 setShowNotifications(next)
@@ -187,7 +187,7 @@ function Header() {
 
           {isAuthenticated && (
             <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button as={Button} variant="ghost" className="px-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">
+              <Menu.Button as={Button} variant="ghost" className="px-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7 overflow-hidden rounded-full">
                     <AvatarImage className="object-cover" src={user?.avatarUrl || ''} alt={user?.name || ''} />
@@ -243,7 +243,7 @@ function Header() {
           
           {!isAuthenticated && (
             <Link href="/login">
-              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700">
+              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">
                 Giriş Yap
               </Button>
             </Link>
