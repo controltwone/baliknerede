@@ -8,6 +8,7 @@ import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
+import { formatRelativeTime } from "@/lib/time"
 
 export default function ProfilePage() {
   const { isAuthenticated, user, token, setUser } = useAuth()
@@ -221,7 +222,7 @@ export default function ProfilePage() {
                     if (res.ok) {
                       const data = await res.json()
                       setModalComments((data.comments || []).map((c: any) => ({
-                        userId: String(c.userId), userName: c.userName, text: c.text, createdAt: new Date(c.createdAt).toLocaleString()
+                        userId: String(c.userId), userName: c.userName, text: c.text, createdAt: c.createdAt
                       })))
                     }
                   } finally {
@@ -273,21 +274,23 @@ export default function ProfilePage() {
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{modalPost.contentText}</p>
               </div>
             ) : null}
-            <div className="max-h-[40vh] overflow-auto">
+            <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
               {loadingComments ? (
                 <div className="h-16 w-full animate-pulse rounded-md bg-muted" />
               ) : modalComments.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Henüz yorum yok.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">Henüz yorum yok.</p>
               ) : (
-                modalComments.map((c, i) => (
-                  <div key={i} className="mb-2 rounded-md border p-2 text-sm last:mb-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
-                      <span className="text-xs text-muted-foreground">{c.createdAt}</span>
+                <div className="space-y-2">
+                  {modalComments.map((c, i) => (
+                    <div key={i} className="rounded-md border p-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
+                        <span className="text-xs text-muted-foreground">{formatRelativeTime(c.createdAt)}</span>
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
                     </div>
-                    <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>

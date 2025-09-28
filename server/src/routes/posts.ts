@@ -131,12 +131,14 @@ router.get('/:id/comments', async (req, res) => {
     .findById(req.params.id)
     .populate('comments.userId', 'name')
   if (!post) return res.status(404).json({ message: 'Not found' })
-  const comments = (post.comments || []).map((c: any) => ({
-    userId: String(c.userId?._id || c.userId),
-    userName: c.userId?.name || 'Kullanıcı',
-    text: c.text,
-    createdAt: c.createdAt,
-  }))
+  const comments = (post.comments || [])
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Yeni yorumlar üstte
+    .map((c: any) => ({
+      userId: String(c.userId?._id || c.userId),
+      userName: c.userId?.name || 'Kullanıcı',
+      text: c.text,
+      createdAt: c.createdAt,
+    }))
   res.json({ comments })
 })
 

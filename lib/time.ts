@@ -1,7 +1,23 @@
 export function formatRelativeTime(dateInput: string | number | Date): string {
+  // Geçersiz tarih kontrolü
+  if (!dateInput) {
+    return "az önce"
+  }
+  
   const date = new Date(dateInput)
   const now = new Date()
+  
+  // Geçersiz tarih kontrolü
+  if (isNaN(date.getTime())) {
+    return "az önce"
+  }
+  
   const diffMs = now.getTime() - date.getTime()
+  
+  // Gelecek tarih kontrolü
+  if (diffMs < 0) {
+    return "az önce"
+  }
 
   const minute = 60 * 1000
   const hour = 60 * minute

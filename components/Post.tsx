@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
 import React from "react"
+import { formatRelativeTime } from '../lib/time'
 import { LoadingSpinner } from "./LoadingSkeleton"
-import { formatRelativeTime } from "../lib/time"
 import { useSocket } from "@/hooks/useSocket"
 
 type PostCardProps = {
@@ -75,8 +75,24 @@ export default function Post({
   const [isCommenting, setIsCommenting] = React.useState(false)
   const [isLoadingComments, setIsLoadingComments] = React.useState(false)
   const [commentList, setCommentList] = React.useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
+  const [visibleComments, setVisibleComments] = React.useState(5) // İlk 5 yorumu göster
+  const [isLoadingMoreComments, setIsLoadingMoreComments] = React.useState(false)
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const hasImage = !!imageUrl
+
+  // Daha fazla yorum göster
+  const loadMoreComments = () => {
+    setIsLoadingMoreComments(true)
+    setTimeout(() => {
+      setVisibleComments(prev => Math.min(prev + 5, commentList.length))
+      setIsLoadingMoreComments(false)
+    }, 500) // Loading efekti için
+  }
+
+  // Yorumlar değiştiğinde visible comments'i sıfırla
+  React.useEffect(() => {
+    setVisibleComments(5)
+  }, [commentList.length])
 
   // Close menu when clicking outside
   React.useEffect(() => {
@@ -272,7 +288,7 @@ export default function Post({
                     if (lr.ok) {
                       const ld = await lr.json()
                       setCommentList((ld.comments || []).map((c: any) => ({
-                        userId: String(c.userId), userName: c.userName, text: c.text, createdAt: new Date(c.createdAt).toLocaleString()
+                        userId: String(c.userId), userName: c.userName, text: c.text, createdAt: c.createdAt
                       })))
                     }
                   } finally {
@@ -284,7 +300,7 @@ export default function Post({
               Gönder
             </Button>
           </div>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
             {isLoadingComments ? (
               <div className="space-y-2">
                 <div className="flex items-start gap-3">
@@ -303,18 +319,42 @@ export default function Post({
                 </div>
               </div>
             ) : (
-              commentList.map((c, i) => (
-                <div key={i} className="rounded-md border p-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
-                    <span className="text-xs text-muted-foreground">{c.createdAt}</span>
+              <>
+                {commentList.slice(0, visibleComments).map((c, i) => (
+                  <div key={i} className="rounded-md border p-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
+                      <span className="text-xs text-muted-foreground">{formatRelativeTime(c.createdAt)}</span>
+                    </div>
+                    <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
                   </div>
-                  <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
-                </div>
-              ))
+                ))}
+                
+                {/* Daha fazla yorum göster butonu */}
+                {commentList.length > visibleComments && (
+                  <div className="flex justify-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadMoreComments}
+                      disabled={isLoadingMoreComments}
+                      className="text-xs px-3 py-1 h-7 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      {isLoadingMoreComments ? (
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          <span>Yükleniyor...</span>
+                        </div>
+                      ) : (
+                        `+${commentList.length - visibleComments} yorum daha göster`
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
             {commentList.length === 0 && !isLoadingComments ? (
-              <p className="text-xs text-muted-foreground">Henüz yorum yok.</p>
+              <p className="text-xs text-muted-foreground text-center py-4">Henüz yorum yok.</p>
             ) : null}
           </div>
         </CardContent>
@@ -373,7 +413,7 @@ export default function Post({
                   if (res.ok) {
                     const data = await res.json()
                     setCommentList((data.comments || []).map((c: any) => ({
-                      userId: String(c.userId), userName: c.userName, text: c.text, createdAt: new Date(c.createdAt).toLocaleString()
+                      userId: String(c.userId), userName: c.userName, text: c.text, createdAt: c.createdAt
                     })))
                   }
                 } finally {

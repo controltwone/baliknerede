@@ -8,6 +8,7 @@ import Post from '@/components/Post'
 import { useAuth } from '@/components/AuthProvider'
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
+import { formatRelativeTime } from '@/lib/time'
 
 export default function UserProfilePage() {
   const params = useParams() as { id: string }
@@ -119,7 +120,7 @@ export default function UserProfilePage() {
             contentText={p.contentText}
             likeCount={p.likeCount}
             commentCount={p.commentCount}
-            createdAt={new Date(p.createdAt).toLocaleString()}
+            createdAt={formatRelativeTime(p.createdAt)}
           />
         ))}
         {posts.length === 0 ? (
