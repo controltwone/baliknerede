@@ -79,6 +79,33 @@ export const articles: Article[] = [
     tags: ["Palamut", "Göç", "Spin"],
     body:
       "Palamut, sonbahar aylarında Karadeniz'den Akdeniz'e göç eden büyük bir balıktır. Güçlü ve hızlıdır.\n\n**Göç Yolları:**\n- **Eylül**: Karadeniz'den çıkış\n- **Ekim**: Boğaz geçişi\n- **Kasım**: Marmara geçişi\n- **Aralık**: Akdeniz'e varış\n\n**Av Teknikleri:**\n- **Spin Avı**: Rapala, popper\n- **Doğal Yem**: Taze hamsi, sardalya\n- **Takım**: 3.00-3.60m kamış\n- **Misina**: 0.25-0.35\n\n**En Verimli Noktalar:**\n- **Boğaz girişi**: Ana geçiş yolu\n- **Marmara çıkışı**: Son fırsat\n- **Akıntılı bölgeler**: Beslenme alanı\n- **Derin sular**: Büyük sürüler\n\n**Kritik Faktörler:**\n- Akıntı hızı\n- Su sıcaklığı\n- Rüzgâr yönü\n- Ay fazı\n\n**En Verimli Zamanlar:**\n- Gün doğumu\n- Gün batımı\n- Gece saatleri\n- Düşük akıntı",
+  },
+  {
+    id: "cipura-dip-teknikleri",
+    title: "Çipura İçin Dip Teknikleri",
+    summary:
+      "Çipura avında dip takımları, fluorocarbon köstek ve taze midye-kurban yemleri fark yaratır.",
+    tags: ["Çipura", "Dip Avı", "Fluorocarbon"],
+    body:
+      "Çipura seçici bir türdür. 0.20-0.25 fluorocarbon köstek, küçük fakat sağlam iğneler ve temiz dip yapısı tercih edilmelidir. Yem olarak midye, karides ve boru kurdu öne çıkar. Sakin havalarda hassas ısırıkları görmek için uç duyarlılığı yüksek kamış kullanın.",
+  },
+  {
+    id: "levrek-nerede-bulunur",
+    title: "Levrek Nerede Bulunur? Habitat ve Av Teknikleri",
+    summary:
+      "Levrek çoğunlukla sığ, kayalık, oksijenli bölgeleri sever. Şafak ve gün batımı, silikon yemlerle verimli saatlerdir.",
+    tags: ["Levrek", "Silikon Yem", "Sığ Su"],
+    body:
+      "Levrek habitatı: Kayalık, yosunluk, oksijenli sığ sular. En verimli saatler şafak ve gün batımı. Silikon yemler (shad, slug) yavaş aksiyonla çekilmelidir. Renk seçimi: gündüz doğal, gece koyu tonlar.",
+  },
+  {
+    id: "lufer-rehberi",
+    title: "Lüfer Avı Rehberi: Mevsim, Takım ve Yem",
+    summary:
+      "Lüfer, boğazların efsanesi. En verimli dönem sonbahar. Akıntılı bölgelerde, rapala veya zoka ile yüzey-su üstü aksiyonları etkili olur.",
+    tags: ["Lüfer", "Spin", "Boğaz"],
+    body:
+      "Lüfer avı: Sonbahar (Eylül-Kasım) en verimli. Akıntılı bölgeler, rapala/popper/zoka. 2.40-3.00m kamış, 0.16-0.20 misina. Gün doğumu/batımı, rüzgârı arkaya alın, sessiz yaklaşım şart.",
   }
 ]
 

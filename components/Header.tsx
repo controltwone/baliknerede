@@ -76,9 +76,15 @@ function Header() {
   return (
     <div className="bg-gradient-to-r from-white/80 to-blue-50/60 dark:from-gray-900/80 dark:to-gray-800/60 backdrop-blur-md sticky top-0 z-40 shadow-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="shrink-0 flex items-center gap-3" onClick={() => setSelectedLocation("")}>
-          <Image src="/logo.png" width={72} height={72} alt="BALIKNEREDE logo" />
-          <span className="text-xl font-bold hidden sm:block" style={{color: '#158EC3'}}>baliknerede.com</span>
+        <Link href="/" className="shrink-0 flex items-center gap-3 group" onClick={() => setSelectedLocation("")}>
+          <Image 
+            src="/logo.png" 
+            width={72} 
+            height={72} 
+            alt="BALIKNEREDE logo" 
+            className="logo-float logo-hover-spin transition-all duration-300 group-hover:scale-110" 
+          />
+          <span className="text-xl font-bold hidden sm:block transition-colors duration-300 group-hover:text-blue-500" style={{color: '#158EC3'}}>baliknerede.com</span>
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-xl items-center gap-2">
@@ -110,9 +116,9 @@ function Header() {
               <option value="Eyüp Sahil">Eyüp Sahil</option>
               <option value="Haliç">Haliç</option>
             </select>
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <Input className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-200" placeholder="Ara: kullanıcı, etiket..." />
+            <div className="relative flex-1 search-float">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors duration-200" />
+              <Input className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" placeholder="Ara: kullanıcı, etiket..." />
             </div>
           </div>
           <Link href="/blog">

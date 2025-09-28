@@ -10,6 +10,9 @@ import { useAuth } from "./AuthProvider"
 import { useLocationFilter } from "./LocationFilterProvider"
 import { PostCardSkeleton, FeedComposerSkeleton } from "./LoadingSkeleton"
 import { useSocket } from "@/hooks/useSocket"
+import { ConfirmationModal } from "./ui/confirmation-modal"
+import { ReportModal } from "./ui/report-modal"
+import { ToastManager } from "./ui/toast"
 
 type FeedPost = {
   id: string
@@ -42,6 +45,125 @@ export default function Feed() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<FeedPost[]>([])
+  
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isReporting, setIsReporting] = useState(false)
+  const [toasts, setToasts] = useState<Array<{
+    id: string
+    type: "success" | "error" | "warning" | "info"
+    title: string
+    description?: string
+    duration?: number
+  }>>([])
+
+  // Toast functions
+  const addToast = (toast: Omit<typeof toasts[0], 'id'>) => {
+    const id = Math.random().toString(36).substr(2, 9)
+    setToasts(prev => [...prev, { ...toast, id }])
+  }
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }
+
+  // Handle post deletion
+  const handleDeletePost = (postId: string) => {
+    setSelectedPostId(postId)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeletePost = async () => {
+    if (!token || !selectedPostId) return
+    
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`${API_BASE}/posts/${selectedPostId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+      })
+
+      if (res.ok) {
+        setPosts(prev => prev.filter(post => post.id !== selectedPostId))
+        setShowDeleteModal(false)
+        setSelectedPostId(null)
+        addToast({
+          type: "success",
+          title: "Gönderi Silindi",
+          description: "Gönderiniz başarıyla silindi."
+        })
+      } else {
+        addToast({
+          type: "error",
+          title: "Hata",
+          description: "Gönderi silinirken bir hata oluştu."
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      addToast({
+        type: "error",
+        title: "Hata",
+        description: "Gönderi silinirken bir hata oluştu."
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Handle post reporting
+  const handleReportPost = (postId: string) => {
+    setSelectedPostId(postId)
+    setShowReportModal(true)
+  }
+
+  const confirmReportPost = async (reason: string) => {
+    if (!token || !selectedPostId) return
+    
+    setIsReporting(true)
+    try {
+      const res = await fetch(`${API_BASE}/posts/${selectedPostId}/report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ reason }),
+      })
+
+      if (res.ok) {
+        setShowReportModal(false)
+        setSelectedPostId(null)
+        addToast({
+          type: "success",
+          title: "Şikayet Gönderildi",
+          description: "Şikayetiniz alındı. İnceleme sürecine alınacaktır."
+        })
+      } else {
+        addToast({
+          type: "error",
+          title: "Hata",
+          description: "Şikayet gönderilirken bir hata oluştu."
+        })
+      }
+    } catch (error) {
+      console.error('Error reporting post:', error)
+      addToast({
+        type: "error",
+        title: "Hata",
+        description: "Şikayet gönderilirken bir hata oluştu."
+      })
+    } finally {
+      setIsReporting(false)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -94,6 +216,11 @@ export default function Feed() {
     const handlePostCreated = (data: any) => {
       console.log('Received post_created event:', data)
       if (data.post) {
+        // Don't add our own posts (they're already added locally)
+        if (data.post.authorId?._id === user?.id) {
+          console.log('Skipping own post from socket event')
+          return
+        }
         const newPost: FeedPost = {
           id: data.post._id,
           authorId: data.post.authorId?._id || undefined,
@@ -111,7 +238,15 @@ export default function Feed() {
         }
         
         console.log('Adding new post to feed:', newPost)
-        setPosts(prev => [newPost, ...prev])
+        setPosts(prev => {
+          // Check if post already exists to prevent duplicates
+          const exists = prev.some(post => post.id === newPost.id)
+          if (exists) {
+            console.log('Post already exists, skipping duplicate')
+            return prev
+          }
+          return [newPost, ...prev]
+        })
       }
     }
 
@@ -121,7 +256,7 @@ export default function Feed() {
       console.log('Cleaning up socket listeners in Feed')
       socketService.removeListener('post_created', handlePostCreated)
     }
-  }, [socketService])
+  }, [socketService, user?.id])
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -195,30 +330,18 @@ export default function Feed() {
         commentCount: p.commentCount || 0,
         createdAt: formatRelativeTime(p.createdAt),
       }
-      setPosts((prev) => [newPost, ...prev])
+      setPosts((prev) => {
+        // Check if post already exists to prevent duplicates
+        const exists = prev.some(post => post.id === newPost.id)
+        if (exists) {
+          console.log('Post already exists, skipping duplicate')
+          return prev
+        }
+        return [newPost, ...prev]
+      })
       setContentText("")
       setImageUrl(undefined)
       setSelectedFile(null)
-      
-      // Emit socket event for real-time updates
-      socketService.emitNewPost({
-        post: {
-          _id: p._id,
-          authorId: {
-            _id: user?.id,
-            name: user?.name,
-            avatarUrl: user?.avatarUrl
-          },
-          imageUrl: p.imageUrl,
-          contentText: p.contentText,
-          locationCity: p.locationCity,
-          locationSpot: p.locationSpot,
-          likeCount: p.likeCount || 0,
-          commentCount: p.commentCount || 0,
-          viewCount: p.viewCount || 0,
-          createdAt: p.createdAt
-        }
-      })
     } catch (e: any) {
       setError(e?.message || "Paylaşım sırasında hata")
     } finally {
@@ -227,7 +350,7 @@ export default function Feed() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-2 sm:px-0">
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-2 sm:px-0 page-stagger">
       <Card className="w-full border-0 shadow-lg bg-gradient-to-br from-white/90 to-blue-50/40 dark:from-gray-800/90 dark:to-gray-700/40 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:scale-[1.01]">
         <CardContent className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
@@ -338,13 +461,47 @@ export default function Feed() {
       ) : (
         <div className="flex flex-col gap-6">
           {posts.map((p) => (
-            <Post key={p.id} {...p} />
+            <Post 
+              key={p.id} 
+              {...p} 
+              onDelete={handleDeletePost}
+              onReport={handleReportPost}
+            />
           ))}
           {posts.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">Henüz gönderi yok.</p>
           ) : null}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setSelectedPostId(null)
+        }}
+        onConfirm={confirmDeletePost}
+        title="Gönderiyi Sil"
+        description="Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        confirmText="Sil"
+        type="delete"
+        isLoading={isDeleting}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false)
+          setSelectedPostId(null)
+        }}
+        onReport={confirmReportPost}
+        isLoading={isReporting}
+      />
+
+      {/* Toast Manager */}
+      <ToastManager toasts={toasts} onRemoveToast={removeToast} />
     </div>
   )
 }

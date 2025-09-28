@@ -3,6 +3,7 @@
 import React from 'react'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Post from '@/components/Post'
 import { useAuth } from '@/components/AuthProvider'
 import Link from 'next/link'
@@ -14,11 +15,11 @@ export default function UserProfilePage() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const { isAuthenticated, token, user } = useAuth()
   
-  const [info, setInfo] = React.useState<{ id: string; name: string; followers: number; following: number } | null>(null)
+  const [info, setInfo] = React.useState<{ id: string; name: string; avatarUrl?: string; followers: number; following: number } | null>(null)
   const [posts, setPosts] = React.useState<any[]>([])
   const [isFollowing, setIsFollowing] = React.useState<boolean | null>(null)
-  const [followersList, setFollowersList] = React.useState<{ id: string; name: string }[]>([])
-  const [followingList, setFollowingList] = React.useState<{ id: string; name: string }[]>([])
+  const [followersList, setFollowersList] = React.useState<{ id: string; name: string; avatarUrl?: string }[]>([])
+  const [followingList, setFollowingList] = React.useState<{ id: string; name: string; avatarUrl?: string }[]>([])
   const [showListModal, setShowListModal] = React.useState<null | 'followers' | 'following'>(null)
 
   const isOwnProfile = user?.id && userId && String(user.id) === String(userId)
@@ -76,8 +77,13 @@ export default function UserProfilePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">{info?.name || 'Kullanıcı'}</h1>
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={info?.avatarUrl || "/logo.png"} alt={info?.name || 'Kullanıcı'} />
+            <AvatarFallback>{(info?.name || 'K').slice(0,2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-xl font-semibold">{info?.name || 'Kullanıcı'}</h1>
           <div className="mt-1 flex items-center gap-3 text-sm">
             <button
               className="rounded-md border px-2 py-1 hover:bg-accent"
@@ -91,6 +97,7 @@ export default function UserProfilePage() {
             >
               <span className="font-medium">Takip</span> {info?.following || 0}
             </button>
+          </div>
           </div>
         </div>
         {userId && !isOwnProfile ? (
@@ -107,7 +114,7 @@ export default function UserProfilePage() {
             id={p._id}
             authorId={p.authorId}
             authorName={info?.name || 'Kullanıcı'}
-            authorAvatarUrl="/logo.png"
+            authorAvatarUrl={info?.avatarUrl || "/logo.png"}
             imageUrl={p.imageUrl}
             contentText={p.contentText}
             likeCount={p.likeCount}
@@ -155,7 +162,13 @@ export default function UserProfilePage() {
                     ) : (
                       (showListModal === 'followers' ? followersList : followingList).map((u) => (
                         <Link key={u.id} href={`/u/${u.id}`} onClick={() => setShowListModal(null)} className="block rounded-md border p-2 hover:bg-accent">
-                          {u.name}
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={u.avatarUrl || "/logo.png"} alt={u.name} />
+                              <AvatarFallback>{u.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span>{u.name}</span>
+                          </div>
                         </Link>
                       ))
                     )}

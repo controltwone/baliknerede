@@ -158,7 +158,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 page-content">
       <section className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
@@ -207,7 +207,7 @@ export default function ProfilePage() {
             <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 page-stagger">
             {myPosts.map((p) => (
               <button
                 key={p._id}

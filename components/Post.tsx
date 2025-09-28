@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin, Trash2, Flag } from "lucide-react"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from 'next/link'
@@ -36,6 +36,8 @@ type PostCardProps = {
   viewCount?: number
   createdAt?: string
   liked?: boolean
+  onDelete?: (postId: string) => void
+  onReport?: (postId: string) => void
 }
 
 export default function Post({
@@ -52,10 +54,15 @@ export default function Post({
   viewCount = 0,
   createdAt,
   liked = false,
+  onDelete,
+  onReport,
 }: PostCardProps) {
-  const { isAuthenticated, token } = useAuth()
+  const { isAuthenticated, token, user } = useAuth()
   const router = useRouter()
   const { socketService } = useSocket()
+  
+  // Check if this is the user's own post
+  const isOwnPost = isAuthenticated && user && authorId === user.id
   const [showAuthModal, setShowAuthModal] = React.useState(false)
   const [likes, setLikes] = React.useState(likeCount)
   const [comments, setComments] = React.useState(commentCount)
@@ -63,12 +70,30 @@ export default function Post({
   const [isLiking, setIsLiking] = React.useState(false)
   const [isLiked, setIsLiked] = React.useState(liked)
   const [showCommentBox, setShowCommentBox] = React.useState(false)
+  const [showMenu, setShowMenu] = React.useState(false)
   const [commentText, setCommentText] = React.useState("")
   const [isCommenting, setIsCommenting] = React.useState(false)
   const [isLoadingComments, setIsLoadingComments] = React.useState(false)
   const [commentList, setCommentList] = React.useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const hasImage = !!imageUrl
+
+  // Close menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMenu) {
+        setShowMenu(false)
+      }
+    }
+
+    if (showMenu) {
+      document.addEventListener('click', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [showMenu])
 
   // Socket event listeners
   React.useEffect(() => {
@@ -142,14 +167,14 @@ export default function Post({
   return (
     <Card className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <Link href={authorId ? `/u/${authorId}` : '#'}>
+        <Link href={authorId ? `/u/${typeof authorId === 'object' ? authorId._id || authorId.id : authorId}` : '#'}>
           <Avatar className="h-9 w-9">
             <AvatarImage src={authorAvatarUrl} alt={authorName} />
             <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
         <div>
-          <Link href={authorId ? `/u/${authorId}` : '#'}>
+          <Link href={authorId ? `/u/${typeof authorId === 'object' ? authorId._id || authorId.id : authorId}` : '#'}>
             <CardTitle className={`text-sm hover:underline dark:text-white ${hasImage ? '' : 'text-foreground/90 dark:text-foreground/90'}`}>{authorName}</CardTitle>
           </Link>
         </div>
@@ -157,9 +182,45 @@ export default function Post({
           {createdAt ? (
             <span className="text-xs text-muted-foreground dark:text-gray-400 hidden sm:inline">{createdAt}</span>
           ) : null}
-          <Button variant="ghost" size="icon" className="shrink-0 transition-all duration-200 hover:scale-110 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
-            <MoreHorizontal />
-          </Button>
+          <div className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="shrink-0 transition-all duration-200 hover:scale-110 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
+              onClick={() => setShowMenu(!showMenu)}
+            >
+              <MoreHorizontal />
+            </Button>
+            
+            {/* Menu Dropdown */}
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                {isOwnPost ? (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      onDelete?.(id)
+                    }}
+                    className="w-full px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Gönderiyi Sil
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      onReport?.(id)
+                    }}
+                    className="w-full px-4 py-3 text-left text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 transition-colors"
+                  >
+                    <Flag className="w-4 h-4" />
+                    Şikayet Et
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
 

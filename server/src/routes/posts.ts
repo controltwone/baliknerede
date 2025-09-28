@@ -173,6 +173,54 @@ router.post('/:id/view', async (req, res) => {
   }
 })
 
+// DELETE /posts/:id - delete a post (only by author)
+router.delete('/:id', requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    // Check if user is the author
+    if (post.authorId.toString() !== req.userId) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' })
+    }
+
+    await Post.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Post deleted successfully' })
+  } catch (error) {
+    console.error('Delete post failed:', error)
+    res.status(500).json({ message: 'Delete post failed' })
+  }
+})
+
+// POST /posts/:id/report - report a post
+router.post('/:id/report', requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const { reason } = req.body
+    const post = await Post.findById(req.params.id)
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    // Check if user is trying to report their own post
+    if (post.authorId.toString() === req.userId) {
+      return res.status(400).json({ message: 'Cannot report your own post' })
+    }
+
+    // Here you would typically save the report to a database
+    // For now, we'll just log it
+    console.log(`Post ${req.params.id} reported by user ${req.userId}. Reason: ${reason}`)
+    
+    res.json({ message: 'Report submitted successfully' })
+  } catch (error) {
+    console.error('Report post failed:', error)
+    res.status(500).json({ message: 'Report post failed' })
+  }
+})
+
 export default router
 
 
