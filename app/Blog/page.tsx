@@ -24,7 +24,7 @@ export default function BlogPage() {
   }, [])
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen page-content">
       {/* Parallax Background */}
       <div 
         className="fixed inset-0 -z-10 opacity-20"
@@ -55,21 +55,21 @@ export default function BlogPage() {
         🌊
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-12 relative z-10">
         <div 
-          className="mb-8 text-center"
+          className="mb-12 text-center"
           style={{ transform: `translateY(${scrollY * 0.1}px)` }}
         >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <span className="text-4xl">🎣</span>
-            <h1 className="text-3xl md:text-4xl font-bold dark:text-white">Blog</h1>
+          <div className="inline-flex items-center gap-3 mb-6">
+            <span className="text-5xl">🎣</span>
+            <h1 className="text-4xl md:text-5xl font-bold dark:text-white">Balık Rehberi</h1>
           </div>
-          <p className="text-lg text-muted-foreground dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Balık türleri, av teknikleri, mevsimsel rehberler ve uzman ipuçları
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {isLoading ? (
             <>
               <BlogCardSkeleton />
@@ -84,24 +84,30 @@ export default function BlogPage() {
             <Link
               key={a.id}
               href={`/blog/${a.id}`}
-              className="group block rounded-2xl border bg-gradient-to-br from-white/90 to-blue-50/40 dark:from-gray-800/90 dark:to-gray-700/40 dark:border-gray-600 p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 hover:-translate-y-1"
+              className="group block rounded-xl border bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-2 overflow-hidden"
               style={{ 
-                transform: `translateY(${scrollY * (0.05 + index * 0.01)}px)`,
+                transform: `translateY(${scrollY * (0.02 + index * 0.005)}px)`,
                 transition: 'transform 0.1s ease-out'
               }}
             >
-              <div className="mb-4">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <h2 className="text-lg font-bold group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors leading-tight">{a.title}</h2>
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform text-lg">🎣</span>
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <h2 className="text-xl font-bold group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors leading-tight flex-1">{a.title}</h2>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform text-xl flex-shrink-0">🎣</span>
                 </div>
-                <p className="text-sm text-muted-foreground dark:text-gray-400 leading-relaxed mb-4">{a.summary}</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm text-muted-foreground dark:text-gray-400 leading-relaxed mb-4 line-clamp-3">{a.summary}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
                   {a.tags.map((t) => (
                     <span key={t} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
                       {t}
                     </span>
                   ))}
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <span className="text-xs text-muted-foreground dark:text-gray-500">Balık Rehberi</span>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    Devamını Oku →
+                  </span>
                 </div>
               </div>
             </Link>
