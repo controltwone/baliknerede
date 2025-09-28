@@ -72,24 +72,32 @@ export default function Post({
 
   // Socket event listeners
   React.useEffect(() => {
+    console.log('Setting up socket listeners for post:', id)
+    
     // Listen for like updates
-    socketService.onPostLikeUpdated((data) => {
+    const handleLikeUpdate = (data: any) => {
+      console.log('Received post_like_updated event:', data)
       if (data.postId === id) {
         setLikes(data.likeCount)
         setIsLiked(data.liked)
       }
-    })
+    }
 
     // Listen for view updates
-    socketService.onPostViewUpdated((data) => {
+    const handleViewUpdate = (data: any) => {
+      console.log('Received post_view_updated event:', data)
       if (data.postId === id) {
         setViews(data.viewCount)
       }
-    })
+    }
+
+    socketService.onPostLikeUpdated(handleLikeUpdate)
+    socketService.onPostViewUpdated(handleViewUpdate)
 
     return () => {
-      socketService.removeListener('post_like_updated')
-      socketService.removeListener('post_view_updated')
+      console.log('Cleaning up socket listeners for post:', id)
+      socketService.removeListener('post_like_updated', handleLikeUpdate)
+      socketService.removeListener('post_view_updated', handleViewUpdate)
     }
   }, [id, socketService])
 
@@ -97,10 +105,23 @@ export default function Post({
   React.useEffect(() => {
     const trackView = async () => {
       try {
-        await fetch(`${API_BASE}/posts/${id}/view`, {
+        const res = await fetch(`${API_BASE}/posts/${id}/view`, {
           method: 'POST',
           credentials: 'include'
         })
+        
+        if (res.ok) {
+          const data = await res.json()
+          if (data.viewCount) {
+            setViews(data.viewCount)
+            
+            // Emit socket event for real-time updates
+            socketService.emitPostViewed({
+              postId: id,
+              viewCount: data.viewCount
+            })
+          }
+        }
       } catch (error) {
         console.error('Failed to track view:', error)
       }
@@ -119,7 +140,7 @@ export default function Post({
   }
 
   return (
-    <Card className={`w-full max-w-xl mx-auto ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
+    <Card className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Link href={authorId ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
@@ -136,15 +157,16 @@ export default function Post({
           {createdAt ? (
             <span className="text-xs text-muted-foreground dark:text-gray-400 hidden sm:inline">{createdAt}</span>
           ) : null}
-          <Button variant="ghost" size="icon" className="shrink-0 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
+          <Button variant="ghost" size="icon" className="shrink-0 transition-all duration-200 hover:scale-110 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
             <MoreHorizontal />
           </Button>
         </div>
       </CardHeader>
 
       {hasImage ? (
-        <div className="relative aspect-[4/5] w-full overflow-hidden">
-          <Image src={imageUrl} alt="post image" fill className="object-cover" />
+        <div className="relative aspect-[4/5] w-full overflow-hidden group">
+          <Image src={imageUrl} alt="post image" fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       ) : null}
 
@@ -244,6 +266,7 @@ export default function Post({
             size="icon"
             aria-label="Beğen"
             disabled={isLiking}
+            className="transition-all duration-200 hover:scale-110 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
             onClick={() => ensureAuth(async () => {
               try {
                 setIsLiking(true)
@@ -257,6 +280,13 @@ export default function Post({
                 if (typeof data.likeCount === 'number') {
                   setLikes(data.likeCount)
                   setIsLiked(data.liked) // Backend'den gelen beğeni durumunu kullan
+                  
+                  // Emit socket event for real-time updates
+                  socketService.emitPostLiked({
+                    postId: id,
+                    likeCount: data.likeCount,
+                    liked: data.liked
+                  })
                 }
               } finally {
                 setIsLiking(false)
@@ -271,6 +301,7 @@ export default function Post({
             variant="ghost"
             size="icon"
             aria-label="Yorum yap"
+            className="transition-all duration-200 hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500"
             onClick={() => ensureAuth(async () => {
               const newState = !showCommentBox
               setShowCommentBox(newState)

@@ -32,6 +32,10 @@ class SocketService {
       console.error('Socket connection error:', error)
     })
 
+    this.socket.on('error', (error) => {
+      console.error('Socket error:', error)
+    })
+
     return this.socket
   }
 

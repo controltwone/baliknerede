@@ -74,8 +74,17 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('user_status_changed', { userId, status: 'online' })
   })
 
+  // Handle get online count
+  socket.on('get_online_count', () => {
+    const count = io.engine.clientsCount
+    socket.emit('online_count_updated', { count })
+  })
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id)
+    // Broadcast online count update
+    const count = io.engine.clientsCount - 1
+    socket.broadcast.emit('online_count_updated', { count })
   })
 })
 

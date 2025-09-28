@@ -88,8 +88,11 @@ export default function Feed() {
 
   // Socket event listeners for real-time updates
   useEffect(() => {
+    console.log('Setting up socket listeners in Feed')
+    
     // Listen for new posts
-    socketService.onPostCreated((data) => {
+    const handlePostCreated = (data: any) => {
+      console.log('Received post_created event:', data)
       if (data.post) {
         const newPost: FeedPost = {
           id: data.post._id,
@@ -107,12 +110,16 @@ export default function Feed() {
           liked: false
         }
         
+        console.log('Adding new post to feed:', newPost)
         setPosts(prev => [newPost, ...prev])
       }
-    })
+    }
+
+    socketService.onPostCreated(handlePostCreated)
 
     return () => {
-      socketService.removeListener('post_created')
+      console.log('Cleaning up socket listeners in Feed')
+      socketService.removeListener('post_created', handlePostCreated)
     }
   }, [socketService])
 
@@ -192,6 +199,26 @@ export default function Feed() {
       setContentText("")
       setImageUrl(undefined)
       setSelectedFile(null)
+      
+      // Emit socket event for real-time updates
+      socketService.emitNewPost({
+        post: {
+          _id: p._id,
+          authorId: {
+            _id: user?.id,
+            name: user?.name,
+            avatarUrl: user?.avatarUrl
+          },
+          imageUrl: p.imageUrl,
+          contentText: p.contentText,
+          locationCity: p.locationCity,
+          locationSpot: p.locationSpot,
+          likeCount: p.likeCount || 0,
+          commentCount: p.commentCount || 0,
+          viewCount: p.viewCount || 0,
+          createdAt: p.createdAt
+        }
+      })
     } catch (e: any) {
       setError(e?.message || "Paylaşım sırasında hata")
     } finally {
@@ -201,7 +228,7 @@ export default function Feed() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-2 sm:px-0">
-      <Card className="w-full border-0 shadow-lg bg-gradient-to-br from-white/90 to-blue-50/40 dark:from-gray-800/90 dark:to-gray-700/40 backdrop-blur-sm">
+      <Card className="w-full border-0 shadow-lg bg-gradient-to-br from-white/90 to-blue-50/40 dark:from-gray-800/90 dark:to-gray-700/40 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:scale-[1.01]">
         <CardContent className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
             {user ? (
@@ -268,7 +295,7 @@ export default function Feed() {
                     <Button 
                       onClick={handleShare} 
                       disabled={isPosting || (!contentText && !selectedFile)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transition-all duration-200 hover:scale-105 hover:shadow-lg"
                     >
                       {isPosting ? "Paylaşılıyor..." : "Paylaş"}
                     </Button>

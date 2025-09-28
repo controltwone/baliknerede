@@ -10,9 +10,11 @@ export function useSocket() {
 
   useEffect(() => {
     if (isAuthenticated && user?.id && !hasConnected.current) {
+      console.log('Connecting socket for user:', user.id)
       socketService.connect(user.id)
       hasConnected.current = true
     } else if (!isAuthenticated && hasConnected.current) {
+      console.log('Disconnecting socket')
       socketService.disconnect()
       hasConnected.current = false
     }
