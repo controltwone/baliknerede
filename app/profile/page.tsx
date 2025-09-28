@@ -1,24 +1,24 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import { Heart, MessageCircle } from "lucide-react"
+import { Trash2, X } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react"
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react"
 import { formatRelativeTime } from "@/lib/time"
+import Post from "@/components/Post"
 
 export default function ProfilePage() {
   const { isAuthenticated, user, token, setUser } = useAuth()
   const router = useRouter()
   const [myPosts, setMyPosts] = useState<Array<{ _id: string; imageUrl?: string; contentText?: string; createdAt?: string; likeCount?: number; commentCount?: number }>>([])
   const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const [modalPost, setModalPost] = useState<{ _id: string; imageUrl?: string; contentText?: string } | null>(null)
-  const [modalComments, setModalComments] = useState<Array<{ userId: string; userName?: string; text: string; createdAt: string }>>([])
-  const [loadingComments, setLoadingComments] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [followersList, setFollowersList] = useState<Array<{ id: string; name: string }>>([])
   const [followingList, setFollowingList] = useState<Array<{ id: string; name: string }>>([])
   const [showListModal, setShowListModal] = useState<null | 'followers' | 'following'>(null)
@@ -158,144 +158,116 @@ export default function ProfilePage() {
     }
   }
 
+  const handleDeletePost = (postId: string) => {
+    setSelectedPostId(postId)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeletePost = async () => {
+    if (!selectedPostId || !token) return
+    
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`${API_BASE}/posts/${selectedPostId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      })
+      
+      if (res.ok) {
+        // Remove post from local state
+        setMyPosts(prev => prev.filter(p => p._id !== selectedPostId))
+        setShowDeleteModal(false)
+        setSelectedPostId(null)
+      } else {
+        console.error('Failed to delete post')
+      }
+    } catch (error) {
+      console.error('Delete post failed:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 page-content">
-      <section className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+      <section className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={user?.avatarUrl || "/logo.png"} alt="avatar" />
-            <AvatarFallback>{(user?.name || 'BN').slice(0,2).toUpperCase()}</AvatarFallback>
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={user?.avatarUrl || "/logo.png"} alt={user?.name || 'Kullanıcı'} />
+            <AvatarFallback>{(user?.name || 'K').slice(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-xl font-semibold">{user?.name || 'Kullanıcı'}</h1>
-            <p className="text-sm text-muted-foreground">{user?.bio || 'Balık meraklısı • İstanbul'}</p>
+            <div className="mt-1 flex items-center gap-3 text-sm">
+              <button
+                className="rounded-md border px-2 py-1 hover:bg-accent"
+                onClick={() => setShowListModal('followers')}
+              >
+                <span className="font-medium">Takipçi</span> {followersList.length}
+              </button>
+              <button
+                className="rounded-md border px-2 py-1 hover:bg-accent"
+                onClick={() => setShowListModal('following')}
+              >
+                <span className="font-medium">Takip</span> {followingList.length}
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleEditProfile}>Profili Düzenle</Button>
-        </div>
+        <Button variant="outline" onClick={handleEditProfile}>
+          Profili Düzenle
+        </Button>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
-        <Card className="border-transparent">
-          <CardContent className="p-4">
-            <div className="font-semibold">{myPosts.length}</div>
-            <div className="text-muted-foreground">Gönderi</div>
-          </CardContent>
-        </Card>
-        <Card className="border-transparent">
-          <CardContent className="p-4">
-            <button className="mx-auto block rounded-md border px-3 py-1 hover:bg-accent" onClick={() => setShowListModal('followers')}>
-              <span className="font-semibold">{followersList.length}</span> Takipçi
-            </button>
-          </CardContent>
-        </Card>
-        <Card className="border-transparent">
-          <CardContent className="p-4">
-            <button className="mx-auto block rounded-md border px-3 py-1 hover:bg-accent" onClick={() => setShowListModal('following')}>
-              <span className="font-semibold">{followingList.length}</span> Takip
-            </button>
-          </CardContent>
-        </Card>
-      </section>
 
-      <section>
-        <h2 className="mb-4 text-base font-semibold">Gönderiler</h2>
+      <div className="grid grid-cols-1 gap-6">
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
-            <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
-            <div className="h-40 w-full animate-pulse rounded-md bg-muted" />
+          <div className="space-y-4">
+            <div className="h-32 w-full animate-pulse rounded-md bg-muted" />
+            <div className="h-32 w-full animate-pulse rounded-md bg-muted" />
+            <div className="h-32 w-full animate-pulse rounded-md bg-muted" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 page-stagger">
-            {myPosts.map((p) => (
-              <button
-                key={p._id}
-                className="relative aspect-square overflow-hidden rounded-md border bg-muted text-left"
-                onClick={async () => {
-                  setShowModal(true)
-                  setModalPost(p)
-                  try {
-                    setLoadingComments(true)
-                    const res = await fetch(`${API_BASE}/posts/${p._id}/comments`)
-                    if (res.ok) {
-                      const data = await res.json()
-                      setModalComments((data.comments || []).map((c: any) => ({
-                        userId: String(c.userId), userName: c.userName, text: c.text, createdAt: c.createdAt
-                      })))
-                    }
-                  } finally {
-                    setLoadingComments(false)
-                  }
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {p.imageUrl ? (
-                  <img src={p.imageUrl} alt="post" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center p-3 text-center text-sm text-foreground bg-background">
-                    <p className="line-clamp-6 whitespace-pre-wrap">{p.contentText || 'Görsel yok'}</p>
-                  </div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-3 bg-black/40 px-2 py-1 text-[11px] text-white">
-                  <span className="inline-flex items-center gap-1">
-                    <Heart className="h-3 w-3" /> {p.likeCount ?? 0}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <MessageCircle className="h-3 w-3" /> {p.commentCount ?? 0}
-                  </span>
-                </div>
-              </button>
+          <>
+            {myPosts.map((p: any) => (
+              <div key={p._id} className="relative group">
+                <Post
+                  id={p._id}
+                  authorId={user?.id}
+                  authorName={user?.name || 'Kullanıcı'}
+                  authorAvatarUrl={user?.avatarUrl || "/logo.png"}
+                  imageUrl={p.imageUrl}
+                  contentText={p.contentText}
+                  likeCount={p.likeCount}
+                  commentCount={p.commentCount}
+                  createdAt={formatRelativeTime(p.createdAt)}
+                  locationCity={p.locationCity}
+                  locationSpot={p.locationSpot}
+                  viewCount={p.viewCount}
+                  onDelete={handleDeletePost}
+                />
+                
+                {/* Delete Button Overlay */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeletePost(p._id)
+                  }}
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg z-10"
+                  title="Gönderiyi Sil"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             ))}
             {myPosts.length === 0 ? (
-              <p className="col-span-full text-center text-sm text-muted-foreground">Henüz gönderin yok.</p>
+              <p className="text-center text-sm text-muted-foreground">Henüz gönderi yok.</p>
             ) : null}
-          </div>
+          </>
         )}
-      </section>
+      </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowModal(false)} />
-          <div className={`relative z-10 w-full ${modalPost?.imageUrl ? 'max-w-2xl' : 'max-w-lg'} rounded-xl border bg-background p-4 shadow-lg max-h-[90vh] overflow-auto`}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-semibold">Gönderi</h3>
-              <Button variant="outline" onClick={() => setShowModal(false)}>Kapat</Button>
-            </div>
-            {modalPost?.imageUrl ? (
-              <div className="relative mb-4 w-full overflow-hidden rounded-md border max-h-[60vh] flex items-center justify-center bg-black/5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={modalPost.imageUrl} alt="post" className="max-h-[60vh] w-auto object-contain" />
-              </div>
-            ) : null}
-            {modalPost?.contentText ? (
-              <div className="mb-4 rounded-md border bg-muted/30 p-4 text-left">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed">{modalPost.contentText}</p>
-              </div>
-            ) : null}
-            <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
-              {loadingComments ? (
-                <div className="h-16 w-full animate-pulse rounded-md bg-muted" />
-              ) : modalComments.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">Henüz yorum yok.</p>
-              ) : (
-                <div className="space-y-2">
-                  {modalComments.map((c, i) => (
-                    <div key={i} className="rounded-md border p-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{c.userName || 'Kullanıcı'}</span>
-                        <span className="text-xs text-muted-foreground">{formatRelativeTime(c.createdAt)}</span>
-                      </div>
-                      <p className="mt-1 whitespace-pre-wrap">{c.text}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       <Transition show={!!showListModal} as={React.Fragment}>
         <Dialog className="relative z-50" onClose={() => setShowListModal(null)}>
@@ -437,6 +409,78 @@ export default function ProfilePage() {
                 </DialogPanel>
               </TransitionChild>
             </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Delete Confirmation Modal */}
+      <Transition show={showDeleteModal}>
+        <Dialog onClose={() => setShowDeleteModal(false)} className="relative z-50">
+          <TransitionChild
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" />
+          </TransitionChild>
+
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <TransitionChild
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <DialogPanel className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                    <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Gönderiyi Sil
+                    </DialogTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Bu işlem geri alınamaz
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                </p>
+
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={isDeleting}
+                    className="px-4"
+                  >
+                    İptal
+                  </Button>
+                  <Button
+                    onClick={confirmDeletePost}
+                    disabled={isDeleting}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4"
+                  >
+                    {isDeleting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Siliniyor...
+                      </div>
+                    ) : (
+                      'Sil'
+                    )}
+                  </Button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </Dialog>
       </Transition>
