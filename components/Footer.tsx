@@ -9,6 +9,10 @@ function Footer() {
         <nav className="flex items-center gap-4">
           <Link href="/blog">Blog</Link>
           <Link href="/">Akış</Link>
+          <span className="mx-2 h-4 w-px bg-gray-300 dark:bg-gray-600" />
+          <Link href="/gizlilik">Gizlilik</Link>
+          <Link href="/cerezler">Çerezler</Link>
+          <Link href="/aydinlatma-metni">Aydınlatma Metni</Link>
         </nav>
       </div>
     </footer>
@@ -16,3 +20,5 @@ function Footer() {
 }
 
 export default Footer
+
+
