@@ -6,6 +6,7 @@ import Post from "@/components/Post"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import { useAuth } from "./AuthProvider"
 import { useLocationFilter } from "./LocationFilterProvider"
 import { PostCardSkeleton, FeedComposerSkeleton } from "./LoadingSkeleton"
@@ -411,6 +412,10 @@ export default function Feed() {
 
   async function handleShare() {
     if (!contentText && !selectedFile) return
+    if (!user) {
+      setError("Paylaşmak için giriş yapmalısınız.")
+      return
+    }
     setIsPosting(true)
     setError(null)
     try {
@@ -456,7 +461,11 @@ export default function Feed() {
         credentials: 'include',
         body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity: "İstanbul", locationSpot, fishType }),
       })
-      if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
+      if (res.status === 401) {
+        setError("Paylaşmak için giriş yapmalısınız.")
+        return
+      }
+      if (!res.ok) throw new Error("Gönderi paylaşılamadı.")
       const data = await res.json()
       const p = data.post
       const newPost: FeedPost = {
@@ -580,7 +589,22 @@ export default function Feed() {
             </div>
           ) : null}
           {error ? (
-            <p className="text-sm text-destructive">{error}</p>
+            <div className="mt-3 rounded-lg border border-red-200 bg-red-50 text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200 p-3 flex items-start gap-3">
+              <svg className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{error}</p>
+                <div className="mt-2 flex gap-2">
+                  <Link href="/login">
+                    <Button size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white">Giriş Yap</Button>
+                  </Link>
+                  <Button size="sm" variant="ghost" className="h-8 px-3" onClick={() => setError(null)}>Kapat</Button>
+                </div>
+              </div>
+            </div>
           ) : null}
         </CardContent>
       </Card>
