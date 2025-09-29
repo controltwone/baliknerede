@@ -1,10 +1,14 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import React from "react"
 
 export default function SignupPage() {
   const { signup } = useAuth()
@@ -22,14 +26,18 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div className="bg-background dark:bg-gray-900 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          www.baliknerede.com
-        </a>
+        <div className="flex flex-col items-center gap-4 mb-2">
+          <Link href="/" className="flex flex-col items-center gap-3">
+            <Image src="/logo.png" width={64} height={64} alt="BALIKNEREDE logo" />
+            <span className="text-2xl font-bold" style={{color: '#158EC3'}}>baliknerede.com</span>
+          </Link>
+        </div>
         <Card>
-          <CardHeader>
-            <CardTitle>Kayıt Ol</CardTitle>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Kayıt Ol</CardTitle>
+            <CardDescription>Topluluğa katıl ve av paylaşımlarını yap.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="grid gap-4">
@@ -47,8 +55,16 @@ export default function SignupPage() {
               </div>
               <Button type="submit" className="w-full">Kaydol</Button>
             </form>
+            <div className="text-center text-sm mt-4">
+              Zaten hesabın var mı?{" "}
+              <Link href="/login" className="underline underline-offset-4">Giriş Yap</Link>
+            </div>
           </CardContent>
         </Card>
+        <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+          Devam ederseniz, <a href="#">Hizmet Şartlarını</a>{" "}
+          ve <a href="#">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
+        </div>
       </div>
     </div>
   )

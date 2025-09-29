@@ -267,7 +267,7 @@ function Header() {
           </span>
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 ml-20">
+        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 ml-8">
           <Link href="/" onClick={() => setSelectedLocation("")}>
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
           </Link>
@@ -488,8 +488,8 @@ function Header() {
             </Link>
           )}
           
-          {/* Blog Button */}
-          <Link href="/blog">
+          {/* Blog Button (desktop only) */}
+          <Link href="/blog" className="hidden md:block">
             <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200 ml-10">Blog</Button>
           </Link>
         </div>

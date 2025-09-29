@@ -518,13 +518,13 @@ export default function Feed() {
               />
               <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-2 justify-center sm:justify-start items-center">
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start items-stretch">
                     <CustomSelect
                       options={locationOptions}
                       value={locationSpot}
                       onChange={setLocationSpot}
                       placeholder="Konum seç"
-                      className="flex-1 max-w-[120px] sm:max-w-none"
+                      className="w-full sm:flex-1 sm:max-w-none"
                       showIcon={true}
                       iconLabel="Konum"
                     />
@@ -533,7 +533,7 @@ export default function Feed() {
                   value={fishType}
                   onChange={setFishType}
                   placeholder="Balık türü"
-                  className="flex-1 max-w-[140px] sm:max-w-none"
+                  className="w-full sm:flex-1 sm:max-w-none"
                   showIcon={true}
                   iconLabel="Balık"
                   searchPlaceholder="Balık ara..."
