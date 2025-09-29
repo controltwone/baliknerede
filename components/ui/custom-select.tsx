@@ -16,6 +16,8 @@ interface CustomSelectProps {
   className?: string
   showIcon?: boolean
   iconLabel?: string
+  searchPlaceholder?: string
+  notFoundText?: string
 }
 
 export function CustomSelect({
@@ -25,7 +27,9 @@ export function CustomSelect({
   placeholder = "Seçiniz",
   className = "",
   showIcon = false,
-  iconLabel = ""
+  iconLabel = "",
+  searchPlaceholder = "Konum ara...",
+  notFoundText = "Konum bulunamadı"
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -91,7 +95,7 @@ export function CustomSelect({
           <div className="p-2 border-b border-gray-100 dark:border-gray-700">
             <input
               type="text"
-              placeholder="Konum ara..."
+              placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"
@@ -122,7 +126,7 @@ export function CustomSelect({
               ))
             ) : (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                Konum bulunamadı
+                {notFoundText}
               </div>
             )}
           </div>

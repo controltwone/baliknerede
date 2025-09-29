@@ -12,6 +12,7 @@ interface IPost extends mongoose.Document {
   imageUrl?: string
   locationCity?: string
   locationSpot?: string
+  fishType?: string
   likeCount: number
   commentCount: number
   viewCount: number
@@ -31,6 +32,7 @@ const postSchema = new mongoose.Schema<IPost>({
   imageUrl: { type: String },
   locationCity: { type: String },
   locationSpot: { type: String },
+  fishType: { type: String },
   likeCount: { type: Number, default: 0 },
   commentCount: { type: Number, default: 0 },
   viewCount: { type: Number, default: 0 },

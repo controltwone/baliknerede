@@ -5,15 +5,18 @@ import React, { createContext, useContext, useState } from 'react'
 type LocationFilterContextType = {
   selectedLocation: string
   setSelectedLocation: (location: string) => void
+  selectedFishType: string
+  setSelectedFishType: (fish: string) => void
 }
 
 const LocationFilterContext = createContext<LocationFilterContextType | undefined>(undefined)
 
 export function LocationFilterProvider({ children }: { children: React.ReactNode }) {
   const [selectedLocation, setSelectedLocation] = useState<string>("")
+  const [selectedFishType, setSelectedFishType] = useState<string>("")
 
   return (
-    <LocationFilterContext.Provider value={{ selectedLocation, setSelectedLocation }}>
+    <LocationFilterContext.Provider value={{ selectedLocation, setSelectedLocation, selectedFishType, setSelectedFishType }}>
       {children}
     </LocationFilterContext.Provider>
   )

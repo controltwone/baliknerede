@@ -24,6 +24,7 @@ type FeedPost = {
   contentText?: string
   locationCity?: string
   locationSpot?: string
+  fishType?: string
   likeCount?: number
   commentCount?: number
   viewCount?: number
@@ -34,7 +35,7 @@ type FeedPost = {
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const { user, token } = useAuth()
-  const { selectedLocation } = useLocationFilter()
+  const { selectedLocation, selectedFishType } = useLocationFilter()
   const { socketService } = useSocket()
 
   const [contentText, setContentText] = useState("")
@@ -42,6 +43,7 @@ export default function Feed() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isPosting, setIsPosting] = useState(false)
   const [locationSpot, setLocationSpot] = useState<string>("")
+  const [fishType, setFishType] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
 
   const locationOptions = [
@@ -67,6 +69,18 @@ export default function Feed() {
     { value: "Yeşilköy Sahil", label: "Yeşilköy Sahil" },
     { value: "Bakırköy Sahil", label: "Bakırköy Sahil" },
     { value: "Yenikapı", label: "Yenikapı" }
+  ]
+  const fishOptions = [
+    { value: "", label: "Balık türü" },
+    { value: "İstavrit", label: "İstavrit" },
+    { value: "Lüfer", label: "Lüfer" },
+    { value: "Çinekop", label: "Çinekop" },
+    { value: "Palamut", label: "Palamut" },
+    { value: "Sardalya", label: "Sardalya" },
+    { value: "Mezgit", label: "Mezgit" },
+    { value: "Kefal", label: "Kefal" },
+    { value: "Levrek", label: "Levrek" },
+    { value: "Sinarit", label: "Sinarit" },
   ]
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<FeedPost[]>([])
@@ -211,6 +225,7 @@ export default function Feed() {
           contentText: p.contentText,
           locationCity: p.locationCity,
           locationSpot: p.locationSpot,
+          fishType: p.fishType,
           likeCount: p.likeCount || 0,
           commentCount: p.commentCount || 0,
           viewCount: p.viewCount || 0,
@@ -218,11 +233,15 @@ export default function Feed() {
           liked: p.liked || false,
         }))
         if (!cancelled) {
-          // Filter posts by selected location if any
-          const filtered = selectedLocation 
-            ? mapped.filter(p => p.locationSpot === selectedLocation)
-            : mapped
-          setPosts(filtered)
+          // Filter posts by selected location and fish type if any
+          let list = mapped
+          if (selectedLocation) {
+            list = list.filter(p => p.locationSpot === selectedLocation)
+          }
+          if (selectedFishType) {
+            list = list.filter(p => (p.fishType || "") === selectedFishType)
+          }
+          setPosts(list)
         }
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Bir hata oluştu")
@@ -231,7 +250,7 @@ export default function Feed() {
       }
     })()
     return () => { cancelled = true }
-  }, [API_BASE, selectedLocation])
+  }, [API_BASE, selectedLocation, selectedFishType])
 
   // Socket event listeners for real-time updates
   useEffect(() => {
@@ -255,6 +274,7 @@ export default function Feed() {
           contentText: data.post.contentText,
           locationCity: data.post.locationCity,
           locationSpot: data.post.locationSpot,
+          fishType: data.post.fishType,
           likeCount: data.post.likeCount || 0,
           commentCount: data.post.commentCount || 0,
           viewCount: data.post.viewCount || 0,
@@ -338,7 +358,7 @@ export default function Feed() {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         credentials: 'include',
-        body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity: "İstanbul", locationSpot }),
+        body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity: "İstanbul", locationSpot, fishType }),
       })
       if (!res.ok) throw new Error("Gönderi paylaşılamadı (giriş gerekli olabilir)")
       const data = await res.json()
@@ -351,6 +371,7 @@ export default function Feed() {
         contentText: p.contentText,
         locationCity: p.locationCity,
         locationSpot: p.locationSpot,
+        fishType: p.fishType,
         likeCount: p.likeCount || 0,
         commentCount: p.commentCount || 0,
         createdAt: formatRelativeTime(p.createdAt),
@@ -368,6 +389,7 @@ export default function Feed() {
       setImageUrl(undefined)
       setSelectedFile(null)
       setLocationSpot("")
+      setFishType("")
     } catch (e: any) {
       setError(e?.message || "Paylaşım sırasında hata")
     } finally {
@@ -410,6 +432,17 @@ export default function Feed() {
                       showIcon={true}
                       iconLabel="Konum"
                     />
+                <CustomSelect
+                  options={fishOptions}
+                  value={fishType}
+                  onChange={setFishType}
+                  placeholder="Balık türü"
+                  className="flex-1 max-w-[140px] sm:max-w-none"
+                  showIcon={true}
+                  iconLabel="Balık"
+                  searchPlaceholder="Balık ara..."
+                  notFoundText="Balık bulunamadı"
+                />
                   </div>
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer transition-colors">

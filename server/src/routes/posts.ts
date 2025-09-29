@@ -53,13 +53,14 @@ router.get('/by/:userId', async (req, res) => {
 
 // POST /posts - create post (auth)
 router.post('/', requireAuth, async (req: AuthedRequest, res) => {
-  const { contentText, imageUrl, locationCity, locationSpot } = req.body || {}
+  const { contentText, imageUrl, locationCity, locationSpot, fishType } = req.body || {}
   const doc = await Post.create({
     authorId: req.userId,
     contentText,
     imageUrl,
     locationCity,
     locationSpot,
+    fishType,
   })
   try {
     const author = await (User as any).findById(req.userId)

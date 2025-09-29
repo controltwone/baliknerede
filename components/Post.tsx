@@ -31,6 +31,7 @@ type PostCardProps = {
   contentText?: string
   locationCity?: string
   locationSpot?: string
+  fishType?: string
   likeCount?: number
   commentCount?: number
   viewCount?: number
@@ -49,6 +50,7 @@ export default function Post({
   contentText,
   locationCity,
   locationSpot,
+  fishType,
   likeCount = 0,
   commentCount = 0,
   viewCount = 0,
@@ -221,14 +223,14 @@ export default function Post({
   return (
     <Card className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <Link href={authorId ? `/u/${typeof authorId === 'object' ? authorId._id || authorId.id : authorId}` : '#'}>
+        <Link href={authorId ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
             <AvatarImage src={authorAvatarUrl} alt={authorName} />
             <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
         <div>
-          <Link href={authorId ? `/u/${typeof authorId === 'object' ? authorId._id || authorId.id : authorId}` : '#'}>
+          <Link href={authorId ? `/u/${authorId}` : '#'}>
             <CardTitle className={`text-sm hover:underline dark:text-white ${hasImage ? '' : 'text-foreground/90 dark:text-foreground/90'}`}>{authorName}</CardTitle>
           </Link>
         </div>
@@ -466,18 +468,28 @@ export default function Post({
           </Button>
           <span className="text-sm text-muted-foreground">{comments}</span>
         </div>
-        {(locationCity || locationSpot) ? (
-          <div className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-1.5 max-w-[200px] sm:max-w-none">
-            <MapPin className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-            <span className="text-[11px] font-medium text-gray-700 truncate">
-              {locationCity || ''}{locationCity && locationSpot ? ' • ' : ''}{locationSpot || ''}
+        <div className="flex items-center gap-2 flex-wrap">
+          {(locationCity || locationSpot) ? (
+            <div className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-1.5 max-w-[200px] sm:max-w-none">
+              <MapPin className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              <span className="text-[11px] font-medium text-gray-700 truncate">
+                {locationCity || ''}{locationCity && locationSpot ? ' • ' : ''}{locationSpot || ''}
+              </span>
+            </div>
+          ) : null}
+
+          {fishType ? (
+            <span className="text-[11px] font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded-full">
+              {fishType}
             </span>
-          </div>
-        ) : (
-          <Button variant="ghost" size="icon" aria-label="Kaydet" className="shrink-0">
-            <Bookmark />
-          </Button>
-        )}
+          ) : null}
+
+          {!(locationCity || locationSpot || fishType) ? (
+            <Button variant="ghost" size="icon" aria-label="Kaydet" className="shrink-0">
+              <Bookmark />
+            </Button>
+          ) : null}
+        </div>
       </CardFooter>
 
       <Transition show={showAuthModal} as={React.Fragment}>

@@ -17,7 +17,7 @@ import { CustomSelect } from './ui/custom-select'
 
 function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
-  const { selectedLocation, setSelectedLocation } = useLocationFilter()
+  const { selectedLocation, setSelectedLocation, selectedFishType, setSelectedFishType } = useLocationFilter()
   const { theme, toggleTheme } = useTheme()
 
   const locationOptions = [
@@ -43,6 +43,18 @@ function Header() {
     { value: "Yeşilköy Sahil", label: "Yeşilköy Sahil" },
     { value: "Bakırköy Sahil", label: "Bakırköy Sahil" },
     { value: "Yenikapı", label: "Yenikapı" }
+  ]
+  const fishOptions = [
+    { value: "", label: "Tüm Balıklar" },
+    { value: "İstavrit", label: "İstavrit" },
+    { value: "Lüfer", label: "Lüfer" },
+    { value: "Çinekop", label: "Çinekop" },
+    { value: "Palamut", label: "Palamut" },
+    { value: "Sardalya", label: "Sardalya" },
+    { value: "Mezgit", label: "Mezgit" },
+    { value: "Kefal", label: "Kefal" },
+    { value: "Levrek", label: "Levrek" },
+    { value: "Sinarit", label: "Sinarit" },
   ]
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const [unreadCount, setUnreadCount] = React.useState(0)
@@ -171,6 +183,18 @@ function Header() {
               placeholder="Tüm Konumlar"
               className="min-w-[120px]"
               showIcon={true}
+              searchPlaceholder="Konum ara..."
+              notFoundText="Konum bulunamadı"
+            />
+            <CustomSelect
+              options={fishOptions}
+              value={selectedFishType}
+              onChange={setSelectedFishType}
+              placeholder="Tüm Balıklar"
+              className="min-w-[120px]"
+              showIcon={true}
+              searchPlaceholder="Balık ara..."
+              notFoundText="Balık bulunamadı"
             />
             <div className="relative flex-1 search-float">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors duration-200" />
@@ -404,6 +428,19 @@ function Header() {
                 className="w-full"
                 showIcon={true}
                 iconLabel="Konum Filtresi"
+                searchPlaceholder="Konum ara..."
+                notFoundText="Konum bulunamadı"
+              />
+              <CustomSelect
+                options={fishOptions}
+                value={selectedFishType}
+                onChange={setSelectedFishType}
+                placeholder="Tüm Balıklar"
+                className="w-full"
+                showIcon={true}
+                iconLabel="Balık Filtresi"
+                searchPlaceholder="Balık ara..."
+                notFoundText="Balık bulunamadı"
               />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
