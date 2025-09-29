@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { Bell, Search, Menu as MenuIcon, X, User, LogOut, Settings } from 'lucide-react'
+import { Bell, Search, Menu as MenuIcon, X, User, LogOut, Settings, Heart, MessageCircle, UserPlus } from 'lucide-react'
 import { Menu } from '@headlessui/react'
 import { useAuth } from './AuthProvider'
 import { useLocationFilter } from './LocationFilterProvider'
@@ -380,23 +380,43 @@ function Header() {
               ) : null}
             </Button>
             {showNotifications ? (
-              <div className="absolute right-0 mt-2 w-80 rounded-md border bg-popover dark:bg-gray-800 dark:border-gray-600 p-2 shadow-md">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium dark:text-white">Bildirimler</span>
-                  <button className="text-xs text-muted-foreground dark:text-gray-400" onClick={() => setShowNotifications(false)}>Kapat</button>
+              <div className="absolute right-0 mt-2 w-96 max-w-[90vw] rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-2xl">
+                <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b border-gray-100/80 dark:border-gray-700/60 bg-white/90 dark:bg-gray-800/90 rounded-t-xl">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">Bildirimler</span>
+                  <button className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onClick={() => setShowNotifications(false)}>Kapat</button>
                 </div>
-                <div className="max-h-80 space-y-2 overflow-auto">
+                <div className="max-h-80 overflow-auto p-2 space-y-2 custom-scrollbar">
                   {notifications.length === 0 ? (
-                    <p className="text-xs text-muted-foreground dark:text-gray-400">Bildirim yok.</p>
-                  ) : notifications.map((n) => (
-                    <div key={n.id} className="rounded-sm border dark:border-gray-600 p-2 text-sm dark:bg-gray-700">
-                      <p className="dark:text-white">
-                        <span className="font-medium">{n.actorName}</span>{' '}
-                        {n.type === 'new_post' ? 'yeni bir gönderi paylaştı.' : n.type === 'follow' ? 'seni takip etti.' : n.type === 'like' ? 'gönderini beğendi.' : 'gönderine yorum yaptı.'}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground dark:text-gray-400">{n.createdAt}</p>
+                    <div className="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                      Hiç bildirimin yok.
                     </div>
-                  ))}
+                  ) : notifications.map((n) => {
+                    const isPost = !!n.postId
+                    const icon = n.type === 'like' ? <Heart className="w-4 h-4 text-red-500" />
+                      : n.type === 'follow' ? <UserPlus className="w-4 h-4 text-blue-500" />
+                      : n.type === 'comment' ? <MessageCircle className="w-4 h-4 text-green-600" />
+                      : <Bell className="w-4 h-4 text-indigo-600" />
+                    const text = n.type === 'new_post' ? 'yeni bir gönderi paylaştı.'
+                      : n.type === 'follow' ? 'seni takip etti.'
+                      : n.type === 'like' ? 'gönderini beğendi.'
+                      : 'gönderine yorum yaptı.'
+                    return (
+                      <div key={n.id} className="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                          {icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">{n.actorName}</span> {text}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{n.createdAt}</p>
+                        </div>
+                        {isPost ? (
+                          <Link href={`/`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Gönderi</Link>
+                        ) : null}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             ) : null}
