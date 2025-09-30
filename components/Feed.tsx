@@ -182,6 +182,12 @@ export default function Feed() {
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<FeedPost[]>([])
   
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [totalPosts, setTotalPosts] = useState(0)
+  
   // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
@@ -301,45 +307,81 @@ export default function Feed() {
     }
   }
 
+  // Fetch posts with pagination
+  const fetchPosts = async (page: number = 1, append: boolean = false) => {
+    try {
+      const res = await fetch(`${API_BASE}/posts?page=${page}&limit=20`, { 
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+      })
+      if (!res.ok) throw new Error("Liste alınamadı")
+      const data = await res.json()
+      const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
+        id: p._id,
+        authorId: p.authorId?._id || undefined,
+        authorName: p.authorId?.name || "Kullanıcı",
+        authorAvatarUrl: p.authorId?.avatarUrl || "/logo.png",
+        imageUrl: p.imageUrl,
+        contentText: p.contentText,
+        locationCity: p.locationCity,
+        locationSpot: p.locationSpot,
+        fishType: p.fishType,
+        likeCount: p.likeCount || 0,
+        commentCount: p.commentCount || 0,
+        viewCount: p.viewCount || 0,
+        createdAt: formatRelativeTime(p.createdAt),
+        liked: p.liked || false,
+      }))
+      
+      // Filter posts by selected location and fish type if any
+      let list = mapped
+      if (selectedLocation) {
+        list = list.filter(p => p.locationSpot === selectedLocation)
+      }
+      if (selectedFishType) {
+        list = list.filter(p => (p.fishType || "") === selectedFishType)
+      }
+      
+      if (append) {
+        setPosts(prev => [...prev, ...list])
+      } else {
+        setPosts(list)
+      }
+      
+      setHasMore(data.pagination?.hasMore || false)
+      setTotalPosts(data.pagination?.totalPosts || 0)
+      setCurrentPage(page)
+      
+      return { posts: list, hasMore: data.pagination?.hasMore || false }
+    } catch (e: any) {
+      setError(e?.message || "Bir hata oluştu")
+      throw e
+    }
+  }
+
+  // Load more posts
+  const loadMorePosts = async () => {
+    if (isLoadingMore || !hasMore) return
+    
+    setIsLoadingMore(true)
+    try {
+      await fetchPosts(currentPage + 1, true)
+    } catch (error) {
+      console.error('Error loading more posts:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
+
+  // Initial load and filter changes
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       setIsLoading(true)
       setError(null)
+      setCurrentPage(1)
       try {
-        const res = await fetch(`${API_BASE}/posts`, { 
-          credentials: 'include',
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined
-        })
-        if (!res.ok) throw new Error("Liste alınamadı")
-        const data = await res.json()
-        const mapped: FeedPost[] = (data.posts || []).map((p: any) => ({
-          id: p._id,
-          authorId: p.authorId?._id || undefined,
-          authorName: p.authorId?.name || "Kullanıcı",
-          authorAvatarUrl: p.authorId?.avatarUrl || "/logo.png",
-          imageUrl: p.imageUrl,
-          contentText: p.contentText,
-          locationCity: p.locationCity,
-          locationSpot: p.locationSpot,
-          fishType: p.fishType,
-          likeCount: p.likeCount || 0,
-          commentCount: p.commentCount || 0,
-          viewCount: p.viewCount || 0,
-          createdAt: formatRelativeTime(p.createdAt),
-          liked: p.liked || false,
-        }))
-        if (!cancelled) {
-          // Filter posts by selected location and fish type if any
-          let list = mapped
-          if (selectedLocation) {
-            list = list.filter(p => p.locationSpot === selectedLocation)
-          }
-          if (selectedFishType) {
-            list = list.filter(p => (p.fishType || "") === selectedFishType)
-          }
-          setPosts(list)
-        }
+        await fetchPosts(1, false)
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Bir hata oluştu")
       } finally {
@@ -387,6 +429,8 @@ export default function Feed() {
             console.log('Post already exists, skipping duplicate')
             return prev
           }
+          // Add new post to the beginning and update total count
+          setTotalPosts(prev => prev + 1)
           return [newPost, ...prev]
         })
       }
@@ -628,6 +672,27 @@ export default function Feed() {
           {posts.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">Henüz gönderi yok.</p>
           ) : null}
+          
+          {/* Load More Button */}
+          {hasMore && posts.length > 0 && (
+            <div className="flex justify-center pt-4">
+              <Button 
+                onClick={loadMorePosts}
+                disabled={isLoadingMore}
+                variant="outline"
+                className="px-8 py-2 bg-white/80 hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-200 hover:scale-105"
+              >
+                {isLoadingMore ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+                    Yükleniyor...
+                  </div>
+                ) : (
+                  'Daha fazla yükle'
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

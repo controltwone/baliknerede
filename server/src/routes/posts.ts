@@ -11,13 +11,22 @@ const Report = (ReportModule && (ReportModule.default || ReportModule)) as any
 
 const router = express.Router()
 
-// GET /posts - list latest posts (with author name)
+// GET /posts - list latest posts (with author name) - with pagination
 router.get('/', async (req, res) => {
+  const page = parseInt(req.query.page as string) || 1
+  const limit = parseInt(req.query.limit as string) || 20
+  const skip = (page - 1) * limit
+  
   const posts = await (Post as any)
     .find()
     .sort({ createdAt: -1 })
-    .limit(50)
+    .skip(skip)
+    .limit(limit)
     .populate('authorId', 'name avatarUrl')
+  
+  // Get total count for pagination info
+  const totalPosts = await (Post as any).countDocuments()
+  const hasMore = skip + posts.length < totalPosts
   
   // Eğer kullanıcı giriş yapmışsa beğeni durumunu ekle
   const authHeader = req.headers.authorization
@@ -34,13 +43,31 @@ router.get('/', async (req, res) => {
         liked: post.likes.some((likeId: any) => String(likeId) === String(userId))
       }))
       
-      return res.json({ posts: postsWithLikes })
+      return res.json({ 
+        posts: postsWithLikes, 
+        pagination: { 
+          page, 
+          limit, 
+          totalPosts, 
+          hasMore,
+          totalPages: Math.ceil(totalPosts / limit)
+        } 
+      })
     } catch (e) {
       // Token geçersizse normal posts döndür
     }
   }
   
-  res.json({ posts })
+  res.json({ 
+    posts, 
+    pagination: { 
+      page, 
+      limit, 
+      totalPosts, 
+      hasMore,
+      totalPages: Math.ceil(totalPosts / limit)
+    } 
+  })
 })
 // GET /posts/by/:userId - list posts by user
 router.get('/by/:userId', async (req, res) => {
