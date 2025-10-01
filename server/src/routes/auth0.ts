@@ -21,7 +21,16 @@ router.use(auth(config as any))
 
 router.get('/auth0/login', (req: any, res) => {
   // Başarılı dönüşte app tarafına tamamla endpointine yönlendir
-  res.oidc.login({ returnTo: '/auth0/complete' })
+  // Google'a direkt yönlendirmek için connection ve prompt parametreleri gönder
+  res.oidc.login({
+    returnTo: '/auth0/complete',
+    authorizationParams: {
+      // Auth0 Google Social Connection identifier
+      connection: 'google-oauth2',
+      // Her seferinde hesap seçim ekranını göster
+      prompt: 'select_account',
+    },
+  })
 })
 
 // Callback'ı express-openid-connect handle eder; biz tamamlamayı ayrı endpointte yapıyoruz
