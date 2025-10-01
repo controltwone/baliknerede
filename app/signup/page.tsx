@@ -26,44 +26,41 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="bg-background dark:bg-gray-900 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <div className="flex flex-col items-center gap-4 mb-2">
-          <Link href="/" className="flex flex-col items-center gap-3">
-            <Image src="/logo.png" width={64} height={64} alt="BALIKNEREDE logo" />
-            <span className="text-2xl font-bold" style={{color: '#158EC3'}}>baliknerede.com</span>
-          </Link>
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+        {/* Brand Panel */}
+        <div className="hidden lg:flex lg:col-span-1 flex-col justify-center gap-4 px-2">
+          
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Aramıza katıl</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300 max-w-md">Favori avlarını paylaş, balık türü ve konuma göre filtrele, anlık bildirimlerle haberdar ol.</p>
         </div>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">Kayıt Ol</CardTitle>
-            <CardDescription>Topluluğa katıl ve av paylaşımlarını yap.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={onSubmit} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Ad</Label>
-                <Input id="name" name="name" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Şifre</Label>
-                <Input id="password" name="password" type="password" required />
-              </div>
-              <Button type="submit" className="w-full">Kaydol</Button>
-            </form>
-            <div className="text-center text-sm mt-4">
-              Zaten hesabın var mı?{" "}
-              <Link href="/login" className="underline underline-offset-4">Giriş Yap</Link>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-          Devam ederseniz, <a href="#">Hizmet Şartlarını</a>{" "}
-          ve <a href="#">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
+
+        {/* Form Panel */}
+        <div className="flex items-start justify-center lg:col-span-2">
+          <Card className="w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl rounded-2xl">
+            <CardHeader className="text-center p-8 pb-4">
+              <CardTitle className="text-2xl font-semibold">Kayıt Ol</CardTitle>
+              <CardDescription className="mt-1">Topluluğa katılmak için bilgilerini doldur.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-8 pt-4">
+              <form onSubmit={onSubmit} className="space-y-5 w-full">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Ad</Label>
+                  <Input id="name" name="name" required className="h-11" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" required className="h-11" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Şifre</Label>
+                  <Input id="password" name="password" type="password" required className="h-11" />
+                </div>
+                <Button type="submit" className="w-full h-11">Kaydol</Button>
+                <div className="text-center text-sm">Zaten hesabın var mı? <Link href="/login" className="underline underline-offset-4">Giriş Yap</Link></div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
