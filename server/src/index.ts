@@ -56,6 +56,14 @@ io.on('connection', (socket) => {
     console.log(`User ${userId} joined room`)
   })
 
+  // Relay direct notification events if needed (reserved)
+  socket.on('notification_emit', (data) => {
+    const { userId, payload } = data || {}
+    if (userId) {
+      io.to(`user_${userId}`).emit('notification_new', payload)
+    }
+  })
+
   // Handle post like updates
   socket.on('post_liked', (data) => {
     socket.broadcast.emit('post_like_updated', data)

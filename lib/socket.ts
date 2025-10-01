@@ -72,6 +72,10 @@ class SocketService {
     this.socket?.on('user_status_changed', callback)
   }
 
+  onNotificationNew(callback: (data: any) => void) {
+    this.socket?.on('notification_new', callback)
+  }
+
   // Event emitters
   emitPostLiked(data: any) {
     this.socket?.emit('post_liked', data)
@@ -87,6 +91,10 @@ class SocketService {
 
   emitUserOnline(userId: string) {
     this.socket?.emit('user_online', userId)
+  }
+
+  emitNotification(userId: string, payload: any) {
+    this.socket?.emit('notification_emit', { userId, payload })
   }
 
   // Remove listeners

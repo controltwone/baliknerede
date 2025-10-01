@@ -138,6 +138,26 @@ router.post('/:id/like', requireAuth, async (req: AuthedRequest, res) => {
       likeCount: post.likeCount,
       liked: !has
     })
+    // Like bildirimi (kendi gönderisi değilse)
+    try {
+      if (!has && String(post.authorId) !== String(uid)) {
+        const actor = await (User as any).findById(uid, 'name')
+        await (Notification as any).create({
+          userId: post.authorId,
+          actorId: uid,
+          type: 'like',
+          postId: post._id,
+        })
+        io.to(`user_${post.authorId}`).emit('notification_new', {
+          type: 'like',
+          actorName: actor?.name || 'Kullanıcı',
+          postId: String(post._id),
+          createdAt: new Date().toISOString(),
+        })
+      }
+    } catch (e) {
+      // noop
+    }
   }
   
   res.json({ likeCount: post.likeCount, liked: !has })
@@ -152,6 +172,30 @@ router.post('/:id/comments', requireAuth, async (req: AuthedRequest, res) => {
   post.comments.push({ userId: req.userId as any, text, createdAt: new Date() } as any)
   post.commentCount = post.comments.length
   await post.save()
+  
+  // Yorum bildirimi (kendi gönderisi değilse)
+  try {
+    if (String(post.authorId) !== String(req.userId)) {
+      const actor = await (User as any).findById(req.userId, 'name')
+      await (Notification as any).create({
+        userId: post.authorId,
+        actorId: req.userId,
+        type: 'comment',
+        postId: post._id,
+      })
+      const io = req.app.get('io')
+      if (io) {
+        io.to(`user_${post.authorId}`).emit('notification_new', {
+          type: 'comment',
+          actorName: actor?.name || 'Kullanıcı',
+          postId: String(post._id),
+          createdAt: new Date().toISOString(),
+        })
+      }
+    }
+  } catch (e) {
+    // noop
+  }
   res.status(201).json({ commentCount: post.commentCount })
 })
 

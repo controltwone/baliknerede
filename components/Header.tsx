@@ -215,6 +215,32 @@ function Header() {
     return () => { if (timer) clearInterval(timer) }
   }, [API_BASE, isAuthenticated, token])
 
+  // Realtime notification push (socket)
+  React.useEffect(() => {
+    if (!isAuthenticated) return
+    const handler = (payload: any) => {
+      // Prepend incoming notification and bump badge if dropdown closed
+      setNotifications(prev => [{
+        id: `${Date.now()}_${Math.random()}`,
+        type: payload?.type || 'like',
+        actorName: payload?.actorName || 'Kullanıcı',
+        postId: payload?.postId,
+        createdAt: formatRelativeTime(payload?.createdAt || new Date().toISOString()),
+        read: false,
+      }, ...prev].slice(0, 50))
+      setUnreadCount(prev => prev + 1)
+    }
+    // Lazy import to avoid circulars
+    import('../lib/socket').then(({ socketService }) => {
+      socketService.onNotificationNew(handler)
+    })
+    return () => {
+      import('../lib/socket').then(({ socketService }) => {
+        socketService.removeListener('notification_new', handler as any)
+      })
+    }
+  }, [isAuthenticated])
+
   async function openNotifications() {
     if (!isAuthenticated) return
     try {
