@@ -275,21 +275,42 @@ function Header() {
         <Link href="/" className="shrink-0 flex items-center gap-3 group" onClick={() => setSelectedLocation("")}>
           <Image 
             src="/logo.png" 
-            width={72} 
-            height={72} 
-            alt="BALIKNEREDE logo" 
+            width={94} 
+            height={94} 
+            alt="BALIKNERDE logo" 
+            priority
             className="logo-float logo-hover-spin transition-all duration-300 group-hover:scale-110" 
           />
           <span 
-            className="text-xl font-bold hidden sm:block transition-all duration-300 group-hover:scale-105 tracking-wide"
+            className="hidden sm:inline-flex items-baseline gap-1 text-2xl font-extrabold tracking-wide transition-all duration-300 group-hover:scale-105"
             style={{
-              color: '#158EC3',
               fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-              textShadow: '0 2px 8px rgba(59, 130, 246, 0.4), 0 1px 3px rgba(21, 142, 195, 0.3)',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.6px'
             }}
           >
-            baliknerede.com
+            {/* balik: cyan → navy (brand) */}
+            <span className="leading-none bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-cyan), var(--brand-blue-deep))' }}>balik</span>
+
+            {/* nerde: daha büyük, hafif döndürülmüş, gradient metin + girift soru işareti (alt nokta yok) */}
+            <span
+              className="relative leading-none bg-clip-text text-transparent font-black tracking-wide"
+              style={{ transform: 'rotate(-3deg)', fontSize: '1.25em', letterSpacing: '0.02em' }}
+            >
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-red), var(--brand-red))' }}>nerde</span>
+              {/* Girift soru işareti: metinle iç içe, sağ üstte hafifçe bindir */}
+              <span
+                aria-hidden
+                className="absolute -top-1 -right-0.5 bg-clip-text text-transparent font-extrabold text-[18px] leading-none select-none"
+                style={{ transform: 'rotate(-5deg)' }}
+              >
+                <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-cyan), var(--brand-blue-deep))' }}>?</span>
+              </span>
+            </span>
+
+            {/* .com: hook graphite */}
+            <span className="ml-1 align-top inline-flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--brand-graphite)' }}>
+              <span className="tracking-wide">.com</span>
+            </span>
           </span>
         </Link>
 
