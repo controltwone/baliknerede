@@ -58,8 +58,25 @@ router.get('/auth0/complete', async (req: any, res) => {
 
 router.get('/auth0/logout', (req: any, res) => {
   try {
+    // Clear all possible cookies
     res.clearCookie('bn_token')
-  } catch {}
+    res.clearCookie('appSession')
+    res.clearCookie('connect.sid')
+    // Clear any other Auth0 related cookies
+    const cookies = req.headers.cookie
+    if (cookies) {
+      cookies.split(';').forEach((cookie: string) => {
+        const eqPos = cookie.indexOf('=')
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+        if (name) {
+          res.clearCookie(name, { path: '/' })
+          res.clearCookie(name, { path: '/', domain: process.env.AUTH0_DOMAIN })
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Error clearing cookies:', error)
+  }
   // Auth0 oturumu da kapat ve frontend'e dön
   return res.oidc.logout({ returnTo: process.env.CLIENT_ORIGIN || 'http://localhost:3000' })
 })

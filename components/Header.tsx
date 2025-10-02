@@ -515,8 +515,16 @@ function Header() {
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          onClick={() => {
+                          onClick={async () => {
+                            // Clear local state first
                             logout()
+                            // Clear localStorage completely
+                            try {
+                              localStorage.removeItem('bn_auth_user')
+                              localStorage.removeItem('bn_token')
+                              sessionStorage.clear()
+                            } catch {}
+                            // Then redirect to Auth0 logout which will clear the session
                             window.location.href = `${API_BASE}/auth0/logout`
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
