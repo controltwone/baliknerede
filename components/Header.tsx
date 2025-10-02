@@ -160,7 +160,7 @@ function Header() {
   const [searchResults, setSearchResults] = React.useState<Array<{id: string, name: string, avatarUrl?: string}>>([])
   const [showSearchResults, setShowSearchResults] = React.useState(false)
   const [isSearching, setIsSearching] = React.useState(false)
-  const [notifications, setNotifications] = React.useState<Array<{ id: string; type: string; actorName: string; postId?: string; createdAt: string; read: boolean }>>([])
+  const [notifications, setNotifications] = React.useState<Array<{ id: string; type: string; actorName: string; actorId?: string; postId?: string; createdAt: string; read: boolean }>>([])
   const [showMobileMenu, setShowMobileMenu] = React.useState(false)
 
   // User search function
@@ -255,6 +255,7 @@ function Header() {
           id: n.id,
           type: n.type,
           actorName: n.actorName,
+          actorId: n.actorId,
           postId: n.postId,
           createdAt: formatRelativeTime(n.createdAt),
           read: !!n.read,
@@ -503,7 +504,9 @@ function Header() {
                         </div>
                         {isPost ? (
                           <Link href={`/p/${n.postId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Gönderi</Link>
-                        ) : null}
+                        ) : (
+                          <Link href={`/u/${n.actorId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Profil</Link>
+                        )}
                       </div>
                     )
                   })}

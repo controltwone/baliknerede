@@ -16,6 +16,7 @@ router.get('/', requireAuth, async (req: AuthedRequest, res) => {
     type: n.type,
     read: n.read,
     actorName: n.actorId?.name || 'Kullanıcı',
+    actorId: n.actorId ? String(n.actorId._id) : undefined,
     postId: n.postId ? String(n.postId) : undefined,
     createdAt: n.createdAt,
   })) })

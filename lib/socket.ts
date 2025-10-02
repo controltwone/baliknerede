@@ -9,32 +9,61 @@ class SocketService {
 
     const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
     
-    this.socket = io(API_BASE, {
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-    })
+    try {
+      this.socket = io(API_BASE, {
+        transports: ['websocket', 'polling'],
+        autoConnect: true,
+        timeout: 10000,
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+      })
 
-    this.socket.on('connect', () => {
-      console.log('Socket connected:', this.socket?.id)
-      this.isConnected = true
-      
-      if (userId) {
-        this.socket?.emit('join', userId)
-      }
-    })
+      this.socket.on('connect', () => {
+        console.log('Socket connected:', this.socket?.id)
+        this.isConnected = true
+        
+        if (userId) {
+          this.socket?.emit('join', userId)
+        }
+      })
 
-    this.socket.on('disconnect', () => {
-      console.log('Socket disconnected')
+      this.socket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason)
+        this.isConnected = false
+      })
+
+      this.socket.on('connect_error', (error) => {
+        console.warn('Socket connection error (will retry):', error.message)
+        this.isConnected = false
+      })
+
+      this.socket.on('error', (error) => {
+        console.warn('Socket error:', error)
+      })
+
+      this.socket.on('reconnect', (attemptNumber) => {
+        console.log('Socket reconnected after', attemptNumber, 'attempts')
+        this.isConnected = true
+        
+        if (userId) {
+          this.socket?.emit('join', userId)
+        }
+      })
+
+      this.socket.on('reconnect_error', (error) => {
+        console.warn('Socket reconnection error:', error.message)
+      })
+
+      this.socket.on('reconnect_failed', () => {
+        console.warn('Socket reconnection failed - giving up')
+        this.isConnected = false
+      })
+
+    } catch (error) {
+      console.warn('Failed to initialize socket:', error)
       this.isConnected = false
-    })
-
-    this.socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error)
-    })
-
-    this.socket.on('error', (error) => {
-      console.error('Socket error:', error)
-    })
+    }
 
     return this.socket
   }
