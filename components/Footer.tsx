@@ -24,7 +24,7 @@ function Footer() {
                 <Link href="/" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Akış</Link>
               </li>
               <li>
-                <Link href="/blog" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Blog</Link>
+                <Link href="/blog" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Balık Rehberi</Link>
               </li>
             </ul>
           </div>
