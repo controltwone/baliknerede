@@ -55,7 +55,7 @@ export default function BlogPage() {
         🌊
       </div>
 
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-4 py-12 pb-64 md:pb-48 relative z-10">
         <div 
           className="mb-12 text-center"
           style={{ transform: `translateY(${scrollY * 0.1}px)` }}

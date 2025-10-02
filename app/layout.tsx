@@ -19,7 +19,7 @@ export default function RootLayout({
             <LocationFilterProvider>
               <div className="flex min-h-screen flex-col">
                 <Header />
-                <main className="flex-grow container mx-auto px-4 py-4">
+                <main className="flex-grow">
                   {children}
                 </main>
                 <Footer />

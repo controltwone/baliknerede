@@ -288,27 +288,69 @@ function Header() {
               letterSpacing: '0.6px'
             }}
           >
-            {/* balik: cyan → navy (brand) */}
-            <span className="leading-none bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-cyan), var(--brand-blue-deep))' }}>balik</span>
-
-            {/* nerde: daha büyük, hafif döndürülmüş, gradient metin + girift soru işareti (alt nokta yok) */}
-            <span
-              className="relative inline-block leading-none bg-clip-text text-transparent font-black tracking-wide"
-              style={{ transform: 'rotate(-8deg)', fontSize: '1.25em', letterSpacing: '0.02em' }}
+            {/* balik: cyan → navy (brand) - daha parlak ve canlı */}
+            <span 
+              className="leading-none bg-clip-text text-transparent drop-shadow-sm" 
+              style={{ 
+                backgroundImage: 'linear-gradient(135deg, #00d4ff, #0099cc, #0066aa)',
+                filter: 'brightness(1.2) saturate(1.3)',
+                textShadow: '0 0 8px rgba(0, 212, 255, 0.3)'
+              }}
             >
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-red), var(--brand-red))' }}>nerde</span>
-              {/* Girift soru işareti: metinle iç içe, sağ üstte hafifçe bindir */}
+              balik
+            </span>
+
+            {/* nerde: daha büyük, hafif döndürülmüş, gradient metin + girift soru işareti - daha parlak */}
+            <span
+              className="relative inline-block leading-none bg-clip-text text-transparent font-black tracking-wide drop-shadow-sm"
+              style={{ 
+                transform: 'rotate(-8deg)', 
+                fontSize: '1.25em', 
+                letterSpacing: '0.02em',
+                filter: 'brightness(1.3) saturate(1.4)',
+                textShadow: '0 0 10px rgba(236, 35, 43, 0.4)'
+              }}
+            >
+              <span 
+                className="bg-clip-text text-transparent" 
+                style={{ 
+                  backgroundImage: 'linear-gradient(135deg, #ff4757, #ff3742, #ff2d3a)',
+                  filter: 'brightness(1.2) saturate(1.3)'
+                }}
+              >
+                nerde
+              </span>
+              {/* Girift soru işareti: metinle iç içe, sağ üstte hafifçe bindir - daha parlak */}
               <span
                 aria-hidden
-                className="absolute -top-1 -right-0.5 bg-clip-text text-transparent font-extrabold text-[18px] leading-none select-none"
-                style={{ transform: 'rotate(-6deg)' }}
+                className="absolute -top-1 -right-0.5 bg-clip-text text-transparent font-extrabold text-[18px] leading-none select-none drop-shadow-sm"
+                style={{ 
+                  transform: 'rotate(-6deg)',
+                  filter: 'brightness(1.3) saturate(1.4)',
+                  textShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
+                }}
               >
-                <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-cyan), var(--brand-blue-deep))' }}>?</span>
+                <span 
+                  className="bg-clip-text text-transparent" 
+                  style={{ 
+                    backgroundImage: 'linear-gradient(135deg, #00d4ff, #0099cc, #0066aa)',
+                    filter: 'brightness(1.2) saturate(1.3)'
+                  }}
+                >
+                  ?
+                </span>
               </span>
             </span>
 
-            {/* .com: hook graphite */}
-            <span className="ml-1 align-top inline-flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--brand-graphite)' }}>
+            {/* .com: hook graphite - daha parlak */}
+            <span 
+              className="ml-1 align-top inline-flex items-center gap-1.5 text-[12px] drop-shadow-sm" 
+              style={{ 
+                color: '#9ca3af',
+                filter: 'brightness(1.1)',
+                textShadow: '0 0 4px rgba(156, 163, 175, 0.3)'
+              }}
+            >
               <span className="tracking-wide">.com</span>
             </span>
           </span>
