@@ -47,7 +47,7 @@ export default function ProfilePage() {
       try {
         setLoading(true)
         const [pr, fr, ngr] = await Promise.all([
-          fetch(`${API_BASE}/posts/my`, {
+          fetch(`${API_BASE}/posts/by/${user.id}`, {
             credentials: 'include',
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           }),
@@ -190,7 +190,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 page-content">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 page-content pb-24">
       <section className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
