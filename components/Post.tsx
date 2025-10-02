@@ -221,7 +221,7 @@ export default function Post({
   }
 
   return (
-    <Card className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
+    <Card id={`post-${id}`} className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Link href={authorId ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">

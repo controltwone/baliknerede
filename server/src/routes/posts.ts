@@ -216,6 +216,51 @@ router.get('/:id/comments', async (req, res) => {
   res.json({ comments })
 })
 
+// GET /posts/:id - get a single post with author
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await (Post as any)
+      .findById(req.params.id)
+      .populate('authorId', 'name avatarUrl')
+    if (!post) return res.status(404).json({ message: 'Not found' })
+
+    // Determine liked status if token present
+    let liked = false
+    const authHeader = req.headers.authorization
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (token) {
+      try {
+        const jwt = require('jsonwebtoken')
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as any
+        const userId = decoded?.userId
+        if (userId && Array.isArray(post.likes)) {
+          liked = post.likes.some((u: any) => String(u) === String(userId))
+        }
+      } catch {}
+    }
+
+    return res.json({
+      post: {
+        _id: String(post._id),
+        authorId: post.authorId ? { _id: String(post.authorId._id), name: post.authorId.name, avatarUrl: post.authorId.avatarUrl } : undefined,
+        imageUrl: post.imageUrl,
+        contentText: post.contentText,
+        locationCity: post.locationCity,
+        locationSpot: post.locationSpot,
+        fishType: post.fishType,
+        likeCount: post.likeCount || 0,
+        commentCount: post.commentCount || 0,
+        viewCount: post.viewCount || 0,
+        createdAt: post.createdAt,
+        liked,
+      }
+    })
+  } catch (error) {
+    console.error('Get post failed:', error)
+    res.status(500).json({ message: 'Get post failed' })
+  }
+})
+
 // GET /posts/my - current user's posts
 router.get('/my', requireAuth, async (req: AuthedRequest, res) => {
   const posts = await (Post as any)

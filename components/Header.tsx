@@ -293,15 +293,15 @@ function Header() {
 
             {/* nerde: daha büyük, hafif döndürülmüş, gradient metin + girift soru işareti (alt nokta yok) */}
             <span
-              className="relative leading-none bg-clip-text text-transparent font-black tracking-wide"
-              style={{ transform: 'rotate(-3deg)', fontSize: '1.25em', letterSpacing: '0.02em' }}
+              className="relative inline-block leading-none bg-clip-text text-transparent font-black tracking-wide"
+              style={{ transform: 'rotate(-8deg)', fontSize: '1.25em', letterSpacing: '0.02em' }}
             >
               <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-red), var(--brand-red))' }}>nerde</span>
               {/* Girift soru işareti: metinle iç içe, sağ üstte hafifçe bindir */}
               <span
                 aria-hidden
                 className="absolute -top-1 -right-0.5 bg-clip-text text-transparent font-extrabold text-[18px] leading-none select-none"
-                style={{ transform: 'rotate(-5deg)' }}
+                style={{ transform: 'rotate(-6deg)' }}
               >
                 <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, var(--brand-cyan), var(--brand-blue-deep))' }}>?</span>
               </span>
@@ -459,7 +459,7 @@ function Header() {
                           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{n.createdAt}</p>
                         </div>
                         {isPost ? (
-                          <Link href={`/`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Gönderi</Link>
+                          <Link href={`/p/${n.postId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Gönderi</Link>
                         ) : null}
                       </div>
                     )

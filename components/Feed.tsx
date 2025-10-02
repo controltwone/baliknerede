@@ -35,6 +35,7 @@ type FeedPost = {
 
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
   const { user, token } = useAuth()
   const { selectedLocation, selectedFishType } = useLocationFilter()
   const { socketService } = useSocket()
@@ -390,6 +391,23 @@ export default function Feed() {
     })()
     return () => { cancelled = true }
   }, [API_BASE, selectedLocation, selectedFishType])
+
+  // Scroll to post from notification link
+  useEffect(() => {
+    const postId = searchParams?.get('post')
+    if (!postId) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(`post-${postId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        el.classList.add('ring-2', 'ring-blue-400')
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-blue-400')
+        }, 2000)
+      }
+    }, 300)
+    return () => clearTimeout(t)
+  }, [posts])
 
   // Socket event listeners for real-time updates
   useEffect(() => {

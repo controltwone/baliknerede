@@ -26,7 +26,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-svh flex items-center justify-center px-4 py-0">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
         {/* Brand Panel */}
         <div className="hidden lg:flex lg:col-span-1 flex-col justify-center gap-4 px-2">

@@ -9,8 +9,7 @@ function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2">
-              <img src="/logo.png" alt="baliknerede" className="h-8 w-8 rounded" />
-              <span className="text-base font-semibold tracking-wide text-gray-900 dark:text-white">baliknerede</span>
+              <span className="text-base font-semibold tracking-wide text-gray-900 dark:text-white">baliknerde.com</span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
               İstanbul ve kıyı şehirlerindeki balık avı paylaşımları, anlık konum ve tür filtreleriyle.
@@ -49,7 +48,7 @@ function Footer() {
 
         <div className="mt-10 border-t border-gray-200/70 dark:border-gray-800/70 pt-6">
           <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted-foreground sm:flex-row">
-            <p>© {new Date().getFullYear()} baliknerede</p>
+            <p>© {new Date().getFullYear()} baliknerde</p>
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-gray-200/60 px-2 py-1 text-[11px] text-gray-600 dark:bg-gray-800 dark:text-gray-300">TR</span>
               <span className="h-3 w-px bg-gray-300 dark:bg-gray-700" />
