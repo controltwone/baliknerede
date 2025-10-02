@@ -509,7 +509,8 @@ export default function Feed() {
       addToast({
         type: "warning",
         title: "Giriş Gerekli",
-        description: "Gönderi paylaşmak için giriş yapmalısınız."
+        description: "Gönderi paylaşmak için giriş yapmalısınız.",
+        duration: 5000
       })
       return
     }
@@ -562,7 +563,8 @@ export default function Feed() {
         addToast({
           type: "warning",
           title: "Giriş Gerekli",
-          description: "Gönderi paylaşmak için giriş yapmalısınız."
+          description: "Gönderi paylaşmak için giriş yapmalısınız.",
+          duration: 5000
         })
         return
       }
@@ -601,13 +603,15 @@ export default function Feed() {
       addToast({
         type: "success",
         title: "Gönderi Paylaşıldı",
-        description: "Gönderiniz başarıyla paylaşıldı."
+        description: "Gönderiniz başarıyla paylaşıldı.",
+        duration: 5000
       })
     } catch (e: any) {
       addToast({
         type: "error",
         title: "Hata",
-        description: e?.message || "Paylaşım sırasında hata oluştu."
+        description: e?.message || "Paylaşım sırasında hata oluştu.",
+        duration: 5000
       })
     } finally {
       setIsPosting(false)

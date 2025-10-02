@@ -90,7 +90,7 @@ export function CustomSelect({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg z-50 max-h-60 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg z-50 max-h-60 overflow-hidden sm:min-w-[280px] sm:w-max">
           {/* Search Input */}
           <div className="p-2 border-b border-gray-100 dark:border-gray-700">
             <input
@@ -111,14 +111,14 @@ export function CustomSelect({
                   key={option.value}
                   type="button"
                   onClick={() => handleSelect(option)}
-                  className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 flex items-center gap-3 ${
+                  className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 flex items-center gap-3 min-w-0 ${
                     option.value === value
                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                  <span className="truncate">{option.label}</span>
+                  <span className="sm:whitespace-nowrap">{option.label}</span>
                   {option.value === value && (
                     <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                   )}
