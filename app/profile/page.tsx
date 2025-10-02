@@ -190,34 +190,75 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 page-content pb-24">
-      <section className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={user?.avatarUrl || "/logo.png"} alt={user?.name || 'Kullanıcı'} />
-            <AvatarFallback>{(user?.name || 'K').slice(0,2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-xl font-semibold">{user?.name || 'Kullanıcı'}</h1>
-            <div className="mt-1 flex items-center gap-3 text-sm">
-              <button
-                className="rounded-md border px-2 py-1 hover:bg-accent"
-                onClick={() => setShowListModal('followers')}
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-8 px-5 sm:px-0 page-content pb-24">
+      <section className="mb-8 mt-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-700 p-6 shadow-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="relative">
+              <Avatar className="h-20 w-20 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+                <AvatarImage src={user?.avatarUrl || "/logo.png"} alt={user?.name || 'Kullanıcı'} />
+                <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                  {(user?.name || 'K').slice(0,2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {user?.name || 'Kullanıcı'}
+              </h1>
+              {user?.bio && (
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 max-w-md">
+                  {user.bio}
+                </p>
+              )}
+              
+              <div className="flex items-center gap-6">
+                <button
+                  className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-600"
+                  onClick={() => setShowListModal('followers')}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {followersList.length}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                      Takipçi
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-600"
+                  onClick={() => setShowListModal('following')}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {followingList.length}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                      Takip
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-shrink-0">
+              <Button 
+                variant="outline" 
+                onClick={handleEditProfile}
+                className="bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200"
               >
-                <span className="font-medium">Takipçi</span> {followersList.length}
-              </button>
-              <button
-                className="rounded-md border px-2 py-1 hover:bg-accent"
-                onClick={() => setShowListModal('following')}
-              >
-                <span className="font-medium">Takip</span> {followingList.length}
-              </button>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Profili Düzenle
+              </Button>
             </div>
           </div>
         </div>
-        <Button variant="outline" onClick={handleEditProfile}>
-          Profili Düzenle
-        </Button>
       </section>
 
 

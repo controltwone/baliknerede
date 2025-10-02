@@ -431,7 +431,7 @@ function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg px-2 py-1">
           {/* Dark Mode Toggle */}
           <Button
             variant="ghost"
@@ -605,10 +605,6 @@ function Header() {
             </Link>
           )}
           
-          {/* Blog Button (desktop only) */}
-          <Link href="/blog" className="hidden md:block">
-            <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 border-gray-300/50 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 dark:border-gray-600/50 dark:hover:border-blue-500 backdrop-blur-sm transition-all duration-200 ml-10">Blog</Button>
-          </Link>
         </div>
       </div>
       
@@ -619,9 +615,6 @@ function Header() {
             <div className="flex gap-2">
               <Link href="/" onClick={() => { setSelectedLocation(""); setShowMobileMenu(false); }}>
                 <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 w-full">Akış</Button>
-              </Link>
-              <Link href="/blog" onClick={() => setShowMobileMenu(false)}>
-                <Button variant="outline" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-gray-300 hover:border-blue-300 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 w-full">Blog</Button>
               </Link>
               {user?.isAdmin && (
                 <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
