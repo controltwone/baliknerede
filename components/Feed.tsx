@@ -506,7 +506,11 @@ export default function Feed() {
   async function handleShare() {
     if (!contentText && !selectedFile) return
     if (!user) {
-      setError("Paylaşmak için giriş yapmalısınız.")
+      addToast({
+        type: "warning",
+        title: "Giriş Gerekli",
+        description: "Gönderi paylaşmak için giriş yapmalısınız."
+      })
       return
     }
     setIsPosting(true)
@@ -555,7 +559,11 @@ export default function Feed() {
         body: JSON.stringify({ contentText, imageUrl: finalImageUrl, locationCity: "İstanbul", locationSpot, fishType }),
       })
       if (res.status === 401) {
-        setError("Paylaşmak için giriş yapmalısınız.")
+        addToast({
+          type: "warning",
+          title: "Giriş Gerekli",
+          description: "Gönderi paylaşmak için giriş yapmalısınız."
+        })
         return
       }
       if (!res.ok) throw new Error("Gönderi paylaşılamadı.")
@@ -588,8 +596,19 @@ export default function Feed() {
       setSelectedFile(null)
       setLocationSpot("")
       setFishType("")
+      
+      // Show success toast
+      addToast({
+        type: "success",
+        title: "Gönderi Paylaşıldı",
+        description: "Gönderiniz başarıyla paylaşıldı."
+      })
     } catch (e: any) {
-      setError(e?.message || "Paylaşım sırasında hata")
+      addToast({
+        type: "error",
+        title: "Hata",
+        description: e?.message || "Paylaşım sırasında hata oluştu."
+      })
     } finally {
       setIsPosting(false)
     }

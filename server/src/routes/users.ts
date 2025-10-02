@@ -2,6 +2,8 @@ import express = require('express')
 const UserModule = require('../models/User')
 const User = (UserModule && (UserModule.default || UserModule)) as any
 
+const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2MzY2RjEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+"
+
 const router = express.Router()
 
 // GET /users/search?q=query - search users by name
@@ -19,7 +21,7 @@ router.get('/search', async (req, res) => {
     const results = users.map((user: any) => ({
       id: String(user._id),
       name: user.name,
-      avatarUrl: user.avatarUrl
+      avatarUrl: user.avatarUrl || DEFAULT_AVATAR
     }))
     
     res.json({ users: results })
@@ -33,14 +35,14 @@ router.get('/search', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const user = await (User as any).findById(req.params.id)
   if (!user) return res.status(404).json({ message: 'Not found' })
-  res.json({ id: String(user._id), name: user.name, avatarUrl: user.avatarUrl, followers: (user.followers || []).length, following: (user.following || []).length })
+  res.json({ id: String(user._id), name: user.name, avatarUrl: user.avatarUrl || DEFAULT_AVATAR, followers: (user.followers || []).length, following: (user.following || []).length })
 })
 
 // GET /users/:id/followers - list followers with names
 router.get('/:id/followers', async (req, res) => {
   const user = await (User as any).findById(req.params.id).populate('followers', 'name avatarUrl')
   if (!user) return res.status(404).json({ message: 'Not found' })
-  const list = (user.followers || []).map((u: any) => ({ id: String(u._id), name: u.name, avatarUrl: u.avatarUrl }))
+  const list = (user.followers || []).map((u: any) => ({ id: String(u._id), name: u.name, avatarUrl: u.avatarUrl || DEFAULT_AVATAR }))
   res.json({ followers: list })
 })
 
@@ -48,7 +50,7 @@ router.get('/:id/followers', async (req, res) => {
 router.get('/:id/following', async (req, res) => {
   const user = await (User as any).findById(req.params.id).populate('following', 'name avatarUrl')
   if (!user) return res.status(404).json({ message: 'Not found' })
-  const list = (user.following || []).map((u: any) => ({ id: String(u._id), name: u.name, avatarUrl: u.avatarUrl }))
+  const list = (user.following || []).map((u: any) => ({ id: String(u._id), name: u.name, avatarUrl: u.avatarUrl || DEFAULT_AVATAR }))
   res.json({ following: list })
 })
 

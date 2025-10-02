@@ -9,6 +9,8 @@ const User = (UserModule && (UserModule.default || UserModule)) as any
 const ReportModule = require('../models/Report')
 const Report = (ReportModule && (ReportModule.default || ReportModule)) as any
 
+const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2MzY2RjEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+"
+
 const router = express.Router()
 
 // GET /posts - list latest posts (with author name) - with pagination
@@ -253,7 +255,7 @@ router.get('/:id', async (req, res) => {
     return res.json({
       post: {
         _id: String(post._id),
-        authorId: post.authorId ? { _id: String(post.authorId._id), name: post.authorId.name, avatarUrl: post.authorId.avatarUrl } : undefined,
+        authorId: post.authorId ? { _id: String(post.authorId._id), name: post.authorId.name, avatarUrl: post.authorId.avatarUrl || DEFAULT_AVATAR } : undefined,
         imageUrl: post.imageUrl,
         contentText: post.contentText,
         locationCity: post.locationCity,
