@@ -38,9 +38,14 @@ router.get('/', async (req, res) => {
       const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
       const userId = payload.sub
       
+      // Get user's following list to check follow status
+      const user = await (User as any).findById(userId)
+      const followingIds = user?.following || []
+      
       const postsWithLikes = posts.map((post: any) => ({
         ...post.toObject(),
-        liked: post.likes.some((likeId: any) => String(likeId) === String(userId))
+        liked: post.likes.some((likeId: any) => String(likeId) === String(userId)),
+        isFollowing: followingIds.some((followId: any) => String(followId) === String(post.authorId._id))
       }))
       
       return res.json({ 
@@ -58,8 +63,14 @@ router.get('/', async (req, res) => {
     }
   }
   
+  // For non-authenticated users, add default follow status
+  const postsWithDefaults = posts.map((post: any) => ({
+    ...post.toObject(),
+    isFollowing: false
+  }))
+  
   res.json({ 
-    posts, 
+    posts: postsWithDefaults, 
     pagination: { 
       page, 
       limit, 

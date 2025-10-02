@@ -52,6 +52,31 @@ router.get('/:id/following', async (req, res) => {
   res.json({ following: list })
 })
 
+// GET /users/:id/follow-status - check if current user follows this user
+router.get('/:id/follow-status', async (req, res) => {
+  try {
+    const { id } = req.params
+    const authHeader = req.headers.authorization
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+    
+    if (!token) {
+      return res.json({ isFollowing: false })
+    }
+    
+    const jwt = require('jsonwebtoken')
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
+    const currentUserId = payload.sub
+    
+    const currentUser = await User.findById(currentUserId)
+    const isFollowing = currentUser?.following?.some((followId: any) => String(followId) === String(id)) || false
+    
+    res.json({ isFollowing })
+  } catch (error) {
+    console.error('Follow status check failed:', error)
+    res.json({ isFollowing: false })
+  }
+})
+
 export default router
 
 

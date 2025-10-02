@@ -31,12 +31,13 @@ type FeedPost = {
   viewCount?: number
   createdAt?: string
   liked?: boolean
+  isFollowing?: boolean
 }
 
 export default function Feed() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-  const { user, token } = useAuth()
+  const { user, token, isAuthenticated } = useAuth()
   const { selectedLocation, selectedFishType } = useLocationFilter()
   const { socketService } = useSocket()
 
@@ -332,6 +333,7 @@ export default function Feed() {
         viewCount: p.viewCount || 0,
         createdAt: formatRelativeTime(p.createdAt),
         liked: p.liked || false,
+        isFollowing: p.isFollowing || false,
       }))
       
       // Filter posts by selected location and fish type if any
@@ -371,6 +373,34 @@ export default function Feed() {
       console.error('Error loading more posts:', error)
     } finally {
       setIsLoadingMore(false)
+    }
+  }
+
+  const handleFollow = async (authorId: string) => {
+    if (!isAuthenticated) {
+      alert('Takip etmek için giriş yapmalısınız.')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/follow/${authorId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+
+      if (response.ok) {
+        // Update the post's follow status
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post.authorId === authorId 
+              ? { ...post, isFollowing: true }
+              : post
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Error following user:', error)
     }
   }
 
@@ -685,6 +715,7 @@ export default function Feed() {
               {...p} 
               onDelete={handleDeletePost}
               onReport={handleReportPost}
+              onFollow={handleFollow}
             />
           ))}
           {posts.length === 0 ? (

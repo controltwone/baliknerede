@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin, Trash2, Flag } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin, Trash2, Flag, UserPlus, Check } from "lucide-react"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from 'next/link'
@@ -37,8 +37,10 @@ type PostCardProps = {
   viewCount?: number
   createdAt?: string
   liked?: boolean
+  isFollowing?: boolean
   onDelete?: (postId: string) => void
   onReport?: (postId: string) => void
+  onFollow?: (authorId: string) => void
 }
 
 export default function Post({
@@ -56,8 +58,10 @@ export default function Post({
   viewCount = 0,
   createdAt,
   liked = false,
+  isFollowing = false,
   onDelete,
   onReport,
+  onFollow,
 }: PostCardProps) {
   const { isAuthenticated, token, user } = useAuth()
   const router = useRouter()
@@ -223,16 +227,35 @@ export default function Post({
   return (
     <Card id={`post-${id}`} className={`w-full max-w-xl mx-auto transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/20 hover:-translate-y-1 ${hasImage ? 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30' : 'bg-gradient-to-br from-muted/30 to-blue-100/20 dark:from-gray-800/30 dark:to-gray-700/20 border-dashed'}`}>
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <Link href={authorId ? `/u/${authorId}` : '#'}>
+        <Link href={authorId && typeof authorId === 'string' ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
             <AvatarImage src={authorAvatarUrl} alt={authorName} />
             <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
-        <div>
-          <Link href={authorId ? `/u/${authorId}` : '#'}>
+        <div className="flex-1 flex items-center gap-2">
+          <Link href={authorId && typeof authorId === 'string' ? `/u/${authorId}` : '#'}>
             <CardTitle className={`text-sm hover:underline dark:text-white ${hasImage ? '' : 'text-foreground/90 dark:text-foreground/90'}`}>{authorName}</CardTitle>
           </Link>
+          {/* Follow Button - only show if not own post and not already following */}
+          {isAuthenticated && authorId && user?.id !== authorId && !isFollowing && onFollow && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 px-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700 dark:hover:border-blue-600"
+              onClick={() => onFollow(authorId)}
+            >
+              <UserPlus className="w-3 h-3 mr-1" />
+              Takip Et
+            </Button>
+          )}
+          {/* Following indicator */}
+          {isAuthenticated && authorId && user?.id !== authorId && isFollowing && (
+            <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+              <Check className="w-3 h-3" />
+              <span>Takip Ediliyor</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {createdAt ? (
