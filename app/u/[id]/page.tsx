@@ -9,6 +9,7 @@ import { useAuth } from '@/components/AuthProvider'
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import { UserPlus, X, Users } from 'lucide-react'
+import { DEFAULT_AVATAR } from '@/lib/constants'
 import { formatRelativeTime } from '@/lib/time'
 
 export default function UserProfilePage() {
@@ -99,7 +100,7 @@ export default function UserProfilePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="relative">
               <Avatar className="h-20 w-20 ring-4 ring-white dark:ring-gray-800 shadow-lg">
-                <AvatarImage src={info?.avatarUrl || "/logo.png"} alt={info?.name || 'Kullanıcı'} />
+                <AvatarImage src={info?.avatarUrl || DEFAULT_AVATAR} alt={info?.name || 'Kullanıcı'} />
                 <AvatarFallback className="text-lg font-bold">{(info?.name || 'K').slice(0,2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
@@ -164,7 +165,7 @@ export default function UserProfilePage() {
             id={p._id}
             authorId={p.authorId}
             authorName={info?.name || 'Kullanıcı'}
-            authorAvatarUrl={info?.avatarUrl || "/logo.png"}
+            authorAvatarUrl={info?.avatarUrl || DEFAULT_AVATAR}
             imageUrl={p.imageUrl}
             contentText={p.contentText}
             likeCount={p.likeCount}
@@ -239,7 +240,7 @@ export default function UserProfilePage() {
                           <div className="flex items-center gap-4">
                             <div className="relative">
                               <Avatar className="h-12 w-12 ring-2 ring-white dark:ring-gray-800 shadow-md group-hover:scale-105 transition-transform duration-200">
-                                <AvatarImage src={u.avatarUrl || "/logo.png"} alt={u.name} />
+                                <AvatarImage src={u.avatarUrl || DEFAULT_AVATAR} alt={u.name} />
                                 <AvatarFallback className="text-sm font-bold">{u.name.slice(0,2).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>

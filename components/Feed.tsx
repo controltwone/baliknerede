@@ -15,6 +15,7 @@ import { ConfirmationModal } from "./ui/confirmation-modal"
 import { ReportModal } from "./ui/report-modal"
 import { ToastManager } from "./ui/toast"
 import { CustomSelect } from "./ui/custom-select"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 
 type FeedPost = {
   id: string
@@ -322,7 +323,7 @@ export default function Feed() {
         id: p._id,
         authorId: p.authorId?._id || undefined,
         authorName: p.authorId?.name || "Kullanıcı",
-        authorAvatarUrl: p.authorId?.avatarUrl || "/logo.png",
+        authorAvatarUrl: p.authorId?.avatarUrl || DEFAULT_AVATAR,
         imageUrl: p.imageUrl,
         contentText: p.contentText,
         locationCity: p.locationCity,
@@ -456,7 +457,7 @@ export default function Feed() {
           id: data.post._id,
           authorId: data.post.authorId?._id || undefined,
           authorName: data.post.authorId?.name || "Kullanıcı",
-          authorAvatarUrl: data.post.authorId?.avatarUrl || "/logo.png",
+          authorAvatarUrl: data.post.authorId?.avatarUrl || DEFAULT_AVATAR,
           imageUrl: data.post.imageUrl,
           contentText: data.post.contentText,
           locationCity: data.post.locationCity,
@@ -563,7 +564,7 @@ export default function Feed() {
       const newPost: FeedPost = {
         id: p._id,
         authorName: user?.name || "Sen",
-        authorAvatarUrl: user?.avatarUrl || "/logo.png",
+        authorAvatarUrl: user?.avatarUrl || DEFAULT_AVATAR,
         imageUrl: p.imageUrl,
         contentText: p.contentText,
         locationCity: p.locationCity,

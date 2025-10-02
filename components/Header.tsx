@@ -14,6 +14,7 @@ import React from 'react'
 import { formatRelativeTime } from '../lib/time'
 import { Sun, Moon, Shield } from 'lucide-react'
 import { CustomSelect } from './ui/custom-select'
+import { DEFAULT_AVATAR } from '../lib/constants'
 
 function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
@@ -356,7 +357,7 @@ function Header() {
           </span>
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 ml-8">
+        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 -ml-10">
           <Link href="/" onClick={() => setSelectedLocation("")}>
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
           </Link>
@@ -405,7 +406,7 @@ function Header() {
                       <Link key={user.id} href={`/u/${user.id}`}>
                         <div className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.avatarUrl || "/logo.png"} alt={user.name} />
+                            <AvatarImage src={user.avatarUrl || DEFAULT_AVATAR} alt={user.name} />
                             <AvatarFallback>{user.name.slice(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</span>
@@ -672,7 +673,7 @@ function Header() {
                         <Link key={user.id} href={`/u/${user.id}`} onClick={() => setShowMobileMenu(false)}>
                           <div className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatarUrl || "/logo.png"} alt={user.name} />
+                              <AvatarImage src={user.avatarUrl || DEFAULT_AVATAR} alt={user.name} />
                               <AvatarFallback>{user.name.slice(0,2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <span className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</span>

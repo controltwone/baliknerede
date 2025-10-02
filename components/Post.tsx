@@ -21,6 +21,7 @@ import React from "react"
 import { formatRelativeTime } from '../lib/time'
 import { LoadingSpinner } from "./LoadingSkeleton"
 import { useSocket } from "@/hooks/useSocket"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 
 type PostCardProps = {
   id: string
@@ -229,7 +230,7 @@ export default function Post({
       <CardHeader className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Link href={authorId && typeof authorId === 'string' ? `/u/${authorId}` : '#'}>
           <Avatar className="h-9 w-9">
-            <AvatarImage src={authorAvatarUrl} alt={authorName} />
+            <AvatarImage src={authorAvatarUrl || DEFAULT_AVATAR} alt={authorName} />
             <AvatarFallback>{authorName?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>

@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { Trash2, X, UserPlus, Users } from "lucide-react"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -196,7 +197,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="relative">
               <Avatar className="h-20 w-20 ring-4 ring-white dark:ring-gray-800 shadow-lg">
-                <AvatarImage src={user?.avatarUrl || "/logo.png"} alt={user?.name || 'Kullanıcı'} />
+                <AvatarImage src={user?.avatarUrl || DEFAULT_AVATAR} alt={user?.name || 'Kullanıcı'} />
                 <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
                   {(user?.name || 'K').slice(0,2).toUpperCase()}
                 </AvatarFallback>
@@ -277,7 +278,7 @@ export default function ProfilePage() {
                 id={p._id}
                 authorId={user?.id}
                 authorName={user?.name || 'Kullanıcı'}
-                authorAvatarUrl={user?.avatarUrl || "/logo.png"}
+                authorAvatarUrl={user?.avatarUrl || DEFAULT_AVATAR}
                 imageUrl={p.imageUrl}
                 contentText={p.contentText}
                 likeCount={p.likeCount}
@@ -359,7 +360,7 @@ export default function ProfilePage() {
                           <div className="flex items-center gap-4">
                             <div className="relative">
                               <Avatar className="h-12 w-12 ring-2 ring-white dark:ring-gray-800 shadow-md group-hover:scale-105 transition-transform duration-200">
-                                <AvatarImage src={u.avatarUrl || "/logo.png"} alt={u.name} />
+                                <AvatarImage src={u.avatarUrl || DEFAULT_AVATAR} alt={u.name} />
                                 <AvatarFallback className="text-sm font-bold">{u.name.slice(0,2).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
