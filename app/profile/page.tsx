@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import { Trash2, X } from "lucide-react"
+import { Trash2, X, UserPlus, Users } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,8 +19,8 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [followersList, setFollowersList] = useState<Array<{ id: string; name: string }>>([])
-  const [followingList, setFollowingList] = useState<Array<{ id: string; name: string }>>([])
+  const [followersList, setFollowersList] = useState<Array<{ id: string; name: string; avatarUrl?: string }>>([])
+  const [followingList, setFollowingList] = useState<Array<{ id: string; name: string; avatarUrl?: string }>>([])
   const [showListModal, setShowListModal] = useState<null | 'followers' | 'following'>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editName, setEditName] = useState('')
@@ -319,18 +319,63 @@ export default function ProfilePage() {
                 leaveFrom="opacity-100 translate-y-0"
                 leaveTo="opacity-0 translate-y-2"
               >
-                <DialogPanel className="w-full max-w-sm rounded-xl border bg-background p-4 shadow-lg">
-                  <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-base font-semibold">{showListModal === 'followers' ? 'Takipçiler' : 'Takip Ettiklerim'}</h3>
-                    <button className="text-sm text-muted-foreground" onClick={() => setShowListModal(null)}>Kapat</button>
+                <DialogPanel className="w-full max-w-md rounded-2xl border bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-6 shadow-2xl">
+                  <div className="mb-6 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {showListModal === 'followers' ? 'Takipçiler' : 'Takip Ettiklerim'}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {showListModal === 'followers' ? 'Seni takip edenler' : 'Senin takip ettiklerin'}
+                      </p>
+                    </div>
+                    <button 
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                      onClick={() => setShowListModal(null)}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
-                  <div className="max-h-96 space-y-2 overflow-auto">
+                  
+                  <div className="max-h-96 space-y-3 overflow-auto custom-scrollbar">
                     {(showListModal === 'followers' ? followersList : followingList).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Liste boş.</p>
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <UserPlus className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">Henüz kimse yok</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                          {showListModal === 'followers' ? 'Seni henüz kimse takip etmiyor' : 'Henüz kimseyi takip etmiyorsun'}
+                        </p>
+                      </div>
                     ) : (
                       (showListModal === 'followers' ? followersList : followingList).map((u) => (
-                        <Link key={u.id} href={`/u/${u.id}`} onClick={() => setShowListModal(null)} className="block rounded-md border p-2 hover:bg-accent">
-                          {u.name}
+                        <Link 
+                          key={u.id} 
+                          href={`/u/${u.id}`} 
+                          onClick={() => setShowListModal(null)} 
+                          className="block rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 hover:shadow-md group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <Avatar className="h-12 w-12 ring-2 ring-white dark:ring-gray-800 shadow-md group-hover:scale-105 transition-transform duration-200">
+                                <AvatarImage src={u.avatarUrl || "/logo.png"} alt={u.name} />
+                                <AvatarFallback className="text-sm font-bold">{u.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {u.name}
+                              </h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Balıkçı
+                              </p>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                          </div>
                         </Link>
                       ))
                     )}
