@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Lock, LogIn, MapPin, Trash2, Flag, UserPlus, Check } from "lucide-react"
+import { Heart, MessageCircle, MoreHorizontal, Lock, LogIn, MapPin, Trash2, Flag, UserPlus, Check } from "lucide-react"
 import { useAuth } from "./AuthProvider"
 import { useRouter } from "next/navigation"
 import Link from 'next/link'
@@ -508,11 +508,6 @@ export default function Post({
             </span>
           ) : null}
 
-          {!(locationCity || locationSpot || fishType) ? (
-            <Button variant="ghost" size="icon" aria-label="Kaydet" className="shrink-0">
-              <Bookmark />
-            </Button>
-          ) : null}
         </div>
       </CardFooter>
 
