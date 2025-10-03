@@ -593,10 +593,8 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Backend Auth0 logout endpoint'ine yönlendir
-                            const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
-                            const returnTo = encodeURIComponent(window.location.origin)
-                            window.location.href = `${API_BASE}/auth0/logout?returnTo=${returnTo}`
+                            // Force page reload to clear any cached state
+                            window.location.reload()
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >

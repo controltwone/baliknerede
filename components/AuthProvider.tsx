@@ -96,13 +96,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })()
   }, [token, API_BASE])
 
-  // Auth0 token kontrolü - URL parameter'dan veya cookie'den
+  // Auth0 token kontrolü - sadece URL parameter'dan (Google login için)
   useEffect(() => {
     const checkAuth0Token = async () => {
       // Eğer zaten token varsa Auth0 kontrolü yapma
       if (token) return
       
-      // Önce URL parameter'ından token'ı kontrol et
+      // Sadece URL parameter'ından token'ı kontrol et (Google login callback)
       const urlParams = new URLSearchParams(window.location.search)
       const urlToken = urlParams.get('token')
       
@@ -136,48 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
       
-      try {
-        console.log('Checking Auth0 token from cookie...')
-        console.log('API_BASE:', API_BASE)
-        console.log('Document cookies:', document.cookie)
-        
-        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
-        console.log('Auth0 token response:', tr.status, tr.statusText)
-        
-        if (tr.ok) {
-          const td = await tr.json()
-          console.log('Auth0 token data:', td)
-          if (td?.token) {
-            console.log('Setting token from Auth0 cookie')
-            setToken(td.token)
-            localStorage.setItem('bn_token', td.token)
-            // Token'ı aldıktan sonra /me'yi tekrar dene
-            try {
-              const res = await fetch(`${API_BASE}/me`, {
-                headers: { Authorization: `Bearer ${td.token}` },
-                credentials: 'include',
-              })
-              console.log('Me response after Auth0 token:', res.status)
-              if (res.ok) {
-                const data = await res.json()
-                console.log('Me data after Auth0 token:', data)
-                if (data?.user) {
-                  console.log('Setting user from Auth0:', data.user)
-                  setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
-                }
-              }
-            } catch (e) {
-              console.error('Error fetching user after Auth0 token:', e)
-            }
-          }
-        } else {
-          console.log('Auth0 token request failed:', tr.status, tr.statusText)
-          const errorText = await tr.text()
-          console.log('Auth0 token error response:', errorText)
-        }
-      } catch (e) {
-        console.error('Error checking Auth0 token:', e)
-      }
+      // Auth0 cookie kontrolü kaldırıldı - sadece manuel giriş yapılabilir
+      console.log('No URL token found, user must login manually')
     }
 
     // Sadece sayfa yüklendiğinde kontrol et
