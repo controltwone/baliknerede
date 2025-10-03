@@ -65,7 +65,6 @@ router.get('/auth0/complete', async (req: any, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      domain: process.env.NODE_ENV === 'production' ? '.baliknerde.com' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     
