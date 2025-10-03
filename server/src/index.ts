@@ -46,6 +46,13 @@ function expandOrigins(origin: string): string[] {
   }
 }
 const ALLOWED_ORIGINS = new Set(expandOrigins(CLIENT_ORIGIN))
+// Also allow Auth0 issuer origin for OAuth redirects/preflights
+if (process.env.AUTH0_ISSUER_BASE_URL) {
+  try {
+    const issuer = new URL(process.env.AUTH0_ISSUER_BASE_URL)
+    ALLOWED_ORIGINS.add(`${issuer.protocol}//${issuer.hostname}`)
+  } catch {}
+}
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
