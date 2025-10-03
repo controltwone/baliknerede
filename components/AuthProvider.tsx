@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sayfa kapandığında otomatik çıkış yap
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (isAuthenticated) {
+      if (user) {
         // Sayfa kapanırken localStorage'ı temizle
         localStorage.removeItem('bn_auth_user')
         localStorage.removeItem('bn_token')
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const handleVisibilityChange = () => {
-      if (document.hidden && isAuthenticated) {
+      if (document.hidden && user) {
         // Sayfa gizlendiğinde (başka tab'a geçildiğinde) çıkış yap
         setTimeout(() => {
           if (document.hidden) {
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [isAuthenticated])
+  }, [user])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
