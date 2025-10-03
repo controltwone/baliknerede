@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Token doğrulama fonksiyonu
   const validateToken = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE}/auth/me`, {
+      const response = await fetch(`${API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
