@@ -597,6 +597,16 @@ function Header() {
                             const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
                             const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
                             const returnTo = encodeURIComponent(window.location.origin)
+                            
+                            console.log('Client ID:', clientId)
+                            console.log('Environment variables:', process.env)
+                            
+                            if (!clientId) {
+                              console.error('NEXT_PUBLIC_AUTH0_CLIENT_ID is not defined!')
+                              alert('Auth0 client ID not configured. Please contact support.')
+                              return
+                            }
+                            
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
                             
                             console.log('Logout URL:', logoutUrl)
