@@ -37,19 +37,38 @@ router.get('/auth0/login', (req: any, res) => {
 // Callback'ı express-openid-connect handle eder; biz tamamlamayı ayrı endpointte yapıyoruz
 router.get('/auth0/complete', async (req: any, res) => {
   try {
+    console.log('Auth0 complete endpoint hit')
     const claims = req.oidc.user
-    if (!claims) return res.redirect('/auth0/login')
+    console.log('Claims:', claims)
+    
+    if (!claims) {
+      console.log('No claims found, redirecting to login')
+      return res.redirect('/auth0/login')
+    }
+    
     const email = claims.email
     const name = claims.name || (email ? email.split('@')[0] : 'User')
+    console.log('Processing user:', { email, name })
+    
     let user = await (User as any).findOne({ email })
-    if (!user) user = await (User as any).create({ name, email, password: jwt.sign({ t: Date.now() }, 'x'), avatarUrl: DEFAULT_AVATAR })
+    if (!user) {
+      console.log('Creating new user')
+      user = await (User as any).create({ name, email, password: jwt.sign({ t: Date.now() }, 'x'), avatarUrl: DEFAULT_AVATAR })
+    } else {
+      console.log('Found existing user:', user.id)
+    }
+    
     const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' })
+    console.log('Setting cookie for user:', user.id)
+    
     res.cookie('bn_token', token, {
       httpOnly: true,
-      secure: true, // localhost kabul edilir; cross-site cookie için gerekli
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
+    
+    console.log('Redirecting to:', process.env.CLIENT_ORIGIN || 'http://localhost:3000')
     return res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000')
   } catch (e) {
     console.error('Auth0 complete error:', e)
