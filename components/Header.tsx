@@ -503,9 +503,9 @@ function Header() {
                           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{n.createdAt}</p>
                         </div>
                         {isPost ? (
-                          <Link href={`/p/${n.postId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Gönderi</Link>
+                          <Link href={`/p/${n.postId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400" onClick={() => setShowNotifications(false)}>Gönderi</Link>
                         ) : (
-                          <Link href={`/u/${n.actorId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400">Profil</Link>
+                          <Link href={`/u/${n.actorId}`} className="text-xs text-blue-600 hover:underline dark:text-blue-400" onClick={() => setShowNotifications(false)}>Profil</Link>
                         )}
                       </div>
                     )
