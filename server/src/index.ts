@@ -27,7 +27,25 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }))
+// Allow both apex and www variants for CORS
+function expandOrigins(origin: string): string[] {
+  try {
+    const url = new URL(origin)
+    const isWww = url.hostname.startsWith('www.')
+    const apex = isWww ? url.hostname.replace(/^www\./, '') : url.hostname
+    const www = isWww ? url.hostname : `www.${url.hostname}`
+    const base = `${url.protocol}//`
+    return [
+      `${base}${apex}`,
+      `${base}${www}`,
+    ]
+  } catch {
+    return [origin]
+  }
+}
+const ALLOWED_ORIGINS = Array.from(new Set(expandOrigins(CLIENT_ORIGIN)))
+
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }))
 app.use(express.json({ limit: '6mb' }))
 app.use(express.urlencoded({ extended: true, limit: '6mb' }))
 app.use(cookieParser())
