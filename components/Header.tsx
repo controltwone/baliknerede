@@ -581,6 +581,9 @@ function Header() {
                       {({ active }) => (
                         <button
                           onClick={() => {
+                            console.log('Logout button clicked!')
+                            alert('Logout button clicked!')
+                            
                             // Clear local state
                             logout()
                             
