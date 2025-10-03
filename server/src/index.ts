@@ -16,6 +16,8 @@ import usersRoutes from './routes/users'
 import adminRoutes from './routes/admin'
 
 const app = express()
+// Behind Render/Proxies so secure cookies and protocol detection work correctly
+app.set('trust proxy', 1)
 const server = createServer(app)
 const io = new Server(server, {
   cors: {
