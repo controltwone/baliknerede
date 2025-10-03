@@ -96,39 +96,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })()
   }, [token, API_BASE])
 
-  // Auth0 callback'inden sonra token'ı kontrol et (sadece token yoksa)
+  // Auth0 otomatik giriş kontrolü kaldırıldı - kullanıcı manuel giriş yapmalı
+
+  // Sayfa kapandığında otomatik çıkış yap
   useEffect(() => {
-    const checkAuth0Token = async () => {
-      // Eğer zaten token varsa Auth0 kontrolü yapma
-      if (token) return
-      
-      try {
-        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
-        if (tr.ok) {
-          const td = await tr.json()
-          if (td?.token) {
-            // Token'ı güncelle
-            setToken(td.token)
-            localStorage.setItem('bn_token', td.token)
-            // Token'ı aldıktan sonra /me'yi tekrar dene
-            try {
-              const res = await fetch(`${API_BASE}/me`, {
-                headers: { Authorization: `Bearer ${td.token}` },
-                credentials: 'include',
-              })
-              if (res.ok) {
-                const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
-              }
-            } catch {}
-          }
-        }
-      } catch {}
+    const handleBeforeUnload = () => {
+      if (isAuthenticated) {
+        // Sayfa kapanırken localStorage'ı temizle
+        localStorage.removeItem('bn_auth_user')
+        localStorage.removeItem('bn_token')
+        sessionStorage.clear()
+      }
     }
 
-    // Sadece ilk yüklemede kontrol et
-    checkAuth0Token()
-  }, [API_BASE])
+    const handleVisibilityChange = () => {
+      if (document.hidden && isAuthenticated) {
+        // Sayfa gizlendiğinde (başka tab'a geçildiğinde) çıkış yap
+        setTimeout(() => {
+          if (document.hidden) {
+            localStorage.removeItem('bn_auth_user')
+            localStorage.removeItem('bn_token')
+            sessionStorage.clear()
+            setUser(null)
+            setToken(null)
+          }
+        }, 30000) // 30 saniye sonra çıkış yap
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isAuthenticated])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
