@@ -7,12 +7,15 @@ import socketService from '@/lib/socket'
 export function useSocket() {
   const { user, isAuthenticated } = useAuth()
   const hasConnected = useRef(false)
+  
+  // Gerçek authentication durumunu kontrol et
+  const isReallyAuthenticated = isAuthenticated && user?.id
 
   useEffect(() => {
-    console.log('useSocket effect:', { isAuthenticated, userId: user?.id, hasConnected: hasConnected.current })
+    console.log('useSocket effect:', { isAuthenticated, userId: user?.id, isReallyAuthenticated, hasConnected: hasConnected.current })
     
     // Sadece gerçekten authenticated olan kullanıcılar için socket bağlantısı yap
-    if (isAuthenticated && user?.id && !hasConnected.current) {
+    if (isReallyAuthenticated && !hasConnected.current) {
       console.log('Connecting socket for user:', user.id)
       try {
         socketService.connect(user.id)
@@ -20,7 +23,7 @@ export function useSocket() {
       } catch (error) {
         console.warn('Socket connection failed, continuing without real-time features:', error)
       }
-    } else if (!isAuthenticated || !user?.id) {
+    } else if (!isReallyAuthenticated) {
       if (hasConnected.current) {
         console.log('Disconnecting socket - user logged out')
         socketService.disconnect()
@@ -29,12 +32,12 @@ export function useSocket() {
     }
 
     return () => {
-      if (!isAuthenticated || !user?.id) {
+      if (!isReallyAuthenticated) {
         socketService.disconnect()
         hasConnected.current = false
       }
     }
-  }, [isAuthenticated, user?.id])
+  }, [isReallyAuthenticated, user?.id])
 
   // Eğer user yoksa socket'i kesinlikle disconnect et
   useEffect(() => {
