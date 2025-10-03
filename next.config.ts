@@ -6,6 +6,14 @@ const withMDX = createMDX({
 });
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/Blog', destination: '/blog', permanent: true },
+      { source: '/Blog/:slug', destination: '/blog/:slug', permanent: true },
+      { source: '/Login', destination: '/login', permanent: true },
+      { source: '/Flow', destination: '/flow', permanent: true },
+    ]
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
