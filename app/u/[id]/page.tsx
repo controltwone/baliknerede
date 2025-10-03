@@ -8,7 +8,7 @@ import Post from '@/components/Post'
 import { useAuth } from '@/components/AuthProvider'
 import Link from 'next/link'
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
-import { UserPlus, X, Users } from 'lucide-react'
+import { UserPlus, X, Users, CheckCircle, UserMinus } from 'lucide-react'
 import { DEFAULT_AVATAR } from '@/lib/constants'
 import { formatRelativeTime } from '@/lib/time'
 
@@ -122,16 +122,31 @@ export default function UserProfilePage() {
                 {userId && !isOwnProfile ? (
                   <div className="flex items-center gap-3">
                     {isFollowing && (
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-medium text-green-700 shadow-sm dark:border-green-800/60 dark:bg-green-900/20 dark:text-green-300">
+                        <CheckCircle className="h-4 w-4" />
                         Takip Ediliyor
                       </span>
                     )}
                     <Button 
-                      variant={isFollowing ? "destructive" : "outline"} 
+                      variant={isFollowing ? "outline" : "outline"}
                       onClick={toggleFollow}
-                      className={isFollowing ? "bg-red-50 hover:bg-red-100 text-red-600 border-red-200 hover:border-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-700 dark:hover:border-red-600" : ""}
+                      className={
+                        isFollowing
+                          ? "group border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:border-red-600"
+                          : "group border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-500"
+                      }
                     >
-                      {isFollowing ? 'Takibi Bırak' : 'Takip Et'}
+                      {isFollowing ? (
+                        <span className="inline-flex items-center gap-2">
+                          <UserMinus className="h-4 w-4" />
+                          Takibi Bırak
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-2">
+                          <UserPlus className="h-4 w-4" />
+                          Takip Et
+                        </span>
+                      )}
                     </Button>
                   </div>
                 ) : null}
