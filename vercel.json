@@ -1,0 +1,30 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "functions": {
+    "app/blog/page.tsx": {
+      "maxDuration": 10
+    },
+    "app/login/page.tsx": {
+      "maxDuration": 10
+    },
+    "app/flow/page.tsx": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/blog",
+      "destination": "/blog"
+    },
+    {
+      "source": "/login", 
+      "destination": "/login"
+    },
+    {
+      "source": "/flow",
+      "destination": "/flow"
+    }
+  ]
+}
