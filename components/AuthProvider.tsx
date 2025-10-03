@@ -96,7 +96,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })()
   }, [token, API_BASE])
 
-  // Auth0 otomatik giriş kontrolü kaldırıldı - kullanıcı manuel giriş yapmalı
+  // Auth0 token kontrolü - sadece sayfa yüklendiğinde bir kez
+  useEffect(() => {
+    const checkAuth0Token = async () => {
+      // Eğer zaten token varsa Auth0 kontrolü yapma
+      if (token) return
+      
+      try {
+        console.log('Checking Auth0 token...')
+        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
+        console.log('Auth0 token response:', tr.status)
+        if (tr.ok) {
+          const td = await tr.json()
+          console.log('Auth0 token data:', td)
+          if (td?.token) {
+            console.log('Setting token from Auth0')
+            setToken(td.token)
+            localStorage.setItem('bn_token', td.token)
+            // Token'ı aldıktan sonra /me'yi tekrar dene
+            try {
+              const res = await fetch(`${API_BASE}/me`, {
+                headers: { Authorization: `Bearer ${td.token}` },
+                credentials: 'include',
+              })
+              if (res.ok) {
+                const data = await res.json()
+                if (data?.user) {
+                  console.log('Setting user from Auth0:', data.user)
+                  setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
+                }
+              }
+            } catch (e) {
+              console.error('Error fetching user after Auth0 token:', e)
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error checking Auth0 token:', e)
+      }
+    }
+
+    // Sadece sayfa yüklendiğinde kontrol et
+    checkAuth0Token()
+  }, [API_BASE])
 
   // Sayfa kapandığında otomatik çıkış yap
   useEffect(() => {
