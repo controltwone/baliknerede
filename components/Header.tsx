@@ -581,19 +581,10 @@ function Header() {
                       {({ active }) => (
                         <button
                           onClick={() => {
-                            console.log('Logout button clicked!')
-                            
                             // Auth0 logout URL'ine yönlendir
                             const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
                             const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
                             const returnTo = encodeURIComponent(window.location.origin)
-                            
-                            console.log('Client ID:', clientId)
-                            console.log('All NEXT_PUBLIC vars:', {
-                              AUTH0_CLIENT_ID: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
-                              API_BASE: process.env.NEXT_PUBLIC_API_BASE,
-                              SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL
-                            })
                             
                             if (!clientId) {
                               console.error('NEXT_PUBLIC_AUTH0_CLIENT_ID is not defined!')
@@ -602,8 +593,6 @@ function Header() {
                             }
                             
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
-                            
-                            console.log('Logout URL:', logoutUrl)
                             
                             // Clear local state
                             logout()
