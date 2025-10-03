@@ -580,45 +580,21 @@ function Header() {
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          onClick={async () => {
-                            try {
-                              // Clear local state first
-                              logout()
-                              
-                              // Clear all possible storage
-                              localStorage.clear()
-                              sessionStorage.clear()
-                              
-                              // Clear cookies by setting them to expire
-                              document.cookie = 'bn_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-                              document.cookie = 'appSession=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-                              document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-                              
-                              // Clear all Auth0 related cookies
-                              const cookies = document.cookie.split(';')
-                              cookies.forEach(cookie => {
-                                const eqPos = cookie.indexOf('=')
-                                const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
-                                if (name) {
-                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
-                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`
-                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`
-                                }
-                              })
-                              
-                              // Wait a bit for state to clear
-                              await new Promise(resolve => setTimeout(resolve, 500))
-                              
-                              // Force page reload to clear any remaining state
-                              window.location.reload()
-                            } catch (error) {
-                              console.error('Logout error:', error)
-                              // Fallback: clear everything and reload
-                              logout()
-                              localStorage.clear()
-                              sessionStorage.clear()
-                              window.location.reload()
-                            }
+                          onClick={() => {
+                            // Clear local state
+                            logout()
+                            
+                            // Clear all storage
+                            localStorage.clear()
+                            sessionStorage.clear()
+                            
+                            // Clear all cookies
+                            document.cookie.split(";").forEach(function(c) { 
+                              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                            });
+                            
+                            // Force redirect to home page
+                            window.location.href = '/'
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
