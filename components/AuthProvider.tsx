@@ -35,13 +35,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
 
-  useEffect(() => {
+  // Token doğrulama fonksiyonu
+  const validateToken = async (token: string) => {
     try {
-      const rawUser = localStorage.getItem("bn_auth_user")
-      const rawToken = localStorage.getItem("bn_token")
-      if (rawUser) setUser(JSON.parse(rawUser))
-      if (rawToken) setToken(rawToken)
-    } catch {}
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      return response.ok
+    } catch {
+      return false
+    }
+  }
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const rawUser = localStorage.getItem("bn_auth_user")
+        const rawToken = localStorage.getItem("bn_token")
+        
+        if (rawToken) {
+          // Token'ı doğrula
+          const isValid = await validateToken(rawToken)
+          if (isValid && rawUser) {
+            setUser(JSON.parse(rawUser))
+            setToken(rawToken)
+          } else {
+            // Token geçersiz, temizle
+            localStorage.removeItem("bn_auth_user")
+            localStorage.removeItem("bn_token")
+            setUser(null)
+            setToken(null)
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error)
+        // Hata durumunda temizle
+        localStorage.removeItem("bn_auth_user")
+        localStorage.removeItem("bn_token")
+        setUser(null)
+        setToken(null)
+      }
+    }
+
+    initializeAuth()
   }, [])
 
   useEffect(() => {
