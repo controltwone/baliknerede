@@ -17,14 +17,16 @@ export function useSocket() {
       } catch (error) {
         console.warn('Socket connection failed, continuing without real-time features:', error)
       }
-    } else if (!isAuthenticated && hasConnected.current) {
-      console.log('Disconnecting socket')
-      socketService.disconnect()
-      hasConnected.current = false
+    } else if (!isAuthenticated || !user?.id) {
+      if (hasConnected.current) {
+        console.log('Disconnecting socket - user logged out')
+        socketService.disconnect()
+        hasConnected.current = false
+      }
     }
 
     return () => {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !user?.id) {
         socketService.disconnect()
         hasConnected.current = false
       }
