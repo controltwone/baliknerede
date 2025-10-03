@@ -1,10 +1,10 @@
 import 'dotenv/config'
-import express = require('express')
-import cors = require('cors')
+import express from 'express'
+import cors from 'cors'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import { connectDB } from './lib/db'
-import cookieParser = require('cookie-parser')
+import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth'
 import meRoutes from './routes/me'
 import auth0Routes from './routes/auth0'

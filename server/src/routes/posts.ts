@@ -1,13 +1,9 @@
-import express = require('express')
-const PostModule = require('../models/Post')
-const Post = (PostModule && (PostModule.default || PostModule)) as any
+import express from 'express'
+import Post from '../models/Post'
 import { AuthedRequest, requireAuth } from '../middleware/auth'
-const NotificationModule = require('../models/Notification')
-const Notification = (NotificationModule && (NotificationModule.default || NotificationModule)) as any
-const UserModule = require('../models/User')
-const User = (UserModule && (UserModule.default || UserModule)) as any
-const ReportModule = require('../models/Report')
-const Report = (ReportModule && (ReportModule.default || ReportModule)) as any
+import Notification from '../models/Notification'
+import User from '../models/User'
+import Report from '../models/Report'
 
 const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2MzY2RjEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+"
 
@@ -36,8 +32,8 @@ router.get('/', async (req, res) => {
   
   if (token) {
     try {
-      const jwt = require('jsonwebtoken')
-      const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
+      const jwt = await import('jsonwebtoken')
+      const payload = (jwt as any).default.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
       const userId = payload.sub
       
       // Get user's following list to check follow status
@@ -94,7 +90,7 @@ router.get('/by/:userId', async (req, res) => {
 // POST /posts - create post (auth)
 router.post('/', requireAuth, async (req: AuthedRequest, res) => {
   const { contentText, imageUrl, locationCity, locationSpot, fishType } = req.body || {}
-  const doc = await Post.create({
+  const doc = await (Post as any).create({
     authorId: req.userId,
     contentText,
     imageUrl,
@@ -119,7 +115,7 @@ router.post('/', requireAuth, async (req: AuthedRequest, res) => {
   // Emit socket event for new post
   const io = req.app.get('io')
   if (io) {
-    const populatedPost = await Post.findById(doc._id).populate('authorId', 'name avatarUrl')
+    const populatedPost = await (Post as any).findById(doc._id).populate('authorId', 'name avatarUrl')
     io.emit('post_created', {
       post: populatedPost,
       author: populatedPost?.authorId
@@ -131,7 +127,7 @@ router.post('/', requireAuth, async (req: AuthedRequest, res) => {
 
 // POST /posts/:id/like - toggle like (auth)
 router.post('/:id/like', requireAuth, async (req: AuthedRequest, res) => {
-  const post = await Post.findById(req.params.id)
+  const post = await (Post as any).findById(req.params.id)
   if (!post) return res.status(404).json({ message: 'Not found' })
   const uid = req.userId as any
   const has = post.likes.some((x: any) => String(x) === String(uid))
@@ -180,7 +176,7 @@ router.post('/:id/like', requireAuth, async (req: AuthedRequest, res) => {
 router.post('/:id/comments', requireAuth, async (req: AuthedRequest, res) => {
   const { text } = req.body || {}
   if (!text) return res.status(400).json({ message: 'text is required' })
-  const post = await Post.findById(req.params.id)
+  const post = await (Post as any).findById(req.params.id)
   if (!post) return res.status(404).json({ message: 'Not found' })
   post.comments.push({ userId: req.userId as any, text, createdAt: new Date() } as any)
   post.commentCount = post.comments.length
@@ -243,8 +239,8 @@ router.get('/:id', async (req, res) => {
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
     if (token) {
       try {
-        const jwt = require('jsonwebtoken')
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as any
+        const jwt = await import('jsonwebtoken')
+        const decoded = (jwt as any).default.verify(token, process.env.JWT_SECRET || 'dev-secret') as any
         const userId = decoded?.userId
         if (userId && Array.isArray(post.likes)) {
           liked = post.likes.some((u: any) => String(u) === String(userId))
@@ -285,7 +281,7 @@ router.get('/my', requireAuth, async (req: AuthedRequest, res) => {
 // POST /posts/:id/view - increment view count (non-admin users only)
 router.post('/:id/view', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
+    const post = await (Post as any).findById(req.params.id)
     if (!post) return res.status(404).json({ message: 'Not found' })
     
     post.viewCount = (post.viewCount || 0) + 1
@@ -310,7 +306,7 @@ router.post('/:id/view', async (req, res) => {
 // GET /posts/:id/view - get view count (for admins to see current count)
 router.get('/:id/view', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
+  const post = await (Post as any).findById(req.params.id)
     if (!post) return res.status(404).json({ message: 'Not found' })
     
     res.json({ viewCount: post.viewCount || 0 })
@@ -323,7 +319,7 @@ router.get('/:id/view', async (req, res) => {
 // DELETE /posts/:id - delete a post (only by author)
 router.delete('/:id', requireAuth, async (req: AuthedRequest, res) => {
   try {
-    const post = await Post.findById(req.params.id)
+  const post = await (Post as any).findById(req.params.id)
     
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
@@ -334,7 +330,7 @@ router.delete('/:id', requireAuth, async (req: AuthedRequest, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this post' })
     }
 
-    await Post.findByIdAndDelete(req.params.id)
+    await (Post as any).findByIdAndDelete(req.params.id)
     res.json({ message: 'Post deleted successfully' })
   } catch (error) {
     console.error('Delete post failed:', error)
@@ -346,7 +342,7 @@ router.delete('/:id', requireAuth, async (req: AuthedRequest, res) => {
 router.post('/:id/report', requireAuth, async (req: AuthedRequest, res) => {
   try {
     const { reason } = req.body
-    const post = await Post.findById(req.params.id)
+    const post = await (Post as any).findById(req.params.id)
     
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
@@ -358,7 +354,7 @@ router.post('/:id/report', requireAuth, async (req: AuthedRequest, res) => {
     }
 
     // Check if user already reported this post
-    const existingReport = await Report.findOne({
+    const existingReport = await (Report as any).findOne({
       postId: req.params.id,
       reporterId: req.userId
     })
@@ -368,7 +364,7 @@ router.post('/:id/report', requireAuth, async (req: AuthedRequest, res) => {
     }
 
     // Save report to database
-    const report = await Report.create({
+    const report = await (Report as any).create({
       postId: req.params.id,
       reporterId: req.userId,
       reason: reason,

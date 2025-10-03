@@ -1,7 +1,6 @@
-import express = require('express')
+import express from 'express'
 import { AuthedRequest, requireAuth } from '../middleware/auth'
-const NotificationModule = require('../models/Notification')
-const Notification = (NotificationModule && (NotificationModule.default || NotificationModule)) as any
+import Notification from '../models/Notification'
 
 const router = express.Router()
 

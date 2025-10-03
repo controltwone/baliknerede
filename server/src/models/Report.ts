@@ -37,4 +37,3 @@ const reportSchema = new mongoose.Schema<IReport>({
 
 const ReportModel = mongoose.models.Report || mongoose.model<IReport>('Report', reportSchema)
 export default ReportModel
-module.exports = ReportModel

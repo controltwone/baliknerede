@@ -1,6 +1,5 @@
-import express = require('express')
-const UserModule = require('../models/User')
-const User = (UserModule && (UserModule.default || UserModule)) as any
+import express from 'express'
+import User from '../models/User'
 
 const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2MzY2RjEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+"
 
@@ -14,7 +13,7 @@ router.get('/search', async (req, res) => {
       return res.json({ users: [] })
     }
     
-    const users = await User.find({
+    const users = await (User as any).find({
       name: { $regex: q, $options: 'i' }
     }).select('name avatarUrl').limit(10)
     
@@ -65,11 +64,11 @@ router.get('/:id/follow-status', async (req, res) => {
       return res.json({ isFollowing: false })
     }
     
-    const jwt = require('jsonwebtoken')
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
+    const jwt = await import('jsonwebtoken')
+    const payload = (jwt as any).default.verify(token, process.env.JWT_SECRET || 'dev_secret') as { sub: string }
     const currentUserId = payload.sub
     
-    const currentUser = await User.findById(currentUserId)
+    const currentUser = await (User as any).findById(currentUserId)
     const isFollowing = currentUser?.following?.some((followId: any) => String(followId) === String(id)) || false
     
     res.json({ isFollowing })

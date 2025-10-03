@@ -1,18 +1,15 @@
-import express = require('express')
+import express from 'express'
 import { AuthedRequest, requireAuth } from '../middleware/auth'
-const ReportModule = require('../models/Report')
-const Report = (ReportModule && (ReportModule.default || ReportModule)) as any
-const PostModule = require('../models/Post')
-const Post = (PostModule && (PostModule.default || PostModule)) as any
-const UserModule = require('../models/User')
-const User = (UserModule && (UserModule.default || UserModule)) as any
+import Report from '../models/Report'
+import Post from '../models/Post'
+import User from '../models/User'
 
 const router = express.Router()
 
 // Admin middleware
 const requireAdmin = async (req: AuthedRequest, res: any, next: any) => {
   try {
-    const user = await User.findById(req.userId)
+    const user = await (User as any).findById(req.userId)
     if (!user || !user.isAdmin) {
       return res.status(403).json({ message: 'Admin access required' })
     }
@@ -25,7 +22,7 @@ const requireAdmin = async (req: AuthedRequest, res: any, next: any) => {
 // GET /admin/reports - get all reports (admin only)
 router.get('/reports', requireAuth, requireAdmin, async (req: AuthedRequest, res) => {
   try {
-    const reports = await Report.find()
+    const reports = await (Report as any).find()
       .populate('postId', 'contentText imageUrl authorId createdAt')
       .populate('reporterId', 'name email')
       .sort({ createdAt: -1 }) // Yeni şikayetler üstte
@@ -41,7 +38,7 @@ router.get('/reports', requireAuth, requireAdmin, async (req: AuthedRequest, res
 router.put('/reports/:id/status', requireAuth, requireAdmin, async (req: AuthedRequest, res) => {
   try {
     const { status, adminNotes } = req.body
-    const report = await Report.findByIdAndUpdate(
+    const report = await (Report as any).findByIdAndUpdate(
       req.params.id,
       { status, adminNotes },
       { new: true }
@@ -62,13 +59,13 @@ router.put('/reports/:id/status', requireAuth, requireAdmin, async (req: AuthedR
 // DELETE /admin/posts/:id - delete post (admin only)
 router.delete('/posts/:id', requireAuth, requireAdmin, async (req: AuthedRequest, res) => {
   try {
-    const post = await Post.findByIdAndDelete(req.params.id)
+    const post = await (Post as any).findByIdAndDelete(req.params.id)
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
     }
 
     // Also delete related reports
-    await Report.deleteMany({ postId: req.params.id })
+    await (Report as any).deleteMany({ postId: req.params.id })
 
     res.json({ message: 'Post deleted successfully' })
   } catch (error) {
@@ -80,10 +77,10 @@ router.delete('/posts/:id', requireAuth, requireAdmin, async (req: AuthedRequest
 // GET /admin/stats - get admin statistics (admin only)
 router.get('/stats', requireAuth, requireAdmin, async (req: AuthedRequest, res) => {
   try {
-    const totalReports = await Report.countDocuments()
-    const pendingReports = await Report.countDocuments({ status: 'pending' })
-    const totalPosts = await Post.countDocuments()
-    const totalUsers = await User.countDocuments()
+    const totalReports = await (Report as any).countDocuments()
+    const pendingReports = await (Report as any).countDocuments({ status: 'pending' })
+    const totalPosts = await (Post as any).countDocuments()
+    const totalUsers = await (User as any).countDocuments()
 
     res.json({
       totalReports,

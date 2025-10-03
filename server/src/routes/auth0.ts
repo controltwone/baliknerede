@@ -1,8 +1,7 @@
-import express = require('express')
+import express from 'express'
 import { auth } from 'express-openid-connect'
-import jwt = require('jsonwebtoken')
-const UserModule = require('../models/User')
-const User = (UserModule && (UserModule.default || UserModule)) as any
+import * as jwt from 'jsonwebtoken'
+import User from '../models/User'
 
 const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2MzY2RjEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+"
 
@@ -42,8 +41,8 @@ router.get('/auth0/complete', async (req: any, res) => {
     if (!claims) return res.redirect('/auth0/login')
     const email = claims.email
     const name = claims.name || (email ? email.split('@')[0] : 'User')
-    let user = await User.findOne({ email })
-    if (!user) user = await User.create({ name, email, password: jwt.sign({ t: Date.now() }, 'x'), avatarUrl: DEFAULT_AVATAR })
+    let user = await (User as any).findOne({ email })
+    if (!user) user = await (User as any).create({ name, email, password: jwt.sign({ t: Date.now() }, 'x'), avatarUrl: DEFAULT_AVATAR })
     const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' })
     res.cookie('bn_token', token, {
       httpOnly: true,
