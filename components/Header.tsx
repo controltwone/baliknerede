@@ -593,8 +593,8 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Force page reload to clear any cached state
-                            window.location.reload()
+                            // Redirect to home page to clear all state
+                            window.location.href = '/'
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
