@@ -96,14 +96,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })()
   }, [token, API_BASE])
 
-  // Auth0 token kontrolü - sadece sayfa yüklendiğinde bir kez
+  // Auth0 token kontrolü - URL parameter'dan veya cookie'den
   useEffect(() => {
     const checkAuth0Token = async () => {
       // Eğer zaten token varsa Auth0 kontrolü yapma
       if (token) return
       
+      // Önce URL parameter'ından token'ı kontrol et
+      const urlParams = new URLSearchParams(window.location.search)
+      const urlToken = urlParams.get('token')
+      
+      if (urlToken) {
+        console.log('Found token in URL parameter')
+        setToken(urlToken)
+        localStorage.setItem('bn_token', urlToken)
+        
+        // URL'den token'ı temizle
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
+        
+        // Token ile kullanıcı bilgilerini al
+        try {
+          const res = await fetch(`${API_BASE}/me`, {
+            headers: { Authorization: `Bearer ${urlToken}` },
+            credentials: 'include',
+          })
+          console.log('Me response after URL token:', res.status)
+          if (res.ok) {
+            const data = await res.json()
+            console.log('Me data after URL token:', data)
+            if (data?.user) {
+              console.log('Setting user from URL token:', data.user)
+              setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
+            }
+          }
+        } catch (e) {
+          console.error('Error fetching user after URL token:', e)
+        }
+        return
+      }
+      
       try {
-        console.log('Checking Auth0 token...')
+        console.log('Checking Auth0 token from cookie...')
         console.log('API_BASE:', API_BASE)
         console.log('Document cookies:', document.cookie)
         
@@ -114,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const td = await tr.json()
           console.log('Auth0 token data:', td)
           if (td?.token) {
-            console.log('Setting token from Auth0')
+            console.log('Setting token from Auth0 cookie')
             setToken(td.token)
             localStorage.setItem('bn_token', td.token)
             // Token'ı aldıktan sonra /me'yi tekrar dene

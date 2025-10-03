@@ -68,8 +68,9 @@ router.get('/auth0/complete', async (req: any, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     
-    console.log('Redirecting to:', process.env.CLIENT_ORIGIN || 'http://localhost:3000')
-    return res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000')
+    const redirectUrl = `${process.env.CLIENT_ORIGIN || 'http://localhost:3000'}?token=${encodeURIComponent(token)}`
+    console.log('Redirecting to:', redirectUrl)
+    return res.redirect(redirectUrl)
   } catch (e) {
     console.error('Auth0 complete error:', e)
     return res.redirect('/')
