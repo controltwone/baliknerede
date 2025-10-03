@@ -595,9 +595,9 @@ function Header() {
                               document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
                               
                               // Wait a bit for state to clear
-                              await new Promise(resolve => setTimeout(resolve, 200))
+                              await new Promise(resolve => setTimeout(resolve, 300))
                               
-                              // Force Auth0 logout with returnTo parameter
+                              // Use our backend logout endpoint
                               const returnTo = encodeURIComponent(window.location.origin)
                               window.location.href = `${API_BASE}/auth0/logout?returnTo=${returnTo}`
                             } catch (error) {
