@@ -55,19 +55,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const rawUser = localStorage.getItem("bn_auth_user")
         const rawToken = localStorage.getItem("bn_token")
         
+        console.log('Auth initialization:', { hasUser: !!rawUser, hasToken: !!rawToken })
+        
         if (rawToken) {
           // Token'ı doğrula
+          console.log('Validating token...')
           const isValid = await validateToken(rawToken)
+          console.log('Token validation result:', isValid)
+          
           if (isValid && rawUser) {
+            console.log('Token valid, setting user')
             setUser(JSON.parse(rawUser))
             setToken(rawToken)
           } else {
+            console.log('Token invalid, clearing auth')
             // Token geçersiz, temizle
             localStorage.removeItem("bn_auth_user")
             localStorage.removeItem("bn_token")
             setUser(null)
             setToken(null)
           }
+        } else {
+          console.log('No token found, user not authenticated')
         }
       } catch (error) {
         console.error('Auth initialization error:', error)
