@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p .",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "clean:src": "rimraf \"src/**/*.js\" \"src/**/*.js.map\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.895.0",
@@ -30,6 +31,7 @@
     "@types/node": "^20",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "rimraf": "^5.0.7"
   }
 }
