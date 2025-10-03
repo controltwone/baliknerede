@@ -595,9 +595,11 @@ function Header() {
                             
                             // Auth0 logout URL'ine yönlendir
                             const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
-                            const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || 'YOUR_CLIENT_ID'
+                            const clientId = 'YOUR_CLIENT_ID' // Auth0 Dashboard'dan al
                             const returnTo = encodeURIComponent(window.location.origin)
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
+                            
+                            console.log('Logout URL:', logoutUrl)
                             
                             window.location.href = logoutUrl
                           }}
