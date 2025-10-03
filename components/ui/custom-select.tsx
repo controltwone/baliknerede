@@ -50,9 +50,26 @@ export function CustomSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Normalize Turkish characters for better search
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/ı/g, 'i')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+  }
+
+  const filteredOptions = options.filter(option => {
+    const normalizedSearchTerm = normalizeText(searchTerm)
+    const normalizedLabel = normalizeText(option.label)
+    const normalizedValue = normalizeText(option.value)
+    
+    return normalizedLabel.includes(normalizedSearchTerm) ||
+           normalizedValue.includes(normalizedSearchTerm)
+  })
 
   const handleSelect = (option: Option) => {
     onChange(option.value)
