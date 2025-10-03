@@ -328,15 +328,18 @@ function Header() {
                 className="absolute -top-1 -right-0.5 bg-clip-text text-transparent font-extrabold text-[18px] leading-none select-none drop-shadow-sm"
                 style={{ 
                   transform: 'rotate(-6deg)',
-                  filter: 'brightness(1.3) saturate(1.4)',
-                  textShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
+                  filter: theme === 'dark' ? 'brightness(1.2) saturate(1.1)' : 'brightness(1.05) saturate(1.05)',
+                  textShadow: theme === 'dark' ? '0 0 6px rgba(148, 163, 184, 0.35)' : '0 0 4px rgba(17, 17, 17, 0.35)'
                 }}
               >
                 <span 
                   className="bg-clip-text text-transparent" 
                   style={{ 
-                    backgroundImage: 'linear-gradient(135deg, #00d4ff, #0099cc, #0066aa)',
-                    filter: 'brightness(1.2) saturate(1.3)'
+                    backgroundImage: theme === 'dark'
+                      ? 'linear-gradient(135deg, #d1d5db, #9ca3af 45%, #4b5563 80%)'
+                      : 'linear-gradient(135deg, #0f0f10, #2a2a2c 40%, #0a0a0b 75%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text'
                   }}
                 >
                   ?
