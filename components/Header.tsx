@@ -594,19 +594,30 @@ function Header() {
                               document.cookie = 'appSession=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
                               document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
                               
-                              // Wait a bit for state to clear
-                              await new Promise(resolve => setTimeout(resolve, 300))
+                              // Clear all Auth0 related cookies
+                              const cookies = document.cookie.split(';')
+                              cookies.forEach(cookie => {
+                                const eqPos = cookie.indexOf('=')
+                                const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+                                if (name) {
+                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`
+                                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`
+                                }
+                              })
                               
-                              // Use our backend logout endpoint
-                              const returnTo = encodeURIComponent(window.location.origin)
-                              window.location.href = `${API_BASE}/auth0/logout?returnTo=${returnTo}`
+                              // Wait a bit for state to clear
+                              await new Promise(resolve => setTimeout(resolve, 500))
+                              
+                              // Force page reload to clear any remaining state
+                              window.location.reload()
                             } catch (error) {
                               console.error('Logout error:', error)
                               // Fallback: clear everything and reload
                               logout()
                               localStorage.clear()
                               sessionStorage.clear()
-                              window.location.href = '/'
+                              window.location.reload()
                             }
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
