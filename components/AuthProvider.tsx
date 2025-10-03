@@ -184,40 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth0Token()
   }, [API_BASE])
 
-  // Sayfa kapandığında otomatik çıkış yap
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (user) {
-        // Sayfa kapanırken localStorage'ı temizle
-        localStorage.removeItem('bn_auth_user')
-        localStorage.removeItem('bn_token')
-        sessionStorage.clear()
-      }
-    }
-
-    const handleVisibilityChange = () => {
-      if (document.hidden && user) {
-        // Sayfa gizlendiğinde (başka tab'a geçildiğinde) çıkış yap
-        setTimeout(() => {
-          if (document.hidden) {
-            localStorage.removeItem('bn_auth_user')
-            localStorage.removeItem('bn_token')
-            sessionStorage.clear()
-            setUser(null)
-            setToken(null)
-          }
-        }, 30000) // 30 saniye sonra çıkış yap
-      }
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [user])
+  // Otomatik çıkış sistemi kaldırıldı - kullanıcı manuel çıkış yapmalı
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
