@@ -9,6 +9,8 @@ export function useSocket() {
   const hasConnected = useRef(false)
 
   useEffect(() => {
+    console.log('useSocket effect:', { isAuthenticated, userId: user?.id, hasConnected: hasConnected.current })
+    
     if (isAuthenticated && user?.id && !hasConnected.current) {
       console.log('Connecting socket for user:', user.id)
       try {
