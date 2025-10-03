@@ -59,6 +59,7 @@ app.use(cors({
     console.log('CORS request from origin:', requestOrigin)
     console.log('Allowed origins:', Array.from(ALLOWED_ORIGINS))
     
+    // Allow requests with no origin (e.g., mobile apps, Postman, etc.)
     if (!requestOrigin) {
       console.log('No origin, allowing request')
       return callback(null, true)
@@ -83,7 +84,8 @@ app.use(cors({
       return allowed ? callback(null, true) : callback(new Error('CORS not allowed'))
     } catch (error) {
       console.log('CORS origin parse failed:', error)
-      return callback(new Error('CORS origin parse failed'))
+      // Allow request if origin parsing fails (for development)
+      return callback(null, true)
     }
   },
   credentials: true,
