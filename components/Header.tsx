@@ -20,6 +20,16 @@ function Header() {
   const { isAuthenticated, user, logout, token } = useAuth()
   const { selectedLocation, setSelectedLocation, selectedFishType, setSelectedFishType } = useLocationFilter()
   const { theme, toggleTheme } = useTheme()
+  const [scrolled, setScrolled] = React.useState(false)
+
+  React.useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 4)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const locationOptions = [
     { value: "", label: "Tüm Konumlar" },
@@ -272,7 +282,11 @@ function Header() {
     } catch {}
   }
   return (
-    <div className="bg-gradient-to-r from-white/80 to-blue-50/60 dark:from-gray-900/80 dark:to-gray-800/60 backdrop-blur-md sticky top-0 z-40 shadow-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300">
+    <div className={`sticky top-0 z-40 transition-all duration-300 ${
+      scrolled
+        ? 'bg-white/80 dark:bg-gray-900/75 backdrop-blur-xl shadow-2xl border-b border-gray-200/70 dark:border-gray-700/70'
+        : 'bg-gradient-to-r from-white/80 to-blue-50/60 dark:from-gray-900/80 dark:to-gray-800/60 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-700/50'
+    }`}>
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="shrink-0 flex items-center gap-3 group" onClick={() => setSelectedLocation("")}>
           <Image 
@@ -361,10 +375,11 @@ function Header() {
           </span>
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 -ml-10">
-          <Link href="/" onClick={() => setSelectedLocation("")}>
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Akış</Button>
-          </Link>
+        <div className="hidden md:flex flex-1 items-center justify-center">
+          <div className="flex items-center gap-2 w-full max-w-xl -ml-28">
+            <Link href="/" onClick={() => setSelectedLocation("")}>
+                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700/80 backdrop-blur-sm transition-all duration-200">Ana Sayfa</Button>
+            </Link>
           <div className="flex items-center gap-2 w-full">
             <CustomSelect
               options={locationOptions}
@@ -389,7 +404,7 @@ function Header() {
             <div className="relative flex-1 search-float">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors duration-200" />
               <Input 
-                className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/80 dark:focus:bg-gray-700/80 focus:border-blue-300 dark:focus:border-blue-500 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" 
+                className="pl-9 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200/50 dark:border-gray-600/50 focus:bg-white/85 dark:focus:bg-gray-700/85 focus:border-blue-300 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-200/60 dark:focus:ring-blue-900/30 dark:text-white transition-all duration-300 search-glow hover:shadow-lg hover:shadow-blue-500/20" 
                 placeholder="Ara: kullanıcı" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -425,6 +440,7 @@ function Header() {
                 </div>
               )}
             </div>
+          </div>
           </div>
           {user?.isAdmin && (
             <Link href="/admin">
@@ -621,7 +637,7 @@ function Header() {
           <div className="px-4 py-3 space-y-3">
             <div className="flex gap-2">
               <Link href="/" onClick={() => { setSelectedLocation(""); setShowMobileMenu(false); }}>
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 w-full">Akış</Button>
+                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-700 w-full">Ana Sayfa</Button>
               </Link>
               {user?.isAdmin && (
                 <Link href="/admin" onClick={() => setShowMobileMenu(false)}>

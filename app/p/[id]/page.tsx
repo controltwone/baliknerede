@@ -1,11 +1,33 @@
 "use client"
 
 import React from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Post from '@/components/Post'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/components/AuthProvider'
 import { formatRelativeTime } from '@/lib/time'
+import { DEFAULT_AVATAR } from '@/lib/constants'
+
+type Author = {
+  _id: string
+  name: string
+  avatarUrl?: string
+}
+
+type PostData = {
+  _id: string
+  authorId?: Author
+  imageUrl?: string
+  contentText?: string
+  locationCity?: string
+  locationSpot?: string
+  fishType?: string
+  likeCount?: number
+  commentCount?: number
+  viewCount?: number
+  createdAt: string
+  liked?: boolean
+}
 
 export default function PostDetailPage() {
   const params = useParams() as { id: string }
@@ -14,7 +36,7 @@ export default function PostDetailPage() {
   const { token } = useAuth()
 
   const [loading, setLoading] = React.useState(true)
-  const [data, setData] = React.useState<any | null>(null)
+  const [data, setData] = React.useState<PostData | null>(null)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
@@ -31,8 +53,9 @@ export default function PostDetailPage() {
         if (!res.ok) throw new Error('Gönderi bulunamadı')
         const json = await res.json()
         if (!cancelled) setData(json.post)
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Bir hata oluştu')
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Bir hata oluştu'
+        if (!cancelled) setError(message)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -64,7 +87,7 @@ export default function PostDetailPage() {
     id: data._id,
     authorId: data.authorId?._id,
     authorName: data.authorId?.name || 'Kullanıcı',
-    authorAvatarUrl: data.authorId?.avatarUrl || '/logo.png',
+    authorAvatarUrl: data.authorId?.avatarUrl || DEFAULT_AVATAR,
     imageUrl: data.imageUrl,
     contentText: data.contentText,
     locationCity: data.locationCity,

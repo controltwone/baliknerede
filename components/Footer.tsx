@@ -21,7 +21,7 @@ function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Site</h3>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Akış</Link>
+                <Link href="/" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Ana Sayfa</Link>
               </li>
               <li>
                 <Link href="/blog" className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">Balık Rehberi</Link>
