@@ -16,6 +16,7 @@ import { ReportModal } from "./ui/report-modal"
 import { ToastManager } from "./ui/toast"
 import { CustomSelect } from "./ui/custom-select"
 import { DEFAULT_AVATAR } from "@/lib/constants"
+import { resizeImage, validateImageFormat, validateImageSize } from "@/lib/imageUtils"
 
 type FeedPost = {
   id: string
@@ -493,14 +494,56 @@ export default function Feed() {
     }
   }, [socketService, user?.id])
 
-  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    setSelectedFile(file)
-    // Preview için base64 kullan, yükleme sırasında R2'ye yükle
-    const reader = new FileReader()
-    reader.onload = () => setImageUrl(reader.result as string)
-    reader.readAsDataURL(file)
+
+    // Foto formatını kontrol et
+    if (!validateImageFormat(file)) {
+      addToast({
+        type: "error",
+        title: "Geçersiz Format",
+        description: "Lütfen JPEG, PNG veya WebP formatında bir foto seçin.",
+        duration: 2000
+      })
+      return
+    }
+
+    // Foto boyutunu kontrol et (10MB max)
+    if (!validateImageSize(file, 10)) {
+      addToast({
+        type: "error",
+        title: "Dosya Çok Büyük",
+        description: "Foto boyutu 10MB'dan küçük olmalıdır.",
+        duration: 2000
+      })
+      return
+    }
+
+    try {
+      // Foto'yu optimize et
+      const optimizedFile = await resizeImage(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.85,
+        format: 'jpeg'
+      })
+
+      setSelectedFile(optimizedFile)
+      
+      // Preview için base64 kullan
+      const reader = new FileReader()
+      reader.onload = () => setImageUrl(reader.result as string)
+      reader.readAsDataURL(optimizedFile)
+    } catch (error) {
+      console.error('Foto optimize edilemedi:', error)
+      addToast({
+        type: "error",
+        title: "Foto İşlenemedi",
+        description: "Foto optimize edilirken hata oluştu.",
+        duration: 2000
+      })
+    }
   }
 
   async function handleShare() {

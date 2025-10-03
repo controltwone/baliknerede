@@ -11,6 +11,7 @@ import Link from "next/link"
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react"
 import { formatRelativeTime } from "@/lib/time"
 import Post from "@/components/Post"
+import { resizeImage, validateImageFormat, validateImageSize } from "@/lib/imageUtils"
 
 export default function ProfilePage() {
   const { isAuthenticated, user, token, setUser } = useAuth()
@@ -86,13 +87,39 @@ export default function ProfilePage() {
     setShowEditModal(true)
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
+    if (!file) return
+
+    // Foto formatını kontrol et
+    if (!validateImageFormat(file)) {
+      alert("Lütfen JPEG, PNG veya WebP formatında bir foto seçin.")
+      return
+    }
+
+    // Foto boyutunu kontrol et (5MB max for avatar)
+    if (!validateImageSize(file, 5)) {
+      alert("Foto boyutu 5MB'dan küçük olmalıdır.")
+      return
+    }
+
+    try {
+      // Avatar için daha küçük boyut
+      const optimizedFile = await resizeImage(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.9,
+        format: 'jpeg'
+      })
+
+      setSelectedFile(optimizedFile)
+      
       const reader = new FileReader()
       reader.onload = () => setPreviewUrl(reader.result as string)
-      reader.readAsDataURL(file)
+      reader.readAsDataURL(optimizedFile)
+    } catch (error) {
+      console.error('Avatar optimize edilemedi:', error)
+      alert("Foto optimize edilirken hata oluştu.")
     }
   }
 
