@@ -56,7 +56,14 @@ if (process.env.AUTH0_ISSUER_BASE_URL) {
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
-    if (!requestOrigin) return callback(null, true)
+    console.log('CORS request from origin:', requestOrigin)
+    console.log('Allowed origins:', Array.from(ALLOWED_ORIGINS))
+    
+    if (!requestOrigin) {
+      console.log('No origin, allowing request')
+      return callback(null, true)
+    }
+    
     try {
       const url = new URL(requestOrigin)
       const hostname = url.hostname
@@ -68,9 +75,14 @@ app.use(cors({
         `${protocol}//${apex}`,
         `${protocol}//${www}`,
       ])
+      
+      console.log('Candidates:', Array.from(candidates))
       const allowed = Array.from(candidates).some((c) => ALLOWED_ORIGINS.has(c))
+      console.log('CORS allowed:', allowed)
+      
       return allowed ? callback(null, true) : callback(new Error('CORS not allowed'))
-    } catch {
+    } catch (error) {
+      console.log('CORS origin parse failed:', error)
       return callback(new Error('CORS origin parse failed'))
     }
   },
