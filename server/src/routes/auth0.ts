@@ -59,10 +59,27 @@ router.get('/auth0/complete', async (req: any, res) => {
 
 router.get('/auth0/logout', (req: any, res) => {
   try {
-    // Clear all possible cookies
-    res.clearCookie('bn_token')
-    res.clearCookie('appSession')
-    res.clearCookie('connect.sid')
+    // Clear all possible cookies with proper options
+    res.clearCookie('bn_token', { 
+      path: '/', 
+      domain: process.env.NODE_ENV === 'production' ? '.baliknerde.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      httpOnly: true
+    })
+    res.clearCookie('appSession', { 
+      path: '/', 
+      domain: process.env.NODE_ENV === 'production' ? '.baliknerde.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none'
+    })
+    res.clearCookie('connect.sid', { 
+      path: '/', 
+      domain: process.env.NODE_ENV === 'production' ? '.baliknerde.com' : undefined,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none'
+    })
+    
     // Clear any other Auth0 related cookies
     const cookies = req.headers.cookie
     if (cookies) {
@@ -70,16 +87,28 @@ router.get('/auth0/logout', (req: any, res) => {
         const eqPos = cookie.indexOf('=')
         const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
         if (name) {
-          res.clearCookie(name, { path: '/' })
-          res.clearCookie(name, { path: '/', domain: process.env.AUTH0_DOMAIN })
+          res.clearCookie(name, { 
+            path: '/', 
+            domain: process.env.NODE_ENV === 'production' ? '.baliknerde.com' : undefined,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none'
+          })
         }
       })
     }
   } catch (error) {
     console.error('Error clearing cookies:', error)
   }
+  
   // Auth0 oturumu da kapat ve frontend'e dön
-  return res.oidc.logout({ returnTo: process.env.CLIENT_ORIGIN || 'http://localhost:3000' })
+  const returnTo = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
+  return res.oidc.logout({ 
+    returnTo,
+    // Force logout from Auth0
+    logoutParams: {
+      returnTo: returnTo
+    }
+  })
 })
 
 // Frontend'in header kullanabilmesi için cookieden token'ı geri ver (dev amaçlı)

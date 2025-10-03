@@ -581,16 +581,25 @@ function Header() {
                       {({ active }) => (
                         <button
                           onClick={async () => {
-                            // Clear local state first
-                            logout()
-                            // Clear localStorage completely
                             try {
+                              // Clear local state first
+                              logout()
+                              // Clear localStorage completely
                               localStorage.removeItem('bn_auth_user')
                               localStorage.removeItem('bn_token')
                               sessionStorage.clear()
-                            } catch {}
-                            // Then redirect to Auth0 logout which will clear the session
-                            window.location.href = `${API_BASE}/auth0/logout`
+                              
+                              // Wait a bit for state to clear
+                              await new Promise(resolve => setTimeout(resolve, 100))
+                              
+                              // Then redirect to Auth0 logout which will clear the session
+                              window.location.href = `${API_BASE}/auth0/logout`
+                            } catch (error) {
+                              console.error('Logout error:', error)
+                              // Fallback: just clear local state and reload
+                              logout()
+                              window.location.reload()
+                            }
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
