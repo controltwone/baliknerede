@@ -43,9 +43,30 @@ function expandOrigins(origin: string): string[] {
     return [origin]
   }
 }
-const ALLOWED_ORIGINS = Array.from(new Set(expandOrigins(CLIENT_ORIGIN)))
+const ALLOWED_ORIGINS = new Set(expandOrigins(CLIENT_ORIGIN))
 
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }))
+app.use(cors({
+  origin: (requestOrigin, callback) => {
+    if (!requestOrigin) return callback(null, true)
+    try {
+      const url = new URL(requestOrigin)
+      const hostname = url.hostname
+      const protocol = url.protocol
+      const apex = hostname.replace(/^www\./, '')
+      const www = hostname.startsWith('www.') ? hostname : `www.${hostname}`
+      const candidates = new Set([
+        `${protocol}//${hostname}`,
+        `${protocol}//${apex}`,
+        `${protocol}//${www}`,
+      ])
+      const allowed = Array.from(candidates).some((c) => ALLOWED_ORIGINS.has(c))
+      return allowed ? callback(null, true) : callback(new Error('CORS not allowed'))
+    } catch {
+      return callback(new Error('CORS origin parse failed'))
+    }
+  },
+  credentials: true,
+}))
 app.use(express.json({ limit: '6mb' }))
 app.use(express.urlencoded({ extended: true, limit: '6mb' }))
 app.use(cookieParser())
