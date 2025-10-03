@@ -126,13 +126,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {}
     }
 
-    // İlk yüklemede kontrol et
+    // Sadece ilk yüklemede kontrol et
     checkAuth0Token()
-    
-    // Her 5 saniyede bir kontrol et (Auth0 callback'ini yakalamak için)
-    const interval = setInterval(checkAuth0Token, 5000)
-    return () => clearInterval(interval)
-  }, [token, API_BASE])
+  }, [API_BASE])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
