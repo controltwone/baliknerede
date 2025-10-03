@@ -593,8 +593,9 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Force redirect to home page
-                            window.location.href = '/'
+                            // Auth0 logout - backend'e yönlendir
+                            const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000'
+                            window.location.href = `${API_BASE}/auth0/logout?returnTo=${encodeURIComponent(window.location.origin)}`
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
