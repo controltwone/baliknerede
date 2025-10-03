@@ -11,7 +11,7 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: process.env.AUTH0_SECRET,
-  baseURL: process.env.AUTH0_BASE_URL || 'http://localhost:4000',
+  baseURL: process.env.AUTH0_BASE_URL || 'https://baliknerde.onrender.com',
   clientID: process.env.AUTH0_CLIENT_ID,
   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
   // Auth0 callback: baseURL + '/callback' → bu yolu lib kendi yönetir
