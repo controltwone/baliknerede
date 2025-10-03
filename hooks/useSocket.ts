@@ -11,6 +11,7 @@ export function useSocket() {
   useEffect(() => {
     console.log('useSocket effect:', { isAuthenticated, userId: user?.id, hasConnected: hasConnected.current })
     
+    // Sadece gerçekten authenticated olan kullanıcılar için socket bağlantısı yap
     if (isAuthenticated && user?.id && !hasConnected.current) {
       console.log('Connecting socket for user:', user.id)
       try {
@@ -34,6 +35,15 @@ export function useSocket() {
       }
     }
   }, [isAuthenticated, user?.id])
+
+  // Eğer user yoksa socket'i kesinlikle disconnect et
+  useEffect(() => {
+    if (!user?.id && hasConnected.current) {
+      console.log('User cleared, forcing socket disconnect')
+      socketService.disconnect()
+      hasConnected.current = false
+    }
+  }, [user?.id])
 
   return {
     socket: socketService.getSocket(),
