@@ -595,7 +595,7 @@ function Header() {
                             
                             // Auth0 logout URL'ine yönlendir
                             const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
-                            const clientId = 'YOUR_CLIENT_ID' // Auth0 Dashboard'dan al
+                            const clientId = process.env.AUTH0_CLIENT_ID
                             const returnTo = encodeURIComponent(window.location.origin)
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
                             
