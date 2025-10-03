@@ -59,6 +59,9 @@ router.get('/auth0/complete', async (req: any, res) => {
 
 router.get('/auth0/logout', (req: any, res) => {
   try {
+    // Get returnTo from query parameter or use default
+    const returnTo = req.query.returnTo || process.env.CLIENT_ORIGIN || 'http://localhost:3000'
+    
     // Clear all possible cookies with proper options
     res.clearCookie('bn_token', { 
       path: '/', 
@@ -96,19 +99,21 @@ router.get('/auth0/logout', (req: any, res) => {
         }
       })
     }
+    
+    // Force Auth0 logout with explicit parameters
+    return res.oidc.logout({ 
+      returnTo: returnTo,
+      logoutParams: {
+        returnTo: returnTo,
+        client_id: process.env.AUTH0_CLIENT_ID
+      }
+    })
   } catch (error) {
-    console.error('Error clearing cookies:', error)
+    console.error('Error during logout:', error)
+    // Fallback: redirect to home page
+    const returnTo = req.query.returnTo || process.env.CLIENT_ORIGIN || 'http://localhost:3000'
+    return res.redirect(returnTo)
   }
-  
-  // Auth0 oturumu da kapat ve frontend'e dön
-  const returnTo = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
-  return res.oidc.logout({ 
-    returnTo,
-    // Force logout from Auth0
-    logoutParams: {
-      returnTo: returnTo
-    }
-  })
 })
 
 // Frontend'in header kullanabilmesi için cookieden token'ı geri ver (dev amaçlı)
