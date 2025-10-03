@@ -174,21 +174,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [API_BASE])
 
   const logout = useCallback(() => {
-    // Disconnect socket first (sync)
-    try {
-      const socketService = require('../lib/socket').default
-      socketService.disconnect()
-    } catch (error) {
-      console.warn('Socket disconnect failed:', error)
-    }
-    
-    // Clear state
+    // Clear state first
     setUser(null)
     setToken(null)
     
     // Clear localStorage
     localStorage.removeItem('bn_auth_user')
     localStorage.removeItem('bn_token')
+    
+    // Clear sessionStorage
+    sessionStorage.clear()
+    
+    // Force page reload to clear all state
+    window.location.reload()
   }, [])
 
   const value = useMemo(
