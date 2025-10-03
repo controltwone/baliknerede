@@ -174,6 +174,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [API_BASE])
 
   const logout = useCallback(() => {
+    // Disconnect socket first
+    import('../lib/socket').then(({ socketService }) => {
+      socketService.disconnect()
+    })
+    
     setUser(null)
     setToken(null)
   }, [])
