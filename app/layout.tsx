@@ -12,6 +12,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+      </head>
       <body className="min-h-screen bg-background text-foreground dark:bg-gray-900 dark:text-white" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>

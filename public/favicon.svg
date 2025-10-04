@@ -1,0 +1,14 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Kanca gövdesi - parlak siyah -->
+  <path d="M16 6 L16 20 L20 20 L20 12 L24 12" stroke="#000000" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Kanca ucu - halka -->
+  <circle cx="24" cy="6" r="3.5" fill="none" stroke="#000000" stroke-width="2.5"/>
+  <!-- Kanca içi - halka dolgusu -->
+  <circle cx="24" cy="6" r="1.5" fill="#000000"/>
+  <!-- Kanca bükümü - U şekli -->
+  <path d="M20 12 Q16 16 12 12" stroke="#000000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Kanca çengeli - diken -->
+  <path d="M12 12 L10 10" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <!-- Parlaklık efekti -->
+  <path d="M16 6 L16 20 L20 20 L20 12 L24 12" stroke="#ffffff" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+</svg>
