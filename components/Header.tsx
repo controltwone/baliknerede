@@ -592,7 +592,7 @@ function Header() {
                               return
                             }
                             
-                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
+                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}&federated`
                             
                             console.log('Logout URL:', logoutUrl)
                             console.log('Client ID:', clientId)
