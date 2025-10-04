@@ -56,20 +56,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const rawUser = localStorage.getItem("bn_auth_user")
         const rawToken = localStorage.getItem("bn_token")
         
-        console.log('Auth initialization:', { hasUser: !!rawUser, hasToken: !!rawToken })
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Auth initialization:', { hasUser: !!rawUser, hasToken: !!rawToken })
+        }
         
         if (rawToken) {
           // Token'ı doğrula
-          console.log('Validating token...')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Validating token...')
+          }
           const isValid = await validateToken(rawToken)
-          console.log('Token validation result:', isValid)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Token validation result:', isValid)
+          }
           
           if (isValid && rawUser) {
-            console.log('Token valid, setting user')
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Token valid, setting user')
+            }
             setUser(JSON.parse(rawUser))
             setToken(rawToken)
           } else {
-            console.log('Token invalid, clearing auth')
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Token invalid, clearing auth')
+            }
             // Token geçersiz, temizle
             localStorage.removeItem("bn_auth_user")
             localStorage.removeItem("bn_token")
@@ -77,7 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setToken(null)
           }
         } else {
-          console.log('No token found, user not authenticated')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('No token found, user not authenticated')
+          }
         }
       } catch (error) {
         console.error('Auth initialization error:', error)
@@ -120,7 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const urlToken = urlParams.get('token')
       
       if (urlToken) {
-        console.log('Found token in URL parameter')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Found token in URL parameter')
+        }
         setToken(urlToken)
         localStorage.setItem('bn_token', urlToken)
         
@@ -134,12 +148,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             headers: { Authorization: `Bearer ${urlToken}` },
             credentials: 'include',
           })
-          console.log('Me response after URL token:', res.status)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Me response after URL token:', res.status)
+          }
           if (res.ok) {
             const data = await res.json()
-            console.log('Me data after URL token:', data)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Me data after URL token:', data)
+            }
             if (data?.user) {
-              console.log('Setting user from URL token')
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Setting user from URL token')
+              }
               setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
             }
           }
@@ -150,7 +170,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Auth0 cookie kontrolü kaldırıldı - sadece manuel giriş yapılabilir
-      console.log('No URL token found, user must login manually')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('No URL token found, user must login manually')
+      }
     }
 
     // Sadece sayfa yüklendiğinde kontrol et

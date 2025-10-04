@@ -12,11 +12,15 @@ export function useSocket() {
   const isReallyAuthenticated = isAuthenticated && user?.id
 
   useEffect(() => {
-    console.log('useSocket effect:', { isAuthenticated, userId: user?.id, isReallyAuthenticated, hasConnected: hasConnected.current })
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useSocket effect:', { isAuthenticated, userId: user?.id, isReallyAuthenticated, hasConnected: hasConnected.current })
+    }
     
     // Sadece gerçekten authenticated olan kullanıcılar için socket bağlantısı yap
     if (isReallyAuthenticated && !hasConnected.current) {
-      console.log('Connecting socket for user')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Connecting socket for user')
+      }
       try {
         socketService.connect(user.id)
         hasConnected.current = true
@@ -25,7 +29,9 @@ export function useSocket() {
       }
     } else if (!isReallyAuthenticated) {
       if (hasConnected.current) {
-        console.log('Disconnecting socket - user logged out')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Disconnecting socket - user logged out')
+        }
         socketService.disconnect()
         hasConnected.current = false
       }
@@ -42,7 +48,9 @@ export function useSocket() {
   // Eğer user yoksa socket'i kesinlikle disconnect et
   useEffect(() => {
     if (!user?.id && hasConnected.current) {
-      console.log('User cleared, forcing socket disconnect')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('User cleared, forcing socket disconnect')
+      }
       socketService.disconnect()
       hasConnected.current = false
     }
