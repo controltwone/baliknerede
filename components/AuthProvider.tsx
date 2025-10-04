@@ -232,8 +232,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear sessionStorage
     sessionStorage.clear()
     
-    // Force page reload to clear all state
-    window.location.reload()
+    // Note: Auth0 logout is handled in Header.tsx
+    // This function only clears local state
   }, [])
 
   const value = useMemo(

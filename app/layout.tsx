@@ -4,7 +4,6 @@ import Footer from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { LocationFilterProvider } from '@/components/LocationFilterProvider'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import CookieBanner from '@/components/CookieBanner'
 
 export default function RootLayout({
   children,
@@ -23,7 +22,6 @@ export default function RootLayout({
                   {children}
                 </main>
                 <Footer />
-                <CookieBanner />
               </div>
             </LocationFilterProvider>
           </AuthProvider>

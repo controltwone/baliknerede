@@ -594,7 +594,7 @@ function Header() {
                             
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
                             
-                            // Clear local state
+                            // Clear local state first
                             logout()
                             
                             // Clear all storage
@@ -606,6 +606,7 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
+                            // Redirect to Auth0 logout to clear Auth0 session
                             window.location.href = logoutUrl
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
