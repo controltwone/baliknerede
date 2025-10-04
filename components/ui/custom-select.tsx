@@ -121,7 +121,11 @@ export function CustomSelect({
           </div>
 
           {/* Options List */}
-          <div className="max-h-48 overflow-y-auto thin-scrollbar mobile-dropdown-scroll">
+          <div className="max-h-48 overflow-y-auto thin-scrollbar mobile-dropdown-scroll" style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y'
+          }}>
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => (
                 <button

@@ -498,6 +498,20 @@
   transform: translateZ(0);
 }
 
+/* Force mobile scroll for all dropdown containers */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+/* Specific fix for dropdown menus */
+.max-h-48 {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
 /* MDX/Prose Styles */
 .prose {
   color: #374151;
