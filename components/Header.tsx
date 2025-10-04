@@ -17,7 +17,7 @@ import { CustomSelect } from './ui/custom-select'
 import { DEFAULT_AVATAR } from '../lib/constants'
 
 function Header() {
-  const { isAuthenticated, user, logout, token } = useAuth()
+  const { isAuthenticated, user, logout, token, setUser, setToken } = useAuth()
   const { selectedLocation, setSelectedLocation, selectedFishType, setSelectedFishType } = useLocationFilter()
   const { theme, toggleTheme } = useTheme()
   const [scrolled, setScrolled] = React.useState(false)
@@ -595,7 +595,8 @@ function Header() {
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
                             
                             // Clear local state first
-                            logout()
+                            setUser(null)
+                            setToken(null)
                             
                             // Clear all storage
                             localStorage.clear()
