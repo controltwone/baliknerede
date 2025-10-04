@@ -222,7 +222,7 @@ function Header() {
       } catch {}
     }
     load()
-    timer = setInterval(load, 30000)
+    timer = setInterval(load, 300000) // 5 dakikada bir
     return () => { if (timer) clearInterval(timer) }
   }, [API_BASE, isAuthenticated, token])
 
