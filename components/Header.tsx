@@ -581,23 +581,6 @@ function Header() {
                       {({ active }) => (
                         <button
                           onClick={() => {
-                            // Auth0 logout URL'ine yönlendir
-                            const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
-                            const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
-                            const returnTo = encodeURIComponent(window.location.origin)
-                            
-                            if (!clientId) {
-                              console.error('NEXT_PUBLIC_AUTH0_CLIENT_ID is not defined!')
-                              alert('Auth0 client ID not configured. Please contact support.')
-                              return
-                            }
-                            
-                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&federated`
-                            
-                            console.log('Logout URL:', logoutUrl)
-                            console.log('Client ID:', clientId)
-                            console.log('Return To:', returnTo)
-                            
                             // Clear local state first
                             setUser(null)
                             setToken(null)
@@ -611,9 +594,9 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Redirect to Auth0 logout to clear Auth0 session
-                            console.log('Redirecting to Auth0 logout...')
-                            window.location.href = logoutUrl
+                            // Force page reload to clear all state
+                            console.log('Logging out - clearing all state and reloading page...')
+                            window.location.reload()
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
