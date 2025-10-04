@@ -594,9 +594,10 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Auth0 logout URL'ine yönlendir - returnTo parametresi yok
+                            // Auth0 logout URL'ine yönlendir - returnTo ile baliknerde.com'a dön
                             const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
                             const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
+                            const returnTo = encodeURIComponent('https://www.baliknerde.com')
                             
                             if (!clientId) {
                               console.error('NEXT_PUBLIC_AUTH0_CLIENT_ID is not defined!')
@@ -604,7 +605,7 @@ function Header() {
                               return
                             }
                             
-                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&federated`
+                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}&federated`
                             
                             console.log('Logout URL:', logoutUrl)
                             console.log('Redirecting to Auth0 logout...')
