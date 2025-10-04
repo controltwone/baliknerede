@@ -93,7 +93,7 @@ export default function ProfilePage() {
 
     // Foto formatını kontrol et
     if (!validateImageFormat(file)) {
-      alert("Lütfen JPEG, PNG veya WebP formatında bir foto seçin.")
+      alert("Lütfen JPEG, PNG, WebP, HEIC veya HEIF formatında bir foto seçin.")
       return
     }
 
@@ -489,11 +489,11 @@ export default function ProfilePage() {
                           <input
                             id="avatarInput"
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.heic,.heif"
                             onChange={handleFileChange}
                             className="hidden"
                           />
-                          <p className="text-xs text-muted-foreground">PNG, JPG veya JPEG. Maks. ~5MB.</p>
+                          <p className="text-xs text-muted-foreground">PNG, JPG, JPEG, WebP, HEIC veya HEIF. Maks. ~5MB.</p>
                         </div>
                       </div>
                     </div>

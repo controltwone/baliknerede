@@ -130,6 +130,13 @@ export function validateImageSize(file: File, maxSizeMB: number = 10): boolean {
  * @returns Desteklenen format ise true
  */
 export function validateImageFormat(file: File): boolean {
-  const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  const supportedTypes = [
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'image/webp',
+    'image/heic',  // iPhone HEIC formatı
+    'image/heif'   // iPhone HEIF formatı
+  ]
   return supportedTypes.includes(file.type)
 }
