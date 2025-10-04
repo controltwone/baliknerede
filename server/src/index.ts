@@ -29,6 +29,9 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 
+console.log('CLIENT_ORIGIN:', CLIENT_ORIGIN)
+console.log('NODE_ENV:', process.env.NODE_ENV)
+
 // Allow both apex and www variants for CORS
 function expandOrigins(origin: string): string[] {
   try {
@@ -56,8 +59,12 @@ if (process.env.AUTH0_ISSUER_BASE_URL) {
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
+    console.log('CORS request from origin:', requestOrigin)
+    console.log('Allowed origins:', Array.from(ALLOWED_ORIGINS))
+    
     // Allow requests with no origin (e.g., mobile apps, Postman, etc.)
     if (!requestOrigin) {
+      console.log('No origin provided, allowing request')
       return callback(null, true)
     }
     
@@ -72,9 +79,19 @@ app.use(cors({
         `${protocol}//${apex}`,
         `${protocol}//${www}`,
       ])
+      
+      console.log('CORS candidates:', Array.from(candidates))
       const allowed = Array.from(candidates).some((c) => ALLOWED_ORIGINS.has(c))
-      return allowed ? callback(null, true) : callback(new Error('CORS not allowed'))
+      
+      if (allowed) {
+        console.log('CORS request allowed')
+        return callback(null, true)
+      } else {
+        console.log('CORS request denied')
+        return callback(new Error('CORS not allowed'))
+      }
     } catch (error) {
+      console.log('CORS origin parsing failed, allowing request:', error)
       // Allow request if origin parsing fails (for development)
       return callback(null, true)
     }
