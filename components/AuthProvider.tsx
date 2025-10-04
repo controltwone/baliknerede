@@ -106,43 +106,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, [token])
 
-  useEffect(() => {
-    // bootstrap user: önce cookie'den /me, başarısızsa token endpointinden token alıp tekrar dene
-    (async () => {
-      try {
-        const res = await fetch(`${API_BASE}/me`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          credentials: 'include',
-        })
-        if (res.ok) {
-          const data = await res.json()
-          if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
-          return
-        }
-      } catch {}
-      try {
-        const tr = await fetch(`${API_BASE}/auth0/token`, { credentials: 'include' })
-        if (tr.ok) {
-          const td = await tr.json()
-          if (td?.token) {
-            setToken(td.token)
-            localStorage.setItem('bn_token', td.token)
-            // Token'ı aldıktan sonra /me'yi tekrar dene
-            try {
-              const res = await fetch(`${API_BASE}/me`, {
-                headers: { Authorization: `Bearer ${td.token}` },
-                credentials: 'include',
-              })
-              if (res.ok) {
-                const data = await res.json()
-                if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
-              }
-            } catch {}
-          }
-        }
-      } catch {}
-    })()
-  }, []) // Sadece sayfa yüklendiğinde bir kez çalış
+  // Removed useEffect that was causing re-login after logout
+  // Google login now works via URL parameter only
 
   // Auth0 token kontrolü - sadece URL parameter'dan (Google login için)
   useEffect(() => {
