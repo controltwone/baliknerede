@@ -2,11 +2,46 @@
  * Foto boyutlandırma ve kalite optimizasyonu için utility fonksiyonları
  */
 
+// HEIC dönüştürme için dynamic import
+let heic2any: any = null
+
+// HEIC kütüphanesini lazy load et
+async function loadHeic2Any() {
+  if (!heic2any) {
+    heic2any = await import('heic2any')
+  }
+  return heic2any
+}
+
 export interface ImageResizeOptions {
   maxWidth: number
   maxHeight: number
   quality: number
   format?: 'jpeg' | 'png' | 'webp'
+}
+
+/**
+ * HEIC/HEIF dosyasını JPEG'e dönüştürür
+ * @param file - HEIC/HEIF dosyası
+ * @returns JPEG dosyası
+ */
+async function convertHeicToJpeg(file: File): Promise<File> {
+  try {
+    const heic2anyLib = await loadHeic2Any()
+    const convertedBlob = await heic2anyLib.default({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.9
+    })
+    
+    return new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+      type: 'image/jpeg',
+      lastModified: Date.now()
+    })
+  } catch (error) {
+    console.error('HEIC dönüştürme hatası:', error)
+    throw new Error('HEIC dosyası dönüştürülemedi')
+  }
 }
 
 /**
@@ -24,6 +59,12 @@ export async function resizeImage(
     format: 'jpeg'
   }
 ): Promise<File> {
+  // HEIC/HEIF dosyasını önce JPEG'e dönüştür
+  let processedFile = file
+  if (file.type === 'image/heic' || file.type === 'image/heif') {
+    console.log('HEIC/HEIF dosyası JPEG\'e dönüştürülüyor...')
+    processedFile = await convertHeicToJpeg(file)
+  }
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -59,7 +100,7 @@ export async function resizeImage(
           // Yeni dosya oluştur
           const resizedFile = new File(
             [blob], 
-            file.name, 
+            processedFile.name, 
             { 
               type: `image/${options.format}`,
               lastModified: Date.now()
@@ -67,7 +108,7 @@ export async function resizeImage(
           )
 
           console.log(`Foto optimize edildi: ${originalWidth}x${originalHeight} → ${newWidth}x${newHeight}`)
-          console.log(`Dosya boyutu: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(resizedFile.size / 1024 / 1024).toFixed(2)}MB`)
+          console.log(`Dosya boyutu: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB → ${(resizedFile.size / 1024 / 1024).toFixed(2)}MB`)
           
           resolve(resizedFile)
         },
@@ -77,7 +118,7 @@ export async function resizeImage(
     }
 
     img.onerror = () => reject(new Error('Foto yüklenemedi'))
-    img.src = URL.createObjectURL(file)
+    img.src = URL.createObjectURL(processedFile)
   })
 }
 
