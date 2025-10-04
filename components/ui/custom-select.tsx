@@ -62,6 +62,20 @@ export function CustomSelect({
       .replace(/[çÇ]/g, 'c')
   }
 
+  // Check if search term characters appear in sequence in the text
+  const isSubsequence = (text: string, searchTerm: string): boolean => {
+    if (searchTerm.length === 0) return true
+    if (searchTerm.length > text.length) return false
+    
+    let searchIndex = 0
+    for (let i = 0; i < text.length && searchIndex < searchTerm.length; i++) {
+      if (text[i] === searchTerm[searchIndex]) {
+        searchIndex++
+      }
+    }
+    return searchIndex === searchTerm.length
+  }
+
   const filteredOptions = options.filter(option => {
     if (!searchTerm.trim()) return true
     
@@ -71,21 +85,34 @@ export function CustomSelect({
     
     // Check if search term matches the beginning of the label or value (priority)
     // Then check if it's included anywhere in the text
+    // Also check if search term is a substring that appears in sequence
     return normalizedLabel.startsWith(normalizedSearchTerm) ||
            normalizedValue.startsWith(normalizedSearchTerm) ||
            normalizedLabel.includes(normalizedSearchTerm) ||
-           normalizedValue.includes(normalizedSearchTerm)
+           normalizedValue.includes(normalizedSearchTerm) ||
+           // Check if search term characters appear in sequence (for partial matches)
+           isSubsequence(normalizedLabel, normalizedSearchTerm) ||
+           isSubsequence(normalizedValue, normalizedSearchTerm)
   }).sort((a, b) => {
-    // Sort results: exact matches first, then starts with, then contains
+    // Sort results: exact matches first, then starts with, then contains, then subsequence
     const normalizedSearchTerm = normalizeText(searchTerm)
     const aLabel = normalizeText(a.label)
     const bLabel = normalizeText(b.label)
     
     const aStartsWith = aLabel.startsWith(normalizedSearchTerm)
     const bStartsWith = bLabel.startsWith(normalizedSearchTerm)
+    const aIncludes = aLabel.includes(normalizedSearchTerm)
+    const bIncludes = bLabel.includes(normalizedSearchTerm)
+    const aSubsequence = isSubsequence(aLabel, normalizedSearchTerm)
+    const bSubsequence = isSubsequence(bLabel, normalizedSearchTerm)
     
+    // Priority: startsWith > includes > subsequence
     if (aStartsWith && !bStartsWith) return -1
     if (!aStartsWith && bStartsWith) return 1
+    if (aIncludes && !bIncludes && !bStartsWith) return -1
+    if (!aIncludes && bIncludes && !aStartsWith) return 1
+    if (aSubsequence && !bSubsequence && !bIncludes && !bStartsWith) return -1
+    if (!aSubsequence && bSubsequence && !aIncludes && !aStartsWith) return 1
     
     return aLabel.localeCompare(bLabel)
   })
