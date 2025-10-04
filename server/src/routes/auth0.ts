@@ -39,7 +39,6 @@ router.get('/auth0/complete', async (req: any, res) => {
   try {
     console.log('Auth0 complete endpoint hit')
     const claims = req.oidc.user
-    console.log('Claims:', claims)
     
     if (!claims) {
       console.log('No claims found, redirecting to login')
@@ -48,18 +47,18 @@ router.get('/auth0/complete', async (req: any, res) => {
     
     const email = claims.email
     const name = claims.name || (email ? email.split('@')[0] : 'User')
-    console.log('Processing user:', { email, name })
+    console.log('Processing user login')
     
     let user = await (User as any).findOne({ email })
     if (!user) {
       console.log('Creating new user')
       user = await (User as any).create({ name, email, password: jwt.sign({ t: Date.now() }, 'x'), avatarUrl: DEFAULT_AVATAR })
     } else {
-      console.log('Found existing user:', user.id)
+      console.log('Found existing user')
     }
     
     const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' })
-    console.log('Setting cookie for user:', user.id)
+    console.log('Setting authentication cookie')
     
     res.cookie('bn_token', token, {
       httpOnly: true,

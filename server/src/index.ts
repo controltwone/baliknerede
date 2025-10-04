@@ -59,14 +59,8 @@ if (process.env.AUTH0_ISSUER_BASE_URL) {
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
-    // Only log actual browser requests, not server-side requests
-    if (requestOrigin) {
-      console.log('CORS request from origin:', requestOrigin)
-    }
-    
     // Allow requests with no origin (e.g., mobile apps, Postman, etc.)
     if (!requestOrigin) {
-      // Silently allow server-side requests (no need to log every time)
       return callback(null, true)
     }
     
@@ -82,18 +76,16 @@ app.use(cors({
         `${protocol}//${www}`,
       ])
       
-      console.log('CORS candidates:', Array.from(candidates))
       const allowed = Array.from(candidates).some((c) => ALLOWED_ORIGINS.has(c))
       
       if (allowed) {
-        console.log('CORS request allowed')
         return callback(null, true)
       } else {
-        console.log('CORS request denied')
+        // Only log denied requests for security monitoring
+        console.log('CORS request denied from:', requestOrigin)
         return callback(new Error('CORS not allowed'))
       }
     } catch (error) {
-      console.log('CORS origin parsing failed, allowing request:', error)
       // Allow request if origin parsing fails (for development)
       return callback(null, true)
     }
@@ -120,12 +112,12 @@ app.use('/admin', adminRoutes)
 
 // Socket.IO event handlers
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id)
+  console.log('User connected')
 
   // User joins with their ID
   socket.on('join', (userId) => {
     socket.join(`user_${userId}`)
-    console.log(`User ${userId} joined room`)
+    console.log('User joined room')
   })
 
   // Relay direct notification events if needed (reserved)
