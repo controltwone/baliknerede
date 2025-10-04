@@ -16,7 +16,7 @@ export function useSocket() {
     
     // Sadece gerçekten authenticated olan kullanıcılar için socket bağlantısı yap
     if (isReallyAuthenticated && !hasConnected.current) {
-      console.log('Connecting socket for user:', user.id)
+      console.log('Connecting socket for user')
       try {
         socketService.connect(user.id)
         hasConnected.current = true

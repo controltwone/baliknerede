@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json()
             console.log('Me data after URL token:', data)
             if (data?.user) {
-              console.log('Setting user from URL token:', data.user)
+              console.log('Setting user from URL token')
               setUser({ id: data.user.id, name: data.user.name, email: data.user.email, bio: data.user.bio, avatarUrl: data.user.avatarUrl || "/logo.png", isAdmin: data.user.isAdmin })
             }
           }
