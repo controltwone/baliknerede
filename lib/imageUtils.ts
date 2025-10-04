@@ -27,12 +27,19 @@ export interface ImageResizeOptions {
  */
 async function convertHeicToJpeg(file: File): Promise<File> {
   try {
+    console.log(`HEIC dönüştürme başlıyor: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
+    const startTime = Date.now()
+    
     const heic2anyLib = await loadHeic2Any()
     const convertedBlob = await heic2anyLib.default({
       blob: file,
       toType: 'image/jpeg',
-      quality: 0.9
+      quality: 0.8, // Kaliteyi düşürdük (0.9 → 0.8) hız için
+      multiple: false // Tek dosya dönüştür
     })
+    
+    const endTime = Date.now()
+    console.log(`HEIC dönüştürme tamamlandı: ${(endTime - startTime) / 1000}s`)
     
     return new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
       type: 'image/jpeg',
@@ -40,7 +47,7 @@ async function convertHeicToJpeg(file: File): Promise<File> {
     })
   } catch (error) {
     console.error('HEIC dönüştürme hatası:', error)
-    throw new Error('HEIC dosyası dönüştürülemedi')
+    throw new Error('HEIC dosyası dönüştürülemedi. Lütfen JPEG formatında fotoğraf seçin.')
   }
 }
 
@@ -53,12 +60,18 @@ async function convertHeicToJpeg(file: File): Promise<File> {
 export async function resizeImage(
   file: File, 
   options: ImageResizeOptions = {
-    maxWidth: 1200,
-    maxHeight: 1200,
-    quality: 0.85,
+    maxWidth: 800, // Daha küçük boyut (1200 → 800) hız için
+    maxHeight: 800,
+    quality: 0.8, // Daha düşük kalite (0.85 → 0.8) hız için
     format: 'jpeg'
   }
 ): Promise<File> {
+  // Dosya boyutu kontrolü (10MB limit)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    throw new Error('Dosya boyutu çok büyük. Lütfen 10MB\'dan küçük bir fotoğraf seçin.')
+  }
+
   // HEIC/HEIF dosyasını önce JPEG'e dönüştür
   let processedFile = file
   if (file.type === 'image/heic' || file.type === 'image/heif') {

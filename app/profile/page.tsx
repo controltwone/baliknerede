@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [myPosts, setMyPosts] = useState<Array<{ _id: string; imageUrl?: string; contentText?: string; createdAt?: string; likeCount?: number; commentCount?: number }>>([])
   const [loading, setLoading] = useState(true)
+  const [avatarLoading, setAvatarLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -91,19 +92,22 @@ export default function ProfilePage() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Foto formatını kontrol et
-    if (!validateImageFormat(file)) {
-      alert("Lütfen JPEG, PNG, WebP, HEIC veya HEIF formatında bir foto seçin.")
-      return
-    }
-
-    // Foto boyutunu kontrol et (5MB max for avatar)
-    if (!validateImageSize(file, 5)) {
-      alert("Foto boyutu 5MB'dan küçük olmalıdır.")
-      return
-    }
+    // Loading başlat
+    setAvatarLoading(true)
 
     try {
+      // Foto formatını kontrol et
+      if (!validateImageFormat(file)) {
+        alert("Lütfen JPEG, PNG, WebP, HEIC veya HEIF formatında bir foto seçin.")
+        return
+      }
+
+      // Foto boyutunu kontrol et (5MB max for avatar)
+      if (!validateImageSize(file, 5)) {
+        alert("Foto boyutu 5MB'dan küçük olmalıdır.")
+        return
+      }
+
       // Avatar için daha küçük boyut
       const optimizedFile = await resizeImage(file, {
         maxWidth: 400,
@@ -120,6 +124,8 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Avatar optimize edilemedi:', error)
       alert("Foto optimize edilirken hata oluştu.")
+    } finally {
+      setAvatarLoading(false)
     }
   }
 
@@ -472,8 +478,13 @@ export default function ProfilePage() {
                     <div>
                       <label className="block text-sm font-medium mb-5">Profil Fotoğrafı</label>
                       <div className="flex items-center gap-4">
-                        <label htmlFor="avatarInput" className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-dashed bg-muted/40 hover:bg-muted cursor-pointer transition-colors">
-                          {previewUrl || user?.avatarUrl ? (
+                        <label htmlFor="avatarInput" className={`relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-dashed bg-muted/40 hover:bg-muted cursor-pointer transition-colors ${avatarLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          {avatarLoading ? (
+                            <div className="flex flex-col items-center justify-center text-center">
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                              <span className="mt-1 text-[10px] text-muted-foreground">İşleniyor...</span>
+                            </div>
+                          ) : previewUrl || user?.avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={(previewUrl as string) || (user?.avatarUrl as string)} alt="Avatar preview" className="h-full w-full object-cover" />
                           ) : (
