@@ -594,9 +594,24 @@ function Header() {
                               document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                             });
                             
-                            // Force page reload to clear all state
-                            console.log('Logging out - clearing all state and reloading page...')
-                            window.location.reload()
+                            // Auth0 logout URL'ine yönlendir - bu sefer farklı bir URL'e
+                            const auth0Domain = 'dev-wkkkp5pu34fqe35i.us.auth0.com'
+                            const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
+                            const returnTo = encodeURIComponent('https://www.google.com') // Google'a yönlendir
+                            
+                            if (!clientId) {
+                              console.error('NEXT_PUBLIC_AUTH0_CLIENT_ID is not defined!')
+                              alert('Auth0 client ID not configured. Please contact support.')
+                              return
+                            }
+                            
+                            const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}&federated`
+                            
+                            console.log('Logout URL:', logoutUrl)
+                            console.log('Redirecting to Auth0 logout...')
+                            
+                            // Auth0 logout URL'ine yönlendir
+                            window.location.href = logoutUrl
                           }}
                           className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 w-full text-left`}
                         >
