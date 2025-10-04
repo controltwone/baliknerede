@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch {}
     })()
-  }, [token, API_BASE])
+  }, []) // Sadece sayfa yüklendiğinde bir kez çalış
 
   // Auth0 token kontrolü - sadece URL parameter'dan (Google login için)
   useEffect(() => {
