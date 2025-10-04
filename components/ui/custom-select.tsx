@@ -121,7 +121,7 @@ export function CustomSelect({
           </div>
 
           {/* Options List */}
-          <div className="max-h-48 overflow-y-auto thin-scrollbar">
+          <div className="max-h-48 overflow-y-auto thin-scrollbar mobile-dropdown-scroll">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => (
                 <button

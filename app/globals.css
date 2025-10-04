@@ -461,6 +461,10 @@
 .thin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #3b82f6 rgba(0, 0, 0, 0.05);
+  /* Mobile touch scroll improvements */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .thin-scrollbar::-webkit-scrollbar {
@@ -481,6 +485,17 @@
 
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #2563eb, #1e40af);
+}
+
+/* Mobile dropdown scroll improvements */
+.mobile-dropdown-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scroll-behavior: smooth;
+  /* Prevent bounce effect on iOS */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* MDX/Prose Styles */
