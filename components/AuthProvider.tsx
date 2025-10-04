@@ -19,6 +19,7 @@ type AuthContextValue = {
   logout: () => void
   token: string | null
   setUser: (user: AuthUser | null) => void
+  setToken: (token: string | null) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -237,8 +238,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, isAuthenticated: !!user, login, signup, logout, token, setUser }),
-    [user, login, signup, logout, token, setUser]
+    () => ({ user, isAuthenticated: !!user, login, signup, logout, token, setUser, setToken }),
+    [user, login, signup, logout, token, setUser, setToken]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
