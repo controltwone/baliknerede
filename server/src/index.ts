@@ -59,12 +59,14 @@ if (process.env.AUTH0_ISSUER_BASE_URL) {
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
-    console.log('CORS request from origin:', requestOrigin)
-    console.log('Allowed origins:', Array.from(ALLOWED_ORIGINS))
+    // Only log actual browser requests, not server-side requests
+    if (requestOrigin) {
+      console.log('CORS request from origin:', requestOrigin)
+    }
     
     // Allow requests with no origin (e.g., mobile apps, Postman, etc.)
     if (!requestOrigin) {
-      console.log('No origin provided, allowing request')
+      // Silently allow server-side requests (no need to log every time)
       return callback(null, true)
     }
     
