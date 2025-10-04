@@ -63,12 +63,31 @@ export function CustomSelect({
   }
 
   const filteredOptions = options.filter(option => {
+    if (!searchTerm.trim()) return true
+    
     const normalizedSearchTerm = normalizeText(searchTerm)
     const normalizedLabel = normalizeText(option.label)
     const normalizedValue = normalizeText(option.value)
     
-    return normalizedLabel.includes(normalizedSearchTerm) ||
+    // Check if search term matches the beginning of the label or value (priority)
+    // Then check if it's included anywhere in the text
+    return normalizedLabel.startsWith(normalizedSearchTerm) ||
+           normalizedValue.startsWith(normalizedSearchTerm) ||
+           normalizedLabel.includes(normalizedSearchTerm) ||
            normalizedValue.includes(normalizedSearchTerm)
+  }).sort((a, b) => {
+    // Sort results: exact matches first, then starts with, then contains
+    const normalizedSearchTerm = normalizeText(searchTerm)
+    const aLabel = normalizeText(a.label)
+    const bLabel = normalizeText(b.label)
+    
+    const aStartsWith = aLabel.startsWith(normalizedSearchTerm)
+    const bStartsWith = bLabel.startsWith(normalizedSearchTerm)
+    
+    if (aStartsWith && !bStartsWith) return -1
+    if (!aStartsWith && bStartsWith) return 1
+    
+    return aLabel.localeCompare(bLabel)
   })
 
   const handleSelect = (option: Option) => {
