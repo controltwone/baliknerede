@@ -20,7 +20,9 @@ class SocketService {
       })
 
       this.socket.on('connect', () => {
-        console.log('Socket connected:', this.socket?.id)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Socket connected:', this.socket?.id)
+        }
         this.isConnected = true
         
         if (userId) {
@@ -29,7 +31,9 @@ class SocketService {
       })
 
       this.socket.on('disconnect', (reason) => {
-        console.log('Socket disconnected:', reason)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Socket disconnected:', reason)
+        }
         this.isConnected = false
       })
 

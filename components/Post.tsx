@@ -120,7 +120,9 @@ export default function Post({
 
   // Socket event listeners
   React.useEffect(() => {
-    console.log('Setting up socket listeners for post:', id)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Setting up socket listeners for post:', id)
+    }
     
     // Listen for like updates
     const handleLikeUpdate = (data: any) => {
@@ -143,7 +145,9 @@ export default function Post({
     socketService.onPostViewUpdated(handleViewUpdate)
 
     return () => {
-      console.log('Cleaning up socket listeners for post:', id)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Cleaning up socket listeners for post:', id)
+      }
       socketService.removeListener('post_like_updated', handleLikeUpdate)
       socketService.removeListener('post_view_updated', handleViewUpdate)
     }

@@ -607,8 +607,10 @@ function Header() {
                             
                             const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${clientId}&returnTo=${returnTo}`
                             
-                            console.log('Logout URL:', logoutUrl)
-                            console.log('Redirecting to Auth0 logout...')
+                            if (process.env.NODE_ENV === 'development') {
+                              console.log('Logout URL:', logoutUrl)
+                              console.log('Redirecting to Auth0 logout...')
+                            }
                             
                             // Auth0 logout URL'ine yönlendir
                             window.location.href = logoutUrl

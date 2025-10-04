@@ -443,7 +443,9 @@ export default function Feed() {
 
   // Socket event listeners for real-time updates
   useEffect(() => {
-    console.log('Setting up socket listeners in Feed')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Setting up socket listeners in Feed')
+    }
     
     // Listen for new posts
     const handlePostCreated = (data: any) => {
@@ -489,7 +491,9 @@ export default function Feed() {
     socketService.onPostCreated(handlePostCreated)
 
     return () => {
-      console.log('Cleaning up socket listeners in Feed')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Cleaning up socket listeners in Feed')
+      }
       socketService.removeListener('post_created', handlePostCreated)
     }
   }, [socketService, user?.id])
