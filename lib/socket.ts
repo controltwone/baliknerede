@@ -11,7 +11,7 @@ class SocketService {
     
     try {
       this.socket = io(API_BASE, {
-        transports: ['websocket', 'polling'],
+        transports: ['websocket'], // Sadece websocket, polling yok
         autoConnect: true,
         timeout: 10000,
         reconnection: true,
