@@ -107,7 +107,11 @@ export function CustomSelect({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg z-50 max-h-60 overflow-hidden sm:min-w-[280px] sm:w-max">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg z-50 max-h-60 sm:min-w-[280px] sm:w-max" style={{
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y'
+        }}>
           {/* Search Input */}
           <div className="p-2 border-b border-gray-100 dark:border-gray-700">
             <input

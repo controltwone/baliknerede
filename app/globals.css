@@ -512,6 +512,41 @@
   touch-action: pan-y !important;
 }
 
+/* Force mobile scroll for all dropdown containers */
+.max-h-60 {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+/* Force mobile scroll for all absolute positioned dropdowns */
+.absolute {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+/* Force mobile scroll for all z-50 elements (dropdowns) */
+.z-50 {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+/* Nuclear option: Force mobile scroll for ALL divs with overflow */
+div[class*="overflow"] {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+/* Force mobile scroll for all elements with max-height */
+[class*="max-h"] {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
 /* MDX/Prose Styles */
 .prose {
   color: #374151;
