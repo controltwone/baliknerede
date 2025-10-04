@@ -56,12 +56,8 @@ if (process.env.AUTH0_ISSUER_BASE_URL) {
 
 app.use(cors({
   origin: (requestOrigin, callback) => {
-    console.log('CORS request from origin:', requestOrigin)
-    console.log('Allowed origins:', Array.from(ALLOWED_ORIGINS))
-    
     // Allow requests with no origin (e.g., mobile apps, Postman, etc.)
     if (!requestOrigin) {
-      console.log('No origin, allowing request')
       return callback(null, true)
     }
     
@@ -76,14 +72,9 @@ app.use(cors({
         `${protocol}//${apex}`,
         `${protocol}//${www}`,
       ])
-      
-      console.log('Candidates:', Array.from(candidates))
       const allowed = Array.from(candidates).some((c) => ALLOWED_ORIGINS.has(c))
-      console.log('CORS allowed:', allowed)
-      
       return allowed ? callback(null, true) : callback(new Error('CORS not allowed'))
     } catch (error) {
-      console.log('CORS origin parse failed:', error)
       // Allow request if origin parsing fails (for development)
       return callback(null, true)
     }
