@@ -264,7 +264,7 @@ export default function Post({
         </div>
         <div className="flex items-center gap-2">
           {createdAt ? (
-            <span className="text-xs text-muted-foreground dark:text-gray-400 hidden sm:inline">{createdAt}</span>
+            <span className="text-xs text-muted-foreground dark:text-gray-400 inline">{createdAt}</span>
           ) : null}
           <div className="relative">
             <Button 
