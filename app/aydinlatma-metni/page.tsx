@@ -46,8 +46,8 @@ export default function AydinlatmaMetniPage() {
             sonuçlandırılır.
           </p>
           <h2>İletişim</h2>
-          <p>KVKK başvurularınız için e‑posta: kvkk@baliknerede.com</p>
-          <p>Genel sorular için: support@baliknerede.com</p>
+         
+          <p>Genel sorular için: oguncerr26@gmail.com</p>
         </div>
       </div>
     </div>

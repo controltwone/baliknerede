@@ -68,7 +68,7 @@ export default function CerezlerPage() {
           <h2>Güncellemeler ve İletişim</h2>
           <p>
             Bu politika zaman zaman güncellenebilir. Önemli değişiklikleri makul yöntemlerle
-            duyururuz. Sorularınız için: cerez@baliknerede.com
+            duyururuz. Sorularınız için: oguncerr26@gmail.com
           </p>
         </div>
       </div>

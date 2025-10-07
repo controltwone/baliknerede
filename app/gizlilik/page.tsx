@@ -61,8 +61,8 @@ export default function GizlilikPage() {
           </p>
           <h2>İletişim</h2>
           <p>
-            KVKK kapsamındaki başvuru ve talepleriniz için: kvkk@baliknerede.com. Genel gizlilik
-            soruları için: support@baliknerede.com
+            KVKK kapsamındaki başvuru ve talepleriniz ve genel gizlilik
+            sorularınız için: oguncerr26@gmail.com
           </p>
           <h2>Değişiklikler</h2>
           <p>
